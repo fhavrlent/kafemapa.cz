@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <g id="mark">
+    <rect width="40" height="40" rx="10" fill="#3b2418"/>
+    <path d="M20 34s-10-8.6-10-16.2a10 10 0 0 1 20 0C30 25.4 20 34 20 34Z" fill="#e9b872"/>
+    <ellipse cx="20" cy="17.8" rx="4.6" ry="6.2" transform="rotate(28 20 17.8)" fill="#3b2418"/>
+    <path d="M17.6 12.6c2.6 2.4 2.2 8-0.6 10.4" transform="rotate(28 20 17.8) translate(1.6 0)" stroke="#e9b872" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

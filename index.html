@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kafemapa — všechny kavárny v Česku na jedné mapě</title>
+  <meta name="description" content="Přes 4 000 kaváren, pražíren a obchodů s kávou v Česku. Zjistěte, co má právě otevřeno, kde je zahrádka, Wi‑Fi nebo bezbariérový vstup. Otevřená data z OpenStreetMap.">
+  <link rel="canonical" href="https://kafemapa.cz/">
+  <meta name="theme-color" content="#f6efe6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1b1411" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kafemapa.cz/">
+  <meta property="og:title" content="Kafemapa — všechny kavárny v Česku na jedné mapě">
+  <meta property="og:description" content="Kde je teď otevřeno? Kavárny, pražírny a obchody s kávou z celé republiky.">
+  <meta property="og:image" content="https://kafemapa.cz/og-image.png">
+  <meta property="og:locale" content="cs_CZ">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="data/cafes.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="assets/vendor/leaflet.css">
+  <link rel="stylesheet" href="assets/vendor/MarkerCluster.css">
+  <link rel="stylesheet" href="assets/style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Kafemapa",
+    "url": "https://kafemapa.cz/",
+    "inLanguage": "cs",
+    "description": "Mapa kaváren, pražíren a obchodů s kávou v Česku z otevřených dat OpenStreetMap."
+  }
+  </script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></symbol>
+      <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+      <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></symbol>
+      <symbol id="i-nav" viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-2-8-8-2Z"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4ZM14 6l4 4"/></symbol>
+      <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.6M8.2 13.2l7.6 4.6"/></symbol>
+      <symbol id="i-insta" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></symbol>
+      <symbol id="i-fb" viewBox="0 0 24 24"><path d="M15 3h-2a4 4 0 0 0-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h2V3Z"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <aside class="panel" id="panel" aria-label="Kavárny">
+      <button class="sheet-handle" id="sheetHandle" aria-label="Rozbalit seznam"><span></span></button>
+      <header class="brand">
+        <a href="./" class="logo" aria-label="Kafemapa — úvod">
+          <svg viewBox="0 0 40 40" aria-hidden="true" class="logo-mark"><use href="favicon.svg#mark"/></svg>
+          <span>kafe<b>mapa</b></span>
+        </a>
+        <nav class="brand-actions">
+          <button class="icon-btn" id="btnRank" title="Žebříček měst" aria-label="Žebříček měst"><svg><use href="#i-trophy"/></svg></button>
+          <button class="icon-btn" id="btnAbout" title="O projektu" aria-label="O projektu"><svg><use href="#i-info"/></svg></button>
+        </nav>
+      </header>
+      <p class="tagline" id="tagline">Všechny kavárny v Česku na jedné mapě.</p>
+
+      <div class="search">
+        <svg aria-hidden="true"><use href="#i-search"/></svg>
+        <input id="q" type="search" placeholder="Hledat kavárnu nebo město…" autocomplete="off" aria-label="Hledat kavárnu nebo město">
+        <button class="clear" id="qClear" aria-label="Vymazat hledání" hidden><svg><use href="#i-x"/></svg></button>
+      </div>
+
+      <div class="chips" id="chips" role="group" aria-label="Filtry">
+        <button class="chip" data-filter="open" aria-pressed="false"><i class="dot dot-open"></i>Otevřeno teď</button>
+        <button class="chip" data-filter="indie" aria-pressed="false">Nezávislé</button>
+        <button class="chip" data-filter="outdoor" aria-pressed="false">Zahrádka</button>
+        <button class="chip" data-filter="wifi" aria-pressed="false">Wi‑Fi</button>
+        <button class="chip" data-filter="wheelchair" aria-pressed="false">Bezbariérové</button>
+        <button class="chip" data-filter="veg" aria-pressed="false">Vegan</button>
+        <button class="chip" data-filter="beans" aria-pressed="false">Pražírny a zrnka</button>
+      </div>
+
+      <div class="list-head">
+        <span id="count" aria-live="polite">Načítám kavárny…</span>
+        <button class="link-btn" id="btnRandom"><svg><use href="#i-shuffle"/></svg>Překvap mě</button>
+      </div>
+
+      <div class="scroll" id="scroll">
+        <div id="cityHint"></div>
+        <ol class="list" id="list"></ol>
+        <section class="detail" id="detail" hidden></section>
+      </div>
+    </aside>
+
+    <main class="map-wrap">
+      <div id="map" role="application" aria-label="Mapa kaváren"></div>
+      <button class="fab" id="btnLocate" title="Kavárny kolem mě" aria-label="Kavárny kolem mě"><svg><use href="#i-locate"/></svg></button>
+      <div class="legend" aria-hidden="true">
+        <span><i class="dot dot-open"></i>otevřeno</span>
+        <span><i class="dot dot-closed"></i>zavřeno</span>
+        <span><i class="dot dot-unknown"></i>neuvedeno</span>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="dlgRank" class="dialog" aria-labelledby="rankTitle">
+    <header>
+      <h2 id="rankTitle">Kavárenský žebříček</h2>
+      <button class="icon-btn" data-close aria-label="Zavřít"><svg><use href="#i-x"/></svg></button>
+    </header>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="perCapita">Na 10 000 obyvatel</button>
+      <button role="tab" aria-selected="false" data-tab="total">Nejvíc kaváren</button>
+    </div>
+    <p class="muted small" id="rankNote"></p>
+    <ol class="rank" id="rankList"></ol>
+  </dialog>
+
+  <dialog id="dlgAbout" class="dialog" aria-labelledby="aboutTitle">
+    <header>
+      <h2 id="aboutTitle">O Kafemapě</h2>
+      <button class="icon-btn" data-close aria-label="Zavřít"><svg><use href="#i-x"/></svg></button>
+    </header>
+    <div class="prose">
+      <p>Kafemapa ukazuje kavárny, pražírny a obchody s kávou z celého Česka. Nejde o placený katalog ani žebříček „nejlepších“. Je tu každé místo, které někdo zapsal do <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>, otevřené mapy, kterou tvoří dobrovolníci.</p>
+      <h3>Chybí vaše kavárna, nebo je tu chyba?</h3>
+      <p>Opravit to může kdokoli. U každého podniku je odkaz <em>Upravit v OSM</em>. Po registraci na openstreetmap.org doplníte otevírací dobu, web nebo zahrádku a změna se tu objeví při další aktualizaci dat. Nový podnik přidáte v <a href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener">editoru OSM</a> jako <em>Kavárna</em>.</p>
+      <h3>Jak to funguje</h3>
+      <ul>
+        <li>Údaje se pravidelně stahují z OpenStreetMap. <span id="aboutData"></span></li>
+        <li>„Otevřeno teď“ se počítá z tagu <code>opening_hours</code> podle času ve vašem zařízení. Svátky ani výjimky nezohledňujeme, takže před cestou raději ověřte.</li>
+        <li>Města se přiřazují podle vzdálenosti od centra, žebříček je proto orientační.</li>
+      </ul>
+      <p class="muted small">Mapová data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL). <span id="aboutTiles">Mapové dlaždice: OpenStreetMap Foundation.</span></p>
+    </div>
+  </dialog>
+
+  <noscript><p class="noscript">Kafemapa potřebuje ke svému běhu JavaScript.</p></noscript>
+
+  <script src="assets/vendor/leaflet.js"></script>
+  <script src="assets/vendor/leaflet.markercluster.js"></script>
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>

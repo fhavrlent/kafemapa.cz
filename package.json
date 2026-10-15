@@ -1,0 +1,13 @@
+{
+  "name": "kafemapa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mapa kaváren, pražíren a obchodů s kávou v Česku z dat OpenStreetMap — kafemapa.cz",
+  "type": "module",
+  "scripts": {
+    "data": "node scripts/fetch-data.mjs",
+    "test": "node --test scripts/*.test.mjs",
+    "dev": "node scripts/serve.mjs"
+  },
+  "engines": { "node": ">=20" }
+}
