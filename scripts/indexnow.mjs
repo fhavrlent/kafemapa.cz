@@ -32,7 +32,9 @@ async function prepare() {
     cache: 'no-store',
     signal: AbortSignal.timeout(15_000),
   });
-  if (res.ok) live = await res.json();
+  const body = await res.text();
+  console.log(`IndexNow: živý manifest HTTP ${res.status}, ${res.headers.get('content-type')}, ${body.length} B, cf-cache: ${res.headers.get('cf-cache-status')}`);
+  if (res.ok) live = JSON.parse(body);
   else if (res.status !== 404) throw new Error(`živý manifest: HTTP ${res.status}`);
 
   const changed = Object.keys(built).filter((path) => built[path] !== live[path]);
