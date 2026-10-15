@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPages, assignCitySlugs } from './build-pages.mjs';
 import { buildCafes } from './build-cafes.mjs';
+import { buildChanges } from './build-changes.mjs';
 import { buildReport } from './build-report.mjs';
 import { findKey } from './indexnow.mjs';
 import { createHash } from 'node:crypto';
@@ -38,7 +39,8 @@ const data = JSON.parse(await readFile(join(ROOT, 'data', 'cafes.json'), 'utf8')
 assignCitySlugs(data);
 const cafes = await buildCafes(OUT, data);
 const reportUrls = await buildReport(ROOT, OUT, data);
-const nPages = await buildPages(OUT, data, { extraUrls: [...reportUrls, ...cafes.urls], cafePaths: cafes.pathById });
+const changeUrls = await buildChanges(ROOT, OUT, data);
+const nPages = await buildPages(OUT, data, { extraUrls: [...changeUrls, ...reportUrls, ...cafes.urls], cafePaths: cafes.pathById });
 
 // IndexNow: klíč do kořene webu a manifest hashů stránek, podle kterého
 // scripts/indexnow.mjs po nasazení pozná, co se změnilo.

@@ -19,6 +19,8 @@ scripts/fetch-data.mjs   stažení dat z Overpass API → data/cafes.json
 scripts/build.mjs        sestavení _site/ pro nasazení (kopie souborů + klíč)
 scripts/build-pages.mjs  statické stránky měst /kavarny/<mesto>/ a sitemap.xml
 scripts/build-cafes.mjs  stránky kaváren /kavarna/<slug>/
+scripts/build-changes.mjs  „Nově na mapě“ /nove/ a RSS
+scripts/changes.mjs      porovnání dat mezi aktualizacemi (s testy)
 assets/slug.js           sdílený výpočet URL kaváren (mapa i build)
 assets/pages.{css,js}    vzhled a živý stav „otevřeno“ na stránkách měst
 scripts/hours.test.mjs   testy parseru otevírací doby
@@ -85,6 +87,10 @@ Kafemapa sama do OSM nezapisuje, lidé upravují pod vlastním účtem. Pomáhá
 - `assets/hours-editor.js`: formulář po dnech, ze kterého se složí hodnota `opening_hours` (ověřená vlastním parserem), plus tlačítko na editor OSM přímo pro danou kavárnu. Je na stránkách kaváren i v detailu na mapě, načte se až po rozbalení. Upozorňuje, že se nesmí přebírat data z Google Map.
 - `/doplnit/`: jak pomoct, pravidla a města s nejvíce chybějícími údaji. Stránka města má sekci „Chybí otevírací doba“ (`#chybi`).
 - `data/stats-history.json`: týdenní záznam úplnosti dat (otevírací doba, adresa, web), doplňuje ho `scripts/fetch-data.mjs`. Poslouží dalším edicím indexu.
+
+## Nově na mapě
+
+Týdenní přehled změn na `/nove/` a v RSS `/nove/feed.xml` (`scripts/build-changes.mjs`). Při každé aktualizaci dat `scripts/fetch-data.mjs` porovná nová data s předchozími (`scripts/changes.mjs`) a do `data/changes.json` přidá nová místa, zmizelá místa a doplněné nebo změněné otevírací doby (nejvýš 52 týdnů). Překreslení podniku v OSM (nové id, stejné jméno do 100 m) se nepočítá jako nová kavárna. První stažení a opakované stažení téhož dne se nezapisují.
 
 ## Kavárenský index
 

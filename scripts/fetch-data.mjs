@@ -7,6 +7,7 @@
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { computeChanges, appendChanges } from './changes.mjs';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -234,6 +235,23 @@ if (out.cafes.length < 1000) {
   process.exit(1);
 }
 await mkdir(dirname(OUT), { recursive: true });
+
+// Týdenní změny: porovnat s dosavadními daty, než je přepíšeme.
+const CHANGES = join(ROOT, 'data', 'changes.json');
+let prev = null;
+try {
+  prev = JSON.parse(await readFile(OUT, 'utf8'));
+} catch {}
+let changes = [];
+try {
+  changes = JSON.parse(await readFile(CHANGES, 'utf8'));
+} catch {}
+const delta = computeChanges(prev, out);
+await writeFile(CHANGES, JSON.stringify(appendChanges(changes, delta)) + '\n');
+if (delta.from) {
+  console.log(`Změny od ${delta.from}: +${delta.added.length} nových, −${delta.removed.length} zmizelo, otevírací doba doplněna ${delta.hoursAdded.length}×, změněna ${delta.hoursChanged.length}×`);
+}
+
 await writeFile(OUT, JSON.stringify(out));
 
 // Historie úplnosti dat: jeden záznam za den dat z OSM (opakované stažení ho přepíše).

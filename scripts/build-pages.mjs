@@ -67,6 +67,7 @@ ${extraCss}  <script type="application/ld+json">${JSON.stringify(jsonLd).replace
     <nav class="site-nav" aria-label="Hlavní">
       <a href="/">Mapa</a>
       <a href="/kavarny/">Města</a>
+      <a href="/nove/">Nově</a>
       <a href="/doplnit/">Doplnit</a>
       <a href="/kavarensky-index/">Index</a>
     </nav>
