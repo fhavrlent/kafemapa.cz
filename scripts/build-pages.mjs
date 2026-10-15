@@ -67,6 +67,7 @@ ${extraCss}  <script type="application/ld+json">${JSON.stringify(jsonLd).replace
     <nav class="site-nav" aria-label="Hlavní">
       <a href="/">Mapa</a>
       <a href="/kavarny/">Města</a>
+      <a href="/doplnit/">Doplnit</a>
       <a href="/kavarensky-index/">Index</a>
     </nav>
   </header>
@@ -79,7 +80,7 @@ export function foot(meta) {
   <footer class="site-foot">
     <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL), aktualizace ${esc(when)}.
     Chybí kavárna nebo je údaj špatně? Opravit ho může kdokoli přímo v OpenStreetMap.</p>
-    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a></p>
+    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a></p>
   </footer>
 </body>
 </html>
@@ -198,7 +199,22 @@ function cityPage(city, ctx) {
       <p class="muted small">Otevírací doby jsou z OpenStreetMap a nezohledňují svátky ani výjimky. Před cestou je raději ověřte.</p>
     </section>
 
-    <section aria-labelledby="near-h">
+    ${(() => {
+      const missing = sorted.filter((c) => !c.o);
+      if (!missing.length) return '';
+      return `<section id="chybi" aria-labelledby="missing-h">
+      <h2 id="missing-h">Chybí otevírací doba (${num(missing.length)})</h2>
+      <p>U těchto míst zatím otevírací dobu nikdo nezapsal. Znáte některé? Na jejich stránce ji doplníte za minutu. <a href="/doplnit/">Jak pomoct</a></p>
+      <details class="missing-list">
+        <summary>Zobrazit ${num(missing.length)} ${plural(missing.length, ['místo', 'místa', 'míst'])}</summary>
+        <ul class="city-links">
+          ${missing.map((c) => `<li><a href="${cafeLinks.get(c.i) || `/#${c.i}`}">${esc(c.n)}</a></li>`).join('\n          ')}
+        </ul>
+      </details>
+    </section>
+
+`;
+    })()}    <section aria-labelledby="near-h">
       <h2 id="near-h">Kavárny v okolních městech</h2>
       <ul class="city-links">
         ${nearby.map((p) => `<li><a href="/kavarny/${p.city.slug}/">${esc(p.city.n)}</a> <span class="muted">${num(p.cafes.length)} · ${Math.round(p.d)} km</span></li>`).join('\n        ')}
@@ -211,6 +227,73 @@ function cityPage(city, ctx) {
 }
 
 /* ---------------- rozcestník měst ---------------- */
+
+function contributePage(pages, data) {
+  const all = data.cafes;
+  const withHours = all.filter((c) => c.o).length;
+  const share = withHours / all.length;
+  const rows = pages
+    .map((p) => {
+      const missing = p.cafes.filter((c) => !c.o).length;
+      return { p, missing, done: 1 - missing / p.cafes.length };
+    })
+    .filter((r) => r.missing > 0)
+    .sort((a, b) => b.missing - a.missing || a.done - b.done)
+    .slice(0, 25);
+  const pct = (x) => `${Math.round(x * 100)}\u00a0%`;
+
+  return (
+    head({
+      title: 'Pomozte doplnit kavárny | Kafemapa',
+      description: `U ${num(all.length - withHours)} kaváren v Česku chybí otevírací doba. Doplníte ji za minutu přímo do OpenStreetMap a pomůžete všem mapám, které z něj čerpají.`,
+      path: '/doplnit/',
+      jsonLd: breadcrumbLd([['Kafemapa', '/'], ['Pomozte doplnit data', '/doplnit/']]),
+    }) +
+    `
+  <main class="page-main report">
+    <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Kafemapa</a> › <span>Pomozte doplnit data</span></nav>
+    <h1>Pomozte doplnit kavárny</h1>
+    <p class="lead">Otevírací dobu zná Kafemapa u ${pct(share)} míst. U zbylých ${num(all.length - withHours)} nevíme, kdy mají otevřeno, takže je neumíme ukázat ve filtru „Otevřeno teď“. Data bereme z OpenStreetMap, otevřené mapy, kterou tvoří dobrovolníci. Co doplníte tam, se objeví na Kafemapě i ve všech dalších mapách a aplikacích, které z OSM čerpají.</p>
+
+    <section>
+      <h2>Jak na to</h2>
+      <ol class="steps">
+        <li><strong>Najděte kavárnu</strong> na <a href="/">mapě</a> nebo v seznamu města níže.</li>
+        <li><strong>Otevřete „Znáte otevírací dobu?“</strong> a vyplňte časy po dnech. Kafemapa z nich složí správný zápis pro OpenStreetMap.</li>
+        <li><strong>Vložte ho v editoru OSM a uložte.</strong> Stačí bezplatný účet na openstreetmap.org. Změna se na Kafemapě objeví při další týdenní aktualizaci.</li>
+      </ol>
+      <aside class="cta">
+        <h3>Jediné pravidlo</h3>
+        <p>Zapisujte jen to, co víte sami: z návštěvy, z cedule na dveřích nebo z webu a sociálních sítí kavárny. <strong>Nepřebírejte údaje z Google Map ani jiných map</strong>, jejich licence to nedovoluje a OpenStreetMap by takové změny musel smazat.</p>
+      </aside>
+      <p>Jste právě v kavárně? Aplikace <a href="https://streetcomplete.app/" rel="noopener">StreetComplete</a> (Android) se na chybějící údaje včetně otevírací doby ptá přímo na místě. V aplikaci <a href="https://every-door.app/" rel="noopener">Every Door</a> (Android i iPhone) upravíte kavárny a obchody v OpenStreetMap z telefonu.</p>
+    </section>
+
+    <section>
+      <h2>Kde chybí nejvíc</h2>
+      <p>Města s nejvíce místy bez otevírací doby. Kliknutím otevřete seznam chybějících míst.</p>
+      <figure class="chart">
+        <figcaption><strong>Podíl míst s otevírací dobou</strong><span>Seřazeno podle počtu chybějících</span></figcaption>
+        <table class="bars">
+          <thead class="sr-only"><tr><th scope="col">Město</th><th scope="col">Úplnost</th></tr></thead>
+          <tbody>
+          ${rows
+            .map(
+              (r) => `<tr>
+            <th scope="row"><a href="/kavarny/${r.p.city.slug}/#chybi">${esc(r.p.city.n)}</a><span class="note">chybí ${num(r.missing)} z ${num(r.p.cafes.length)}</span></th>
+            <td><div class="bw"><span class="bar" style="--w:${(r.done * 100).toFixed(1)}%"></span><span class="v">${pct(r.done)}</span></div></td>
+          </tr>`
+            )
+            .join('\n          ')}
+          </tbody>
+        </table>
+      </figure>
+      <p class="small muted">Celý seznam měst je v <a href="/kavarny/">přehledu měst</a>, každé město má dole sekci „Chybí otevírací doba“.</p>
+    </section>
+  </main>` +
+    foot(data)
+  );
+}
 
 function indexPage(pages, meta, totalCafes) {
   const top = pages.slice().sort((a, b) => b.cafes.length - a.cafes.length).slice(0, 12);
@@ -295,12 +378,14 @@ export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new
     await writeFile(join(dir, 'index.html'), cityPage(p.city, { cafes: p.cafes, pages, rankPerCapita, meta: data }));
   }
   await writeFile(join(outDir, 'kavarny', 'index.html'), indexPage(pages, data, data.cafes.length));
+  await mkdir(join(outDir, 'doplnit'), { recursive: true });
+  await writeFile(join(outDir, 'doplnit', 'index.html'), contributePage(pages, data));
 
   // Slugy měst pro odkaz /?mesto=… z mapy
   await writeFile(join(outDir, 'data', 'mesta.json'), JSON.stringify(Object.fromEntries(pages.map((p) => [p.city.slug, data.cities.indexOf(p.city)]))));
 
   const lastmod = (data.osmBase || data.generated).slice(0, 10);
-  const urls = ['/', '/kavarny/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
+  const urls = ['/', '/kavarny/', '/doplnit/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
   await writeFile(
     join(outDir, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +

@@ -78,6 +78,14 @@ Kvůli vyhledávačům má každé město s aspoň 5 kavárnami vlastní statick
 
 Každá nezávislá kavárna s adresou, otevírací dobou nebo webem má vlastní stránku `/kavarna/<jméno>-<město>-<osm id>/` (`scripts/build-cafes.mjs`), kvůli hledání podle jména. Obsahuje adresu, týdenní otevírací dobu s dneškem a živým stavem, vybavení, odkazy (navigace, web, Instagram…), 6 nejbližších kaváren a strukturovaná data `CafeOrCoffeeShop` (u obchodů s kávou `Store`). Do schema.org `openingHours` jde jen jednoduchý zápis bez svátků a měsíců. Řetězce a podniky jen se jménem stránku nemají. URL počítá sdílený `assets/slug.js`, takže na ni umí odkázat mapa, stránky měst i build. OSM id na konci drží adresu stabilní.
 
+## Doplňování dat
+
+Kafemapa sama do OSM nezapisuje, lidé upravují pod vlastním účtem. Pomáhá jim s nejtěžší částí, se zápisem otevírací doby:
+
+- `assets/hours-editor.js`: formulář po dnech, ze kterého se složí hodnota `opening_hours` (ověřená vlastním parserem), plus tlačítko na editor OSM přímo pro danou kavárnu. Je na stránkách kaváren i v detailu na mapě, načte se až po rozbalení. Upozorňuje, že se nesmí přebírat data z Google Map.
+- `/doplnit/`: jak pomoct, pravidla a města s nejvíce chybějícími údaji. Stránka města má sekci „Chybí otevírací doba“ (`#chybi`).
+- `data/stats-history.json`: týdenní záznam úplnosti dat (otevírací doba, adresa, web), doplňuje ho `scripts/fetch-data.mjs`. Poslouží dalším edicím indexu.
+
 ## Kavárenský index
 
 Datová zpráva na `/kavarensky-index/<edice>/` (první edice: [podzim 2026](https://kafemapa.cz/kavarensky-index/podzim-2026/)). Čísla edice jsou **zmrazená** v `data/kavarensky-index/<edice>.json` (+ tečková mapa `-mapa.svg` a obrázek pro sdílení `-og.png`), takže citovaná čísla se týdenní aktualizací dat nezmění.

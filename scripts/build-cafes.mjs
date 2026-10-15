@@ -48,6 +48,12 @@ function schemaHours(o) {
   return rules.length && rules.every((r) => RULE.test(r)) ? rules : null;
 }
 
+// Rozbalovací pomocník pro zápis otevírací doby (assets/hours-editor.js, načte se až po otevření).
+const helpBox = (c, label, open = false) => `<details class="help-box"${open ? ' data-primary' : ''}>
+          <summary>${label}</summary>
+          <div data-hours-editor data-osm-edit="${osmUrl(c, true)}"${c.o ? ` data-current="${esc(c.o)}"` : ''}></div>
+        </details>`;
+
 const kindOf = (c) => (c.k ? (c.r ? 'Pražírna' : 'Obchod s kávou') : c.r ? 'Kavárna a pražírna' : 'Kavárna');
 
 function cafePage(c, ctx) {
@@ -102,11 +108,12 @@ function cafePage(c, ctx) {
             return `<tr data-day="${i}"><th scope="row">${d}</th><td>${txt}</td></tr>`;
           }).join('')}</tbody>
         </table>
-        <p class="small muted">Svátky a výjimky nezohledňujeme. Před cestou je raději ověřte.</p>`;
+        <p class="small muted">Svátky a výjimky nezohledňujeme. Před cestou je raději ověřte.</p>
+        ${helpBox(c, 'Nesedí otevírací doba? Opravte ji')}`;
   } else if (c.o) {
-    hours = `<p class="cafe-hours raw">${esc(c.o)}</p>`;
+    hours = `<p class="cafe-hours raw">${esc(c.o)}</p>${helpBox(c, 'Nesedí otevírací doba? Opravte ji')}`;
   } else {
-    hours = `<p class="muted">Otevírací doba zatím v OpenStreetMap chybí. Znáte ji? <a href="${osmUrl(c, true)}" rel="noopener">Doplňte ji</a> a objeví se tady.</p>`;
+    hours = `<p class="muted">Otevírací doba zatím v OpenStreetMap chybí.</p>${helpBox(c, 'Znáte otevírací dobu? Pomozte ji doplnit', true)}`;
   }
 
   return (

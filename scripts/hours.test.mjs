@@ -71,3 +71,19 @@ test('formatWeek', async () => {
   assert.equal(formatWeek(parseHours('Sa,Su 09:00-12:00,13:00-17:00')), 'po–pá zavřeno · so, ne 9:00–12:00, 13:00–17:00');
   assert.equal(formatWeek(null), null);
 });
+
+test('buildOpeningHours: skládání a zpětné čtení', async () => {
+  const { buildOpeningHours } = await import('../assets/hours-editor.js');
+  const day = (from, to) => ({ closed: false, from, to });
+  const off = { closed: true, from: '08:00', to: '18:00' };
+  const wk = [day('08:00', '18:00'), day('08:00', '18:00'), day('08:00', '18:00'), day('08:00', '18:00'), day('08:00', '18:00'), day('09:00', '14:00'), off];
+  assert.equal(buildOpeningHours(wk), 'Mo-Fr 08:00-18:00; Sa 09:00-14:00; Su off');
+  assert.equal(buildOpeningHours(Array(7).fill(day('10:00', '22:00'))), 'Mo-Su 10:00-22:00');
+  assert.equal(buildOpeningHours([off, ...Array(6).fill(day('10:00', '00:00'))]), 'Mo off; Tu-Su 10:00-24:00');
+  // přes půlnoc
+  const late = buildOpeningHours(Array(7).fill(day('18:00', '02:00')));
+  assert.equal(late, 'Mo-Su 18:00-02:00');
+  // vše, co editor vyrobí, musí přečíst i náš parser
+  for (const oh of [buildOpeningHours(wk), late, 'Mo off; Tu-Su 10:00-24:00']) assert.ok(parseHours(oh), oh);
+  assert.deepEqual(parseHours('Mo off; Tu-Su 10:00-24:00')[1], [[600, 1440]]);
+});

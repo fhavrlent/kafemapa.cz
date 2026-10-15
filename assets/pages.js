@@ -60,3 +60,14 @@ if (bar) {
 
 refresh();
 setInterval(refresh, 60_000);
+
+// Pomocník pro otevírací dobu: modul se načte, až ho někdo rozbalí.
+for (const box of document.querySelectorAll('.help-box')) {
+  box.addEventListener('toggle', async () => {
+    const host = box.querySelector('[data-hours-editor]');
+    if (!box.open || host.dataset.mounted) return;
+    host.dataset.mounted = '1';
+    const { mountHoursEditor } = await import('./hours-editor.js');
+    mountHoursEditor(host, { osmEditUrl: host.dataset.osmEdit, current: host.dataset.current });
+  });
+}

@@ -183,3 +183,9 @@ body.page { height: auto; }
 .near li { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .near a { font-weight: 600; }
 .osm-note { margin-top: 36px; }
+
+/* ---------- doplňování dat ---------- */
+.steps { padding-left: 22px; max-width: 68ch; }
+.steps li { margin: 8px 0; }
+.missing-list summary { cursor: pointer; color: var(--accent); font-weight: 600; margin: 4px 0 10px; }
+.page .help-box { max-width: 560px; }

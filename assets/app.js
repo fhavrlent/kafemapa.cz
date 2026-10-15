@@ -386,7 +386,7 @@ function renderDetail(c) {
   } else if (c.o) {
     hours = `<p class="hours-raw">${esc(c.o)}</p>`;
   } else {
-    hours = `<p class="muted">Otevírací doba zatím není v OpenStreetMap. <a href="${osmUrl(c, true)}" target="_blank" rel="noopener">Doplnit</a></p>`;
+    hours = `<p class="muted">Otevírací doba zatím není v OpenStreetMap.</p>`;
   }
 
   const feats = [];
@@ -417,7 +417,12 @@ function renderDetail(c) {
     <span class="status-pill ${c.status.cls}">${c.status.cls !== 'unknown' ? `<i class="dot dot-${c.status.cls === 'soon' ? 'open' : c.status.cls}"></i>` : icon('clock')}${esc(c.status.text)}</span>
     <div class="actions">${actions.join('')}</div>
     ${c.d ? `<div class="section"><h3>Popis</h3><p class="desc">${esc(c.d)}</p></div>` : ''}
-    <div class="section"><h3>Otevírací doba</h3>${hours}</div>
+    <div class="section"><h3>Otevírací doba</h3>${hours}
+      <details class="help-box"${c.o ? '' : ' data-primary'}>
+        <summary>${c.o ? 'Nesedí otevírací doba? Opravte ji' : 'Znáte otevírací dobu? Pomozte ji doplnit'}</summary>
+        <div data-hours-editor></div>
+      </details>
+    </div>
     ${feats.length ? `<div class="section"><h3>Vybavení</h3><div class="feats">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>` : ''}
     <div class="osm-links">
       ${cafePath(c, c.city?.n) ? `<a href="${cafePath(c, c.city?.n)}">${icon('globe')}Stránka kavárny</a>` : ''}
@@ -427,6 +432,14 @@ function renderDetail(c) {
     </div>`;
 
   $('#btnBack').onclick = leaveDetail;
+  const helpBox = $('#detail .help-box');
+  helpBox.addEventListener('toggle', async () => {
+    const host = helpBox.querySelector('[data-hours-editor]');
+    if (!helpBox.open || host.dataset.mounted) return;
+    host.dataset.mounted = '1';
+    const { mountHoursEditor } = await import('./hours-editor.js');
+    mountHoursEditor(host, { osmEditUrl: osmUrl(c, true), current: c.o });
+  });
   $('#btnShare').onclick = async (e) => {
     const url = location.href;
     if (navigator.share) {

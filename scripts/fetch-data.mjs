@@ -214,6 +214,17 @@ function build(raw) {
   };
 }
 
+export function statsEntry(out) {
+  const c = out.cafes;
+  return {
+    date: (out.osmBase || out.generated).slice(0, 10),
+    places: c.length,
+    withHours: c.filter((x) => x.o).length,
+    withAddress: c.filter((x) => x.a).length,
+    withWebsite: c.filter((x) => x.w).length,
+  };
+}
+
 const rawPath = process.argv[2];
 const raw = rawPath ? JSON.parse(await readFile(rawPath, 'utf8')) : await fetchOverpass();
 const out = build(raw);
@@ -224,6 +235,16 @@ if (out.cafes.length < 1000) {
 }
 await mkdir(dirname(OUT), { recursive: true });
 await writeFile(OUT, JSON.stringify(out));
+
+// Historie úplnosti dat: jeden záznam za den dat z OSM (opakované stažení ho přepíše).
+const HISTORY = join(ROOT, 'data', 'stats-history.json');
+let history = [];
+try {
+  history = JSON.parse(await readFile(HISTORY, 'utf8'));
+} catch {}
+const entry = statsEntry(out);
+history = history.filter((h) => h.date !== entry.date).concat(entry).sort((a, b) => a.date.localeCompare(b.date));
+await writeFile(HISTORY, JSON.stringify(history, null, 1) + '\n');
 console.log(
   `Zapsáno ${out.cafes.length} míst, ${out.cities.length} měst → ${OUT} ` +
     `(${(JSON.stringify(out).length / 1024).toFixed(0)} kB, bez jména vynecháno ${out.skippedUnnamed})`
