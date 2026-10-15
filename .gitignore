@@ -3,3 +3,5 @@ node_modules/
 *.log
 assets/config.js
 .claude/
+_site/
+.wrangler/

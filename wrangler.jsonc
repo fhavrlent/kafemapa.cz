@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kafemapa-cz",
+  "compatibility_date": "2026-10-15",
+  // Čistě statický web, bez kódu Workeru. Sestavuje `npm run build` do _site/.
+  "assets": {
+    "directory": "./_site",
+    "not_found_handling": "404-page"
+  },
+  "routes": [
+    { "pattern": "kafemapa.cz", "custom_domain": true },
+    { "pattern": "www.kafemapa.cz", "custom_domain": true }
+  ],
+  "workers_dev": false,
+  "preview_urls": true
+}

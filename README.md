@@ -6,7 +6,7 @@ Data pocházejí z [OpenStreetMap](https://www.openstreetmap.org/) (ODbL). Kdo n
 
 ## Jak to funguje
 
-Statický web: žádný backend, build ani npm závislosti.
+Statický web: žádný backend ani npm závislosti, „build“ jen zkopíruje soubory do `_site/` a doplní klíč.
 
 ```
 index.html               stránka
@@ -26,21 +26,22 @@ Potřebujete Node 20+.
 
 ```bash
 npm run dev     # http://localhost:8080
+npm run build   # sestaví _site/ pro nasazení
 npm test        # testy parseru otevírací doby
 npm run data    # stáhne čerstvá data z OSM (1–3 minuty, Overpass občas zlobí, skript zkouší víc serverů)
 ```
 
 ## Nasazení
 
-Web běží na **GitHub Pages**, DNS je na **Cloudflare**.
+Web běží na **Cloudflare Workers** (statické soubory, bez kódu Workeru), zdrojem je tento repozitář.
 
-- Každý push do `main` spustí workflow [`deploy.yml`](.github/workflows/deploy.yml): otestuje parser, zapíše `assets/config.js` s klíčem ze secretu `MAPY_API_KEY` a nasadí web.
-- Každé pondělí ráno týž workflow stáhne čerstvá data z OSM, commitne je a nasadí. Ručně jde spustit v záložce Actions (*Run workflow* → *Stáhnout čerstvá data*).
-- DNS: `kafemapa.cz` má A/AAAA záznamy na GitHub Pages, `www` je CNAME na `fhavrlent.github.io`. Záznamy nejsou proxované přes Cloudflare, aby GitHub mohl vystavit HTTPS certifikát.
+- Každý push do `main` spustí Cloudflare Workers Builds: `npm test && npm run build` (sestaví `_site/`) a `npx wrangler deploy`. Nastavení je ve [`wrangler.jsonc`](wrangler.jsonc), bezpečnostní a cache hlavičky v [`_headers`](_headers).
+- Každé pondělí ráno workflow [`refresh-data.yml`](.github/workflows/refresh-data.yml) stáhne čerstvá data z OSM a commitne je, čímž spustí nové nasazení. Ručně jde spustit v záložce Actions.
+- Domény `kafemapa.cz` a `www.kafemapa.cz` jsou na Worker napojené jako custom domains, DNS záznamy spravuje Cloudflare sám.
 
 ### Klíč Mapy.com
 
-Klíč nepatří do repozitáře, proto je `assets/config.js` v `.gitignore`. Pro lokální vývoj zkopírujte `assets/config.example.js` jako `assets/config.js` a doplňte klíč. Bez klíče se použije podkladová mapa OSM.
+Klíč nepatří do repozitáře, proto je `assets/config.js` v `.gitignore`. Při nasazení ho build zapíše z proměnné `MAPY_API_KEY`, která je v Cloudflare uložená jako tajná (Workers → kafemapa-cz → Settings → Build → Variables and secrets). Pro lokální vývoj zkopírujte `assets/config.example.js` jako `assets/config.js` a doplňte klíč. Bez klíče se použije podkladová mapa OSM.
 
 Klíč pro dlaždice je v prohlížeči vždy veřejně vidět, protože se posílá s každým požadavkem na dlaždici. Skutečnou ochranou je omezení klíče v konzoli Mapy.com na domény `kafemapa.cz`, `www.kafemapa.cz` a `localhost`.
 

@@ -7,7 +7,10 @@
   "scripts": {
     "data": "node scripts/fetch-data.mjs",
     "test": "node --test scripts/*.test.mjs",
+    "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }
