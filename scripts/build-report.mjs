@@ -5,7 +5,7 @@
 
 import { mkdir, writeFile, readFile, copyFile, access } from 'node:fs/promises';
 import { join } from 'node:path';
-import { head, foot, esc, num, dec, breadcrumbLd, SITE } from './build-pages.mjs';
+import { head, foot, esc, num, dec, plural, breadcrumbLd, SITE } from './build-pages.mjs';
 
 const pct = (x) => `${Math.round(x * 100)} %`;
 const time = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
@@ -61,7 +61,7 @@ function histogram({ title, sub, bins, labelOf }) {
     const d = b.n
       ? `M${x},${base}V${top + r}Q${x},${top} ${x + r},${top}H${x + bw - r}Q${x + bw},${top} ${x + bw},${top + r}V${base}Z`
       : '';
-    const tip = `${labelOf(b)}: ${num(b.n)} kaváren`;
+    const tip = `${labelOf(b)}: ${num(b.n)} ${plural(b.n, ['kavárna', 'kavárny', 'kaváren'])}`;
     return `<g class="col" tabindex="0" role="img" aria-label="${esc(tip)}" data-tip="${esc(tip)}">
         <rect class="hit" x="${L + i * band}" y="${T}" width="${band}" height="${H - T - B}"/>
         ${d ? `<path d="${d}"/>` : ''}
