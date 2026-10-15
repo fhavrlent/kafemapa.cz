@@ -6,12 +6,13 @@
 import { cp, mkdir, rm, writeFile, readFile, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildPages } from './build-pages.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '_site');
 const FILES = [
   'index.html', '404.html', '_headers', 'favicon.svg', 'icon-512.png', 'og-image.png',
-  'manifest.webmanifest', 'robots.txt', 'sitemap.xml', 'assets', 'data',
+  'manifest.webmanifest', 'robots.txt', 'assets', 'data',
 ];
 
 await rm(OUT, { recursive: true, force: true });
@@ -28,4 +29,7 @@ if (!key) {
 }
 await writeFile(join(OUT, 'assets', 'config.js'), `export const MAPY_API_KEY = ${JSON.stringify(key)};\n`);
 
-console.log(`Sestaveno do _site/ (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);
+const data = JSON.parse(await readFile(join(ROOT, 'data', 'cafes.json'), 'utf8'));
+const nPages = await buildPages(OUT, data);
+
+console.log(`Sestaveno do _site/, ${nPages} stránek měst (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);

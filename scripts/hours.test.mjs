@@ -62,3 +62,12 @@ test('neznámý zápis vrací null', () => {
   assert.equal(parseHours('dle domluvy'), null);
   assert.equal(parseHours('Mo-Fr 08:00-18:00; Su "dle domluvy"'), null);
 });
+
+test('formatWeek', async () => {
+  const { formatWeek } = await import('../assets/hours.js');
+  assert.equal(formatWeek(parseHours('Mo-Fr 08:00-18:00; Sa 09:00-14:00')), 'po–pá 8:00–18:00 · so 9:00–14:00 · ne zavřeno');
+  assert.equal(formatWeek(parseHours('Mo-Su 10:00-22:00')), 'denně 10:00–22:00');
+  assert.equal(formatWeek(parseHours('24/7')), 'nonstop');
+  assert.equal(formatWeek(parseHours('Sa,Su 09:00-12:00,13:00-17:00')), 'po–pá zavřeno · so, ne 9:00–12:00, 13:00–17:00');
+  assert.equal(formatWeek(null), null);
+});

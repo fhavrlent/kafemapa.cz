@@ -15,10 +15,18 @@ const TYPES = {
 
 createServer(async (req, res) => {
   let path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^(\.\.[/\\])+/, '');
-  let file = join(ROOT, path);
+  // Nejdřív zdrojové soubory, pak vygenerované v _site/ (stránky měst, sitemap…) — po `npm run build`.
+  let body, file;
+  for (const base of [ROOT, join(ROOT, '_site')]) {
+    file = join(base, path);
+    try {
+      if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
+      body = await readFile(file);
+      break;
+    } catch {}
+  }
   try {
-    if ((await stat(file)).isDirectory()) file = join(file, 'index.html');
-    const body = await readFile(file);
+    if (!body) throw new Error('404');
     res.writeHead(200, { 'Content-Type': TYPES[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
     res.end(body);
   } catch {

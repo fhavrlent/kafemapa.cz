@@ -1,8 +1,7 @@
-import { parseHours, statusAt, fmtMin } from './hours.js';
+import { parseHours, statusLabel, fmtMin } from './hours.js';
 
 // Bitové příznaky — musí odpovídat scripts/fetch-data.mjs
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
-const DAY_SHORT = ['po', 'út', 'st', 'čt', 'pá', 'so', 'ne'];
 const DAY_LONG = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
 const CZ_BOUNDS = [[48.55, 12.09], [51.06, 18.86]];
 const LIST_LIMIT = 80;
@@ -38,23 +37,8 @@ const state = {
 
 /* ---------------- otevírací doba ---------------- */
 
-function isNonstop(week) {
-  return week && week.every((d) => d.length === 1 && d[0][0] === 0 && d[0][1] >= 1440);
-}
-
 function computeStatus(c, now) {
-  if (!c.week) return { cls: 'unknown', text: c.o ? 'Otevírací doba v detailu' : 'Otevírací doba neuvedena' };
-  if (isNonstop(c.week)) return { cls: 'open', text: 'Nonstop' };
-  const s = statusAt(c.week, now);
-  if (s.open) {
-    const until = s.until % 1440 === 0 ? 'půlnoci' : fmtMin(s.until);
-    return s.soon ? { cls: 'soon', text: `Zavírá v ${fmtMin(s.until)}` } : { cls: 'open', text: `Otevřeno do ${until}` };
-  }
-  if (!s.next) return { cls: 'closed', text: 'Zavřeno' };
-  const at = fmtMin(s.next.at);
-  const day = (dayIndex(now) + s.next.day) % 7;
-  const when = s.next.day === 0 ? `v ${at}` : s.next.day === 1 ? `zítra v ${at}` : `${DAY_SHORT[day]} v ${at}`;
-  return { cls: 'closed', text: `Zavřeno · otevře ${when}` };
+  return statusLabel(c.week, now) ?? { cls: 'unknown', text: c.o ? 'Otevírací doba v detailu' : 'Otevírací doba neuvedena' };
 }
 const dayIndex = (d) => (d.getDay() + 6) % 7;
 
@@ -188,6 +172,7 @@ async function load() {
 
   applyFilters();
   if (location.hash.length > 1) showFromHash();
+  else openCityFromQuery();
   setInterval(refreshStatuses, 60_000);
 }
 
@@ -475,6 +460,16 @@ function renderRank(tab) {
         <span class="val">${shown}</span></button></li>`;
     })
     .join('');
+}
+
+// Odkaz ze stránky města: /?mesto=brno
+async function openCityFromQuery() {
+  const slug = new URLSearchParams(location.search).get('mesto');
+  if (!slug) return;
+  try {
+    const idx = (await (await fetch('data/mesta.json')).json())[slug];
+    if (idx != null) goToCity(idx);
+  } catch {}
 }
 
 function goToCity(idx) {

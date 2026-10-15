@@ -10,12 +10,15 @@ Statický web: žádný backend ani npm závislosti, „build“ jen zkopíruje 
 
 ```
 index.html               stránka
-assets/app.js            mapa, seznam, filtry, detail, žebříček
+assets/app.js            mapa, seznam, filtry, detail, žebříček (podporuje /?mesto=<slug>)
 assets/hours.js          parser OSM opening_hours (otevřeno teď / zavírá v…)
 assets/style.css         vzhled (světlý i tmavý režim, mobilní spodní list)
 assets/vendor/           Leaflet 1.9.4 + Leaflet.markercluster 1.5.3
 data/cafes.json          kompaktní data (~600 kB, gzip ~200 kB)
 scripts/fetch-data.mjs   stažení dat z Overpass API → data/cafes.json
+scripts/build.mjs        sestavení _site/ pro nasazení (kopie souborů + klíč)
+scripts/build-pages.mjs  statické stránky měst /kavarny/<mesto>/ a sitemap.xml
+assets/pages.{css,js}    vzhled a živý stav „otevřeno“ na stránkách měst
 scripts/hours.test.mjs   testy parseru otevírací doby
 .github/workflows/       nasazení na GitHub Pages + týdenní aktualizace dat
 ```
@@ -56,8 +59,11 @@ Klíč pro dlaždice je v prohlížeči vždy veřejně vidět, protože se pos�
 - **Města**: v OSM má `addr:city` jen menšina podniků, proto se každý přiřazuje k nejbližšímu městu (dosah roste s velikostí města). Žebříček je tedy orientační.
 - Podniky bez jména (~270) se vynechávají.
 
+## Stránky měst
+
+Kvůli vyhledávačům má každé město s aspoň 5 kavárnami vlastní statickou stránku (`/kavarny/brno/`): počty, žebříček na obyvatele, seznam všech míst s čitelnou otevírací dobou, filtry a okolní města. Rozcestník je na `/kavarny/`. Generují se při každém buildu z `data/cafes.json`, takže je týdenní aktualizace dat obnoví sama. Texty se vyhýbají skloňování názvů měst („v okolí centra města Brno“), protože automatické skloňování by dělalo chyby.
+
 ## Nápady na další rozvoj
 
-- Statické stránky pro jednotlivá města (`/praha/`, `/brno/`) kvůli SEO
 - Vlastní vektorový styl mapy (MapLibre + OpenFreeMap) místo rastrových dlaždic
 - Kurátorské vrstvy, např. výběrové kavárny nebo pražírny s e-shopem
