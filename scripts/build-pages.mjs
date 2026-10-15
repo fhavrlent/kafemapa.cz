@@ -97,7 +97,7 @@ export function foot(meta, lang = 'cs') {
   <footer class="site-foot">
     <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL), updated ${esc(when)}.
     Missing café or wrong data? Anyone can fix it directly on OpenStreetMap.</p>
-    <p><a href="/en/">Kafemapa</a> · <a href="/en/cities/">Cafés by town</a> · <a href="/en/help/">Help improve the data</a> · <a href="/" lang="cs">Česky</a></p>
+    <p><a href="/en/">Kafemapa</a> · <a href="/en/cities/">Cafés by town</a> · <a href="/en/help/">Help improve the data</a> · <a href="/en/about/">About</a> · <a href="/" lang="cs">Česky</a></p>
   </footer>
 </body>
 </html>
@@ -107,7 +107,7 @@ export function foot(meta, lang = 'cs') {
   <footer class="site-foot">
     <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL), aktualizace ${esc(when)}.
     Chybí kavárna nebo je údaj špatně? Opravit ho může kdokoli přímo v OpenStreetMap.</p>
-    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a> · <a href="/en/" lang="en">English</a></p>
+    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a> · <a href="/o-projektu/">O projektu</a> · <a href="/en/" lang="en">English</a></p>
   </footer>
 </body>
 </html>
@@ -324,6 +324,83 @@ function contributePage(pages, data) {
   );
 }
 
+// O projektu (/o-projektu/, /en/about/): delší text, který dřív visel v dialogu na mapě.
+const ABOUT = {
+  cs: {
+    path: '/o-projektu/', other: '/en/about/', title: 'O projektu | Kafemapa', h1: 'O Kafemapě', crumb: 'O projektu',
+    description: 'Kafemapa ukazuje všechny kavárny, pražírny a obchody s kávou v Česku z otevřených dat OpenStreetMap. Jak funguje a jak pomoct.',
+    body: (when) => `
+    <p class="lead">Kafemapa ukazuje kavárny, pražírny a obchody s kávou z celého Česka. Nejde o placený katalog ani žebříček „nejlepších“. Je tu každé místo, které někdo zapsal do <a href="https://www.openstreetmap.org/" rel="noopener">OpenStreetMap</a>, otevřené mapy, kterou tvoří dobrovolníci.</p>
+    <section>
+      <h2>Chybí kavárna, nebo je tu chyba?</h2>
+      <p>U třetiny kaváren zatím chybí otevírací doba. <a href="/doplnit/">Pomozte ji doplnit</a>, u každé kavárny k tomu najdete jednoduchý formulář. Zavřený podnik nahlásíte přes „Zavřeno nebo je tu chyba?“ na jeho stránce. Chybějící kavárnu přidáte v <a href="https://www.openstreetmap.org/edit" rel="noopener">editoru OpenStreetMap</a> jako <em>Kavárna</em>.</p>
+    </section>
+    <section>
+      <h2>Jak to funguje</h2>
+      <ul>
+        <li>Údaje se každý týden stahují z OpenStreetMap. Poslední aktualizace: ${when}. Co se změnilo, ukazuje <a href="/nove/">Nově na mapě</a>.</li>
+        <li>„Otevřeno teď“ se počítá z tagu <code>opening_hours</code> podle času ve vašem zařízení. Svátky ani výjimky nezohledňujeme, takže před cestou raději ověřte.</li>
+        <li>Města se přiřazují podle vzdálenosti od centra, žebříčky jsou proto orientační.</li>
+        <li>Dvakrát do roka z dat vychází <a href="/kavarensky-index/">Kavárenský index</a>.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Soukromí</h2>
+      <p>Návštěvnost měříme anonymně a bez cookies (Cloudflare Web Analytics), žádné osobní údaje neukládáme. Kafemapa sama cookies nepoužívá; poskytovatel mapových dlaždic Mapy.com nastavuje technickou cookie pro rozložení zátěže svých serverů.</p>
+    </section>
+    <section>
+      <h2>Zdroje a licence</h2>
+      <p>Mapová data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL). Podkladová mapa © <a href="https://mapy.com/" rel="noopener">Seznam.cz a.s. (Mapy.com)</a> a další. Kontakt: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
+    </section>`,
+  },
+  en: {
+    path: '/en/about/', other: '/o-projektu/', title: 'About | Kafemapa', h1: 'About Kafemapa', crumb: 'About',
+    description: 'Kafemapa shows every café, coffee roaster and coffee shop in Czechia from open OpenStreetMap data. How it works and how to help.',
+    body: (when) => `
+    <p class="lead">Kafemapa shows cafés, coffee roasters and coffee shops all over Czechia. It is not a paid directory or a “best of” list: it includes every place that someone has added to <a href="https://www.openstreetmap.org/" rel="noopener">OpenStreetMap</a>, the open map built by volunteers.</p>
+    <section>
+      <h2>Missing café or wrong data?</h2>
+      <p>A third of cafés have no opening hours yet. <a href="/en/help/">Help add them</a> — every café page has a simple form for it. Report a closed café with “Closed or something wrong?” on its page. Add a missing café in the <a href="https://www.openstreetmap.org/edit" rel="noopener">OpenStreetMap editor</a> as a <em>Cafe</em>.</p>
+    </section>
+    <section>
+      <h2>How it works</h2>
+      <ul>
+        <li>Data is downloaded from OpenStreetMap every week. Last update: ${when}.</li>
+        <li>“Open now” is calculated from the <code>opening_hours</code> tag using your device's clock. Public holidays and exceptions are not included, so check before you go.</li>
+        <li>Cafés are assigned to the nearest town, so the town rankings are approximate.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Privacy</h2>
+      <p>Visits are measured anonymously and without cookies (Cloudflare Web Analytics); no personal data is stored. Kafemapa itself uses no cookies; the map tile provider Mapy.com sets a technical cookie to balance load across its servers.</p>
+    </section>
+    <section>
+      <h2>Sources and licences</h2>
+      <p>Map data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL). Base map © <a href="https://mapy.com/" rel="noopener">Seznam.cz a.s. (Mapy.com)</a> and others. Contact: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
+    </section>`,
+  },
+};
+
+function aboutPage(lang, meta) {
+  const A = ABOUT[lang];
+  const when = new Date(meta.osmBase || meta.generated).toLocaleDateString(lang === 'en' ? 'en-GB' : 'cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+  const home = lang === 'en' ? '/en/' : '/';
+  return (
+    head({
+      lang, title: A.title, description: A.description, path: A.path,
+      alternates: { cs: ABOUT.cs.path, en: ABOUT.en.path },
+      jsonLd: breadcrumbLd([['Kafemapa', home], [A.crumb, A.path]]),
+    }) +
+    `
+  <main class="page-main report">
+    <nav class="crumbs" aria-label="${lang === 'en' ? 'Breadcrumb' : 'Drobečková navigace'}"><a href="${home}">Kafemapa</a> › <span>${A.crumb}</span></nav>
+    <h1>${A.h1}</h1>
+    ${A.body(esc(when))}
+  </main>` +
+    foot(meta, lang)
+  );
+}
+
 function indexPage(pages, meta, totalCafes) {
   const top = pages.slice().sort((a, b) => b.cafes.length - a.cafes.length).slice(0, 12);
   const groups = new Map();
@@ -408,6 +485,10 @@ export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new
     await writeFile(join(dir, 'index.html'), cityPage(p.city, { cafes: p.cafes, pages, rankPerCapita, meta: data }));
   }
   await writeFile(join(outDir, 'kavarny', 'index.html'), indexPage(pages, data, data.cafes.length));
+  for (const lang of ['cs', 'en']) {
+    await mkdir(join(outDir, ABOUT[lang].path), { recursive: true });
+    await writeFile(join(outDir, ABOUT[lang].path, 'index.html'), aboutPage(lang, data));
+  }
   await mkdir(join(outDir, 'doplnit'), { recursive: true });
   await writeFile(join(outDir, 'doplnit', 'index.html'), contributePage(pages, data));
 
@@ -418,7 +499,7 @@ export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new
   );
 
   const lastmod = (data.osmBase || data.generated).slice(0, 10);
-  const urls = ['/', '/kavarny/', '/doplnit/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
+  const urls = ['/', '/kavarny/', '/doplnit/', '/o-projektu/', '/en/about/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
   await writeFile(
     join(outDir, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +

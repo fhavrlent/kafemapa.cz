@@ -58,30 +58,18 @@ const PAIRS = [
 const BLOCKS = [
   [/<div class="promo" id="promo"[\s\S]*?<\/div>\n/, ''],
   [
-    /<nav class="menu-cards"[\s\S]*?<\/nav>/,
-    `<nav class="menu-cards" aria-label="More">
-      <a href="/en/cities/"><strong>Cafés by town</strong><span>Every place with coffee in Prague, Brno, Český Krumlov and 120+ other towns</span></a>
-      <a href="/en/help/"><strong>Help improve the data</strong><span>A third of cafés have no opening hours yet</span></a>
-      <a href="/kavarensky-index/podzim-2026/" hreflang="cs"><strong>Café Index (in Czech)</strong><span>Brno has more cafés per person than Prague, and more numbers</span></a>
-      <a href="/" hreflang="cs" lang="cs"><strong>Česká verze</strong><span>Kafemapa česky</span></a>
-    </nav>`,
-  ],
-  [
-    /<div class="prose">[\s\S]*?<\/div>\n  <\/dialog>/,
-    `<div class="prose">
-      <h3>About</h3>
-      <p>Kafemapa shows cafés, coffee roasters and coffee shops all over Czechia. It is not a paid directory or a “best of” list: it includes every place that someone has added to <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>, the open map built by volunteers.</p>
-      <h3>Missing café or wrong data?</h3>
-      <p>A third of cafés have no opening hours yet. <a href="/en/help/">Help add them</a> — every café has a simple form for it. Anyone can fix the data on OpenStreetMap; changes show up here after the next weekly update.</p>
-      <h3>How it works</h3>
-      <ul>
-        <li>Data is downloaded from OpenStreetMap every week. <span id="aboutData"></span></li>
-        <li>“Open now” is calculated from the <code>opening_hours</code> tag using your device's clock. Public holidays and exceptions are not included, so check before you go.</li>
-        <li>Cafés are assigned to the nearest town, so the town ranking is approximate.</li>
-      </ul>
-      <p class="muted small">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL). <span id="aboutTiles">Map tiles: OpenStreetMap Foundation.</span></p>
-      <p class="muted small">Visits are measured anonymously and without cookies (Cloudflare Web Analytics); no personal data is stored. Kafemapa itself uses no cookies; the map tile provider Mapy.com sets a technical cookie to balance load across its servers.</p>
-    </div>
+    /<dialog id="dlgAbout"[\s\S]*?<\/dialog>/,
+    `<dialog id="dlgAbout" class="dialog menu-dialog" aria-labelledby="aboutTitle">
+    <header>
+      <h2 id="aboutTitle">Menu</h2>
+      <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+    </header>
+    <nav class="menu-list" aria-label="More">
+      <a href="/en/cities/"><span><strong>Cafés by town</strong><small>Prague, Brno, Český Krumlov and 120+ other towns</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="/en/help/"><span><strong>Help improve the data</strong><small>A third of cafés have no opening hours yet</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="/kavarensky-index/podzim-2026/" hreflang="cs"><span><strong>Café Index <span class="muted">(in Czech)</span></strong><small>Brno has more cafés per person than Prague</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </nav>
+    <p class="menu-foot"><a href="/en/about/">About</a><a href="/" lang="cs" hreflang="cs">Česky</a></p>
   </dialog>`,
   ],
 ];

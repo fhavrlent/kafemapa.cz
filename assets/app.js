@@ -92,7 +92,6 @@ if (MAPY_API_KEY) {
     },
   });
   new MapyLogo().addTo(map);
-  $('#aboutTiles').innerHTML = t.tilesBy;
   map.getContainer().classList.add('tiles-mapy');
 } else {
   // Standardní dlaždice OSM jsou zdarma jen pro rozumný provoz
@@ -178,8 +177,6 @@ async function load() {
 
   const total = data.cafes.length;
   $('#tagline').textContent = t.tagline(fmtNum(total));
-  const when = new Date(data.osmBase || data.generated).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
-  $('#aboutData').textContent = t.lastUpdate(when);
 
   applyFilters();
   if (location.hash.length > 1) showFromHash();

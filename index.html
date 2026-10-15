@@ -146,37 +146,18 @@
     <p class="rank-more"><a href="/kavarensky-index/">Celý Kavárenský index: otevírací doby, řetězce a další čísla&nbsp;→</a></p>
   </dialog>
 
-  <dialog id="dlgAbout" class="dialog" aria-labelledby="aboutTitle">
+  <dialog id="dlgAbout" class="dialog menu-dialog" aria-labelledby="aboutTitle">
     <header>
-      <h2 id="aboutTitle">Kafemapa</h2>
+      <h2 id="aboutTitle">Menu</h2>
       <button class="icon-btn" data-close aria-label="Zavřít"><svg><use href="#i-x"/></svg></button>
     </header>
-    <nav class="menu-cards" aria-label="Další části webu">
-      <a href="/kavarny/"><strong>Kavárny podle měst</strong><span>Všechna místa s kávou ve vašem městě, s otevírací dobou</span></a>
-      <a href="/kavarensky-index/podzim-2026/"><strong>Kavárenský index</strong><span>Brno je kavárenštější než Praha a další čísla</span></a>
-      <a href="/nove/"><strong>Nově na mapě</strong><span>Nové kavárny a změny, každý týden</span></a>
-      <a href="/doplnit/"><strong>Pomozte doplnit data</strong><span>U třetiny kaváren chybí otevírací doba</span></a>
-      <a href="/en/" lang="en" hreflang="en"><strong>English version</strong><span>Kafemapa in English for visitors</span></a>
+    <nav class="menu-list" aria-label="Další části webu">
+      <a href="/kavarny/"><span><strong>Kavárny podle měst</strong><small>Všechna místa s kávou ve vašem městě</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="/nove/"><span><strong>Nově na mapě</strong><small>Nové kavárny a změny, každý týden</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="/kavarensky-index/podzim-2026/"><span><strong>Kavárenský index</strong><small>Brno je kavárenštější než Praha a další čísla</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="/doplnit/"><span><strong>Pomozte doplnit data</strong><small>U třetiny kaváren chybí otevírací doba</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
     </nav>
-    <div class="prose">
-      <h3>O projektu</h3>
-      <p>Kafemapa ukazuje kavárny, pražírny a obchody s kávou z celého Česka. Nejde o placený katalog ani žebříček „nejlepších“. Je tu každé místo, které někdo zapsal do <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>, otevřené mapy, kterou tvoří dobrovolníci.</p>
-      <h3>Chybí vaše kavárna, nebo je tu chyba?</h3>
-      <p>U třetiny kaváren zatím chybí otevírací doba. <a href="/doplnit/">Pomozte ji doplnit</a>, u každé kavárny k tomu najdete jednoduchý formulář.</p>
-      <p>Opravit to může kdokoli. U každého podniku je odkaz <em>Upravit v OSM</em>. Po registraci na openstreetmap.org doplníte otevírací dobu, web nebo zahrádku a změna se tu objeví při další aktualizaci dat. Nový podnik přidáte v <a href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener">editoru OSM</a> jako <em>Kavárna</em>.</p>
-      <h3>Nově na mapě</h3>
-      <p>Každý týden přehled nových kaváren a doplněných otevíracích dob: <a href="/nove/">Nově na mapě</a> (i jako <a href="/nove/feed.xml">RSS</a>).</p>
-      <h3>Kavárenský index</h3>
-      <p>Dvakrát do roka z dat vychází <a href="/kavarensky-index/">Kavárenský index</a>: kolik kaváren připadá na obyvatele, kdy otevírají a kde na mapě chybí. A <a href="/kavarny/">stránky měst</a> ukazují všechny kavárny ve vašem městě.</p>
-      <h3>Jak to funguje</h3>
-      <ul>
-        <li>Údaje se pravidelně stahují z OpenStreetMap. <span id="aboutData"></span></li>
-        <li>„Otevřeno teď“ se počítá z tagu <code>opening_hours</code> podle času ve vašem zařízení. Svátky ani výjimky nezohledňujeme, takže před cestou raději ověřte.</li>
-        <li>Města se přiřazují podle vzdálenosti od centra, žebříček je proto orientační.</li>
-      </ul>
-      <p class="muted small">Mapová data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL). <span id="aboutTiles">Mapové dlaždice: OpenStreetMap Foundation.</span></p>
-      <p class="muted small">Návštěvnost měříme anonymně a bez cookies (Cloudflare Web Analytics), žádné osobní údaje neukládáme. Kafemapa sama cookies nepoužívá; poskytovatel mapových dlaždic Mapy.com nastavuje technickou cookie pro rozložení zátěže svých serverů.</p>
-    </div>
+    <p class="menu-foot"><a href="/o-projektu/">O projektu</a><a href="/en/" lang="en" hreflang="en">English</a></p>
   </dialog>
 
   <noscript><p class="noscript">Kafemapa potřebuje ke svému běhu JavaScript.</p></noscript>
