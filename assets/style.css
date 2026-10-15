@@ -164,6 +164,13 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .city-hint b { font-weight: 600; }
 
 .empty { padding: 40px 24px; text-align: center; color: var(--ink-2); }
+.home-static { padding: 8px 10px 0; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+.home-static h2 { font: 600 16px/1.3 var(--display); color: var(--ink); margin: 18px 0 8px; }
+.home-static ul { list-style: none; margin: 0; padding: 0; }
+.home-towns { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 12px; }
+.home-towns span, .home-static p + p { color: var(--ink-3); }
+.home-links li { padding: 3px 0; }
+.home-static a { color: var(--accent); }
 .empty strong { display: block; font: 600 18px/1.3 var(--display); color: var(--ink); margin-bottom: 6px; }
 
 /* ---------- detail ---------- */

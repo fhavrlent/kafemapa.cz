@@ -11,6 +11,7 @@ import { buildCafes } from './build-cafes.mjs';
 import { buildChanges } from './build-changes.mjs';
 import { buildEn } from './build-en.mjs';
 import { buildEnMap } from './build-en-map.mjs';
+import { buildHome } from './build-home.mjs';
 import { buildReport } from './build-report.mjs';
 import { findKey } from './indexnow.mjs';
 import { createHash } from 'node:crypto';
@@ -43,6 +44,7 @@ const cafes = await buildCafes(OUT, data);
 const reportUrls = await buildReport(ROOT, OUT, data);
 const changeUrls = await buildChanges(ROOT, OUT, data);
 const enUrls = [...(await buildEnMap(ROOT, OUT)), ...(await buildEn(OUT, data)), ...cafes.enUrls];
+await buildHome(OUT, data);
 const nPages = await buildPages(OUT, data, { extraUrls: [...changeUrls, ...reportUrls, ...cafes.urls, ...enUrls], cafePaths: cafes.pathById });
 
 // IndexNow: klíč do kořene webu a manifest hashů stránek, podle kterého
