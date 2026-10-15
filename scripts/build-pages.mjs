@@ -56,6 +56,7 @@ export function head({ title, description, path, jsonLd, image = '/og-image.png'
   <link rel="stylesheet" href="/assets/style.css">
   <link rel="stylesheet" href="/assets/pages.css">
 ${extraCss}  <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "0e1d42365ab846fdb996803ff6628e9a"}'></script>
 </head>
 <body class="page">
   <header class="site-head">
