@@ -3,9 +3,33 @@
 // a pošleme je do editoru OSM. Sdílí ho mapa (app.js) i statické stránky (pages.js).
 
 import { parseHours, formatWeek } from './hours.js';
+import { LANG } from './i18n.js';
 
 const OSM_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-const CZ_DAYS = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
+const TXT = {
+  cs: {
+    days: ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'],
+    intro: 'Vyplňte časy podle toho, co víte z návštěvy, cedule na dveřích nebo z webu kavárny. <strong>Nepřebírejte je z Google Map</strong>, licence OpenStreetMap to nedovoluje.',
+    closed: 'zavřeno', opens: 'otevírá', closes: 'zavírá', copyMonday: 'Pondělí → celý všední týden',
+    copy: 'Zkopírovat hodnotu', openEditor: 'Otevřít editor OpenStreetMap', account: '(potřebujete účet na openstreetmap.org, je zdarma)',
+    step3: 'V editoru najděte pole <em>Otevírací doba</em>, vložte hodnotu a klikněte na <em>Uložit</em>. Do poznámky ke změně napište třeba „otevírací doba podle cedule“.',
+    complex: 'Složitější otevírací dobu (přestávky, sezónní provoz) zapište přímo v editoru. Změna se na Kafemapě objeví při další týdenní aktualizaci.',
+    missingTime: 'Doplňte u otevřených dnů čas otevření i zavření.', invalid: 'Tuhle kombinaci se nepodařilo ověřit, zkontrolujte časy.',
+    preview: (w) => `Bude vypadat takto: ${w}`, copied: 'Zkopírováno ✓', selected: 'Označeno, zkopírujte Ctrl/Cmd+C',
+  },
+  en: {
+    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    intro: 'Fill in the times you know from a visit, the sign on the door or the café\'s own website. <strong>Do not copy them from Google Maps</strong> — the OpenStreetMap licence does not allow it.',
+    closed: 'closed', opens: 'opens', closes: 'closes', copyMonday: 'Copy Monday to the whole working week',
+    copy: 'Copy the value', openEditor: 'Open the OpenStreetMap editor', account: '(you need a free account on openstreetmap.org)',
+    step3: 'In the editor, find the <em>Opening Hours</em> field, paste the value and click <em>Save</em>. In the change comment write e.g. “opening hours from the sign”.',
+    complex: 'More complex hours (lunch breaks, seasonal opening) can be entered directly in the editor. The change shows up on Kafemapa after the next weekly update.',
+    missingTime: 'Please fill in both opening and closing time for open days.', invalid: 'This combination could not be verified, please check the times.',
+    preview: (w) => `It will read: ${w}`, copied: 'Copied ✓', selected: 'Selected — copy with Ctrl/Cmd+C',
+  },
+};
+const T = TXT[LANG];
+const CZ_DAYS = T.days;
 const pad = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
 /**
@@ -45,32 +69,31 @@ export function mountHoursEditor(container, { osmEditUrl, current }) {
   const days = initialDays(current ? parseHours(current) : null);
   container.classList.add('he');
   container.innerHTML = `
-    <p class="he-intro">Vyplňte časy podle toho, co víte z návštěvy, cedule na dveřích nebo z webu kavárny.
-      <strong>Nepřebírejte je z Google Map</strong>, licence OpenStreetMap to nedovoluje.</p>
+    <p class="he-intro">${T.intro}</p>
     <div class="he-days">
       ${CZ_DAYS.map(
         (d, i) => `<div class="he-day" data-i="${i}">
           <span class="he-name">${d}</span>
-          <label class="he-closed"><input type="checkbox" data-k="closed"> zavřeno</label>
-          <input type="time" step="900" data-k="from" aria-label="${d}: otevírá">
+          <label class="he-closed"><input type="checkbox" data-k="closed"> ${T.closed}</label>
+          <input type="time" step="900" data-k="from" aria-label="${d}: ${T.opens}">
           <span aria-hidden="true">–</span>
-          <input type="time" step="900" data-k="to" aria-label="${d}: zavírá">
+          <input type="time" step="900" data-k="to" aria-label="${d}: ${T.closes}">
         </div>`
       ).join('')}
     </div>
-    <p class="he-quick"><button type="button" class="link-btn" data-copy-mo>Pondělí → celý všední týden</button></p>
+    <p class="he-quick"><button type="button" class="link-btn" data-copy-mo>${T.copyMonday}</button></p>
     <div class="he-out">
       <p class="he-preview" aria-live="polite"></p>
       <code class="he-value"></code>
       <p class="he-err" hidden></p>
     </div>
     <ol class="he-steps">
-      <li><button type="button" class="btn" data-copy>Zkopírovat hodnotu</button></li>
-      <li><a class="btn primary" href="${osmEditUrl}" target="_blank" rel="noopener">Otevřít editor OpenStreetMap</a>
-        <span class="small muted">(potřebujete účet na openstreetmap.org, je zdarma)</span></li>
-      <li>V editoru najděte pole <em>Otevírací doba</em>, vložte hodnotu a klikněte na <em>Uložit</em>. Do poznámky ke změně napište třeba „otevírací doba podle cedule“.</li>
+      <li><button type="button" class="btn" data-copy>${T.copy}</button></li>
+      <li><a class="btn primary" href="${osmEditUrl}" target="_blank" rel="noopener">${T.openEditor}</a>
+        <span class="small muted">${T.account}</span></li>
+      <li>${T.step3}</li>
     </ol>
-    <p class="small muted">Složitější otevírací dobu (přestávky, sezónní provoz) zapište přímo v editoru. Změna se na Kafemapě objeví při další týdenní aktualizaci.</p>`;
+    <p class="small muted">${T.complex}</p>`;
 
   const rows = [...container.querySelectorAll('.he-day')];
   const value = container.querySelector('.he-value');
@@ -91,8 +114,8 @@ export function mountHoursEditor(container, { osmEditUrl, current }) {
     const parsed = parseHours(oh);
     const bad = days.find((d) => !d.closed && (!d.from || !d.to || d.from === d.to));
     err.hidden = !bad && !!parsed;
-    err.textContent = bad ? 'Doplňte u otevřených dnů čas otevření i zavření.' : 'Tuhle kombinaci se nepodařilo ověřit, zkontrolujte časy.';
-    preview.textContent = parsed && !bad ? `Bude vypadat takto: ${formatWeek(parsed)}` : '';
+    err.textContent = bad ? T.missingTime : T.invalid;
+    preview.textContent = parsed && !bad ? T.preview(formatWeek(parsed, LANG)) : '';
   };
 
   container.addEventListener('input', (e) => {
@@ -111,14 +134,14 @@ export function mountHoursEditor(container, { osmEditUrl, current }) {
     const btn = e.currentTarget;
     try {
       await navigator.clipboard.writeText(value.textContent);
-      btn.textContent = 'Zkopírováno ✓';
+      btn.textContent = T.copied;
     } catch {
       // Bez přístupu ke schránce aspoň označíme text k ručnímu zkopírování.
       const r = document.createRange();
       r.selectNodeContents(value);
       getSelection().removeAllRanges();
       getSelection().addRange(r);
-      btn.textContent = 'Označeno, zkopírujte Ctrl/Cmd+C';
+      btn.textContent = T.selected;
     }
   });
   sync();

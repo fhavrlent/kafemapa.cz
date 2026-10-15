@@ -1,9 +1,10 @@
 import { parseHours, statusLabel, fmtMin } from './hours.js';
-import { cafePath } from './slug.js';
+import { cafePath, cityNameIn } from './slug.js';
+import { LANG, t, pluralIn, numIn } from './i18n.js';
 
 // Bitové příznaky — musí odpovídat scripts/fetch-data.mjs
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
-const DAY_LONG = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
+const DAY_LONG = t.days;
 const CZ_BOUNDS = [[48.55, 12.09], [51.06, 18.86]];
 const LIST_LIMIT = 80;
 
@@ -11,8 +12,10 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 const norm = (s) => String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-const plural = (n, [one, few, many]) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
-const fmtNum = (n) => n.toLocaleString('cs-CZ');
+const plural = (n, forms) => pluralIn(LANG, n, forms);
+const fmtNum = (n) => numIn(LANG, n);
+// Na /en/ ukazujeme anglická jména měst (Prague, Pilsen); hledání zná obě.
+const cityLabel = (city) => cityNameIn(city?.n, LANG);
 const isMobile = () => matchMedia('(max-width: 760px)').matches;
 const icon = (id) => `<svg aria-hidden="true"><use href="#i-${id}"/></svg>`;
 
@@ -39,7 +42,7 @@ const state = {
 /* ---------------- otevírací doba ---------------- */
 
 function computeStatus(c, now) {
-  return statusLabel(c.week, now) ?? { cls: 'unknown', text: c.o ? 'Otevírací doba v detailu' : 'Otevírací doba neuvedena' };
+  return statusLabel(c.week, now, LANG) ?? { cls: 'unknown', text: c.o ? t.hoursInDetail : t.hoursUnknown };
 }
 const dayIndex = (d) => (d.getDay() + 6) % 7;
 
@@ -57,15 +60,15 @@ map.attributionControl.setPrefix(false);
 // Bez klíče se použijí standardní dlaždice OSM.
 const { MAPY_API_KEY = '' } = await import('./config.js').catch(() => ({}));
 
-const OSM_DATA_ATTR =
-  'Kavárny © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">přispěvatelé OpenStreetMap</a>';
+const OSM_DATA_ATTR = t.cafesAttr;
 
 if (MAPY_API_KEY) {
   const size = devicePixelRatio > 1 ? '256@2x' : '256';
-  L.tileLayer(`https://api.mapy.com/v1/maptiles/basic/${size}/{z}/{x}/{y}?apikey=${MAPY_API_KEY}`, {
+  // lang=en přeloží popisky zemí a moří (Mapy.com to umí jen pro přehledové úrovně z ≤ 6)
+  L.tileLayer(`https://api.mapy.com/v1/maptiles/basic/${size}/{z}/{x}/{y}?apikey=${MAPY_API_KEY}${LANG === 'en' ? '&lang=en' : ''}`, {
     minZoom: 0,
     maxZoom: 19,
-    attribution: `<a href="https://api.mapy.com/copyright" target="_blank" rel="noopener">© Seznam.cz a.s. a další</a> · ${OSM_DATA_ATTR}`,
+    attribution: `<a href="https://api.mapy.com/copyright" target="_blank" rel="noopener">${t.mapyAttr}</a> · ${OSM_DATA_ATTR}`,
   }).addTo(map);
 
   // Logo Mapy.com musí být podle podmínek API viditelné nad mapou.
@@ -82,7 +85,7 @@ if (MAPY_API_KEY) {
     },
   });
   new MapyLogo().addTo(map);
-  $('#aboutTiles').innerHTML = 'Podkladová mapa © <a href="https://mapy.com/" target="_blank" rel="noopener">Seznam.cz a.s. (Mapy.com)</a> a další.';
+  $('#aboutTiles').innerHTML = t.tilesBy;
   map.getContainer().classList.add('tiles-mapy');
 } else {
   // Standardní dlaždice OSM jsou zdarma jen pro rozumný provoz
@@ -145,7 +148,7 @@ const setHoverMarker = (c) => setRing(hoverMarker, c);
 /* ---------------- data ---------------- */
 
 async function load() {
-  const res = await fetch('data/cafes.json');
+  const res = await fetch('/data/cafes.json');
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   state.cities = data.cities;
@@ -155,7 +158,7 @@ async function load() {
     c.f ||= 0;
     c.city = c.c != null ? data.cities[c.c] : null;
     c.week = parseHours(c.o, now);
-    c.search = norm(`${c.n} ${c.a || ''} ${c.city?.n || ''} ${c.b || ''}`);
+    c.search = norm(`${c.n} ${c.a || ''} ${c.city?.n || ''} ${cityLabel(c.city) || ''} ${c.b || ''}`);
     c.status = computeStatus(c, now);
     c.marker = L.marker([c.y, c.x], { icon: pinIcon(c.status.cls, c.k), keyboard: false, title: '' });
     c.marker.on('click', () => openCafe(c));
@@ -167,9 +170,9 @@ async function load() {
   state.cafes = data.cafes;
 
   const total = data.cafes.length;
-  $('#tagline').textContent = `${fmtNum(total)} kaváren, pražíren a obchodů s kávou v Česku.`;
-  const when = new Date(data.osmBase || data.generated).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
-  $('#aboutData').textContent = `Poslední aktualizace: ${when}.`;
+  $('#tagline').textContent = t.tagline(fmtNum(total));
+  const when = new Date(data.osmBase || data.generated).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+  $('#aboutData').textContent = t.lastUpdate(when);
 
   applyFilters();
   if (location.hash.length > 1) showFromHash();
@@ -227,11 +230,11 @@ function applyFilters() {
 function renderCityHint() {
   const box = $('#cityHint');
   if (!state.q || state.q.length < 2) return void (box.innerHTML = '');
-  const hits = state.cities.filter((c) => norm(c.n).startsWith(state.q)).sort((a, b) => b.pop - a.pop).slice(0, 2);
+  const hits = state.cities.filter((c) => norm(c.n).startsWith(state.q) || norm(cityLabel(c)).startsWith(state.q)).sort((a, b) => b.pop - a.pop).slice(0, 2);
   box.innerHTML = hits
     .map(
       (c, i) => `<button class="city-hint" data-city="${state.cities.indexOf(c)}">${icon('pin')}
-        <span>Přejít na mapu města <b>${esc(c.n)}</b><br><span class="muted small">${fmtNum(c.count)} ${plural(c.count, ['místo', 'místa', 'míst'])} s kávou · ${fmtNum(c.pop)} obyvatel</span></span></button>`
+        <span>${t.goToCity} <b>${esc(cityLabel(c))}</b><br><span class="muted small">${fmtNum(c.count)} ${plural(c.count, t.places)} ${t.withCoffee} · ${fmtNum(c.pop)} ${t.inhabitants}</span></span></button>`
     )
     .join('');
 }
@@ -250,11 +253,11 @@ function renderList() {
   let label;
   if (state.q) {
     items = state.matched;
-    label = `${fmtNum(items.length)} ${plural(items.length, ['výsledek', 'výsledky', 'výsledků'])} v celém Česku`;
+    label = `${fmtNum(items.length)} ${plural(items.length, t.results)} ${t.inCzechia}`;
   } else {
     const b = map.getBounds();
     items = state.matched.filter((c) => b.contains([c.y, c.x]));
-    label = `${fmtNum(items.length)} ${plural(items.length, ['místo', 'místa', 'míst'])} v této části mapy`;
+    label = `${fmtNum(items.length)} ${plural(items.length, t.places)} ${t.inView}`;
   }
   for (const c of items) c._d = km(ref, [c.y, c.x]);
   // otevřené nahoru, pak podle vzdálenosti
@@ -268,21 +271,19 @@ function renderList() {
   $('#count').textContent = label;
 
   if (!items.length) {
-    list.innerHTML = `<li class="empty"><strong>Tady nic není</strong>${
-      state.q || state.filters.size ? 'Zkuste upravit hledání nebo vypnout některý filtr.' : 'Oddalte nebo posuňte mapu.'
-    }</li>`;
+    list.innerHTML = `<li class="empty"><strong>${t.nothingHere}</strong>${state.q || state.filters.size ? t.tryFilters : t.tryMove}</li>`;
     return;
   }
 
   const showDist = !!state.me || !!state.q;
   const html = items.slice(0, LIST_LIMIT).map((c) => {
-    const where = c.a || c.city?.n || '';
+    const where = c.a || cityLabel(c.city) || '';
     const tags = [];
-    if (c.k) tags.push(c.r ? 'Pražírna' : 'Káva na doma');
-    else if (c.r) tags.push('Pražírna');
-    if (c.f & F.OUTDOOR) tags.push('Zahrádka');
-    if (c.f & F.WIFI) tags.push('Wi‑Fi');
-    if (c.f & F.VEGAN) tags.push('Vegan');
+    if (c.k) tags.push(c.r ? t.roaster : t.homeCoffee);
+    else if (c.r) tags.push(t.roaster);
+    if (c.f & F.OUTDOOR) tags.push(t.outdoor);
+    if (c.f & F.WIFI) tags.push(t.wifi);
+    if (c.f & F.VEGAN) tags.push(t.vegan);
     if (c.b) tags.push(c.b);
     return `<li><button class="card" data-id="${c.i}">
       <div class="card-top"><span class="card-name">${esc(c.n)}</span>${showDist ? `<span class="card-dist">${fmtDist(c._d)}</span>` : ''}</div>
@@ -291,7 +292,7 @@ function renderList() {
     </button></li>`;
   });
   if (items.length > LIST_LIMIT) {
-    html.push(`<li class="more">a dalších ${fmtNum(items.length - LIST_LIMIT)} — přibližte mapu nebo zpřesněte hledání</li>`);
+    html.push(`<li class="more">${t.more(fmtNum(items.length - LIST_LIMIT))}</li>`);
   }
   list.innerHTML = html.join('');
 }
@@ -353,7 +354,7 @@ function closeDetail(updateUrl = true) {
   state.pushedHash = false;
   state.selected = null;
   setActiveMarker(null);
-  document.title = 'Kafemapa — všechny kavárny v Česku na jedné mapě';
+  document.title = t.title;
   $('#detail').hidden = true;
   $('#panel').classList.remove('has-detail');
   $('#list').hidden = false;
@@ -371,66 +372,66 @@ function osmUrl(c, edit) {
 }
 
 function renderDetail(c) {
-  const kind = c.k ? (c.r ? 'Pražírna' : 'Obchod s kávou') : c.r ? 'Kavárna a pražírna' : 'Kavárna';
-  const addr = [c.a, c.a && c.city && c.a.includes(c.city.n) ? null : c.city?.n].filter(Boolean).join(', ');
+  const kind = c.k ? (c.r ? t.roaster : t.coffeeShop) : c.r ? t.cafeRoaster : t.cafe;
+  const addr = [c.a, c.a && c.city && c.a.includes(c.city.n) ? null : cityLabel(c.city)].filter(Boolean).join(', ');
   const today = dayIndex(new Date());
 
   let hours = '';
   if (c.week) {
     hours = `<table class="hours"><tbody>${DAY_LONG.map((d, i) => {
       const iv = c.week[i];
-      const txt = !iv.length ? 'zavřeno' : iv.map(([a, b]) => (a === 0 && b >= 1440 ? 'nonstop' : `${fmtMin(a)}–${fmtMin(b)}`)).join(', ');
+      const txt = !iv.length ? t.closed : iv.map(([a, b]) => (a === 0 && b >= 1440 ? t.nonstop : `${fmtMin(a)}–${fmtMin(b)}`)).join(', ');
       return `<tr class="${i === today ? 'today' : ''}"><td>${d}</td><td>${txt}</td></tr>`;
     }).join('')}</tbody></table>
-    <p class="muted small">Svátky a výjimky nezohledňujeme.</p>`;
+    <p class="muted small">${t.noHolidays}</p>`;
   } else if (c.o) {
     hours = `<p class="hours-raw">${esc(c.o)}</p>`;
   } else {
-    hours = `<p class="muted">Otevírací doba zatím není v OpenStreetMap.</p>`;
+    hours = `<p class="muted">${t.hoursMissing}</p>`;
   }
 
   const feats = [];
-  if (c.f & F.OUTDOOR) feats.push('Zahrádka');
-  if (c.f & F.WIFI) feats.push('Wi‑Fi');
-  if (c.f & F.WHEELCHAIR) feats.push('Bezbariérový vstup');
-  if (c.f & F.WHEELCHAIR_LIMITED) feats.push('Částečně bezbariérové');
-  if (c.f & F.VEGAN) feats.push('Veganské možnosti');
-  else if (c.f & F.VEGETARIAN) feats.push('Vegetariánské možnosti');
-  if (c.f & F.CARD) feats.push('Platba kartou');
-  if (c.b) feats.push(`Síť ${c.b}`);
-  if (c.l) feats.push(`Podlaží ${c.l}`);
+  if (c.f & F.OUTDOOR) feats.push(t.outdoor);
+  if (c.f & F.WIFI) feats.push(t.wifi);
+  if (c.f & F.WHEELCHAIR) feats.push(t.wheelchair);
+  if (c.f & F.WHEELCHAIR_LIMITED) feats.push(t.wheelchairLimited);
+  if (c.f & F.VEGAN) feats.push(t.veganOptions);
+  else if (c.f & F.VEGETARIAN) feats.push(t.vegetarianOptions);
+  if (c.f & F.CARD) feats.push(t.card);
+  if (c.b) feats.push(t.chain(c.b));
+  if (c.l) feats.push(t.level(c.l));
 
   const actions = [
-    `<a class="btn primary" href="https://mapy.com/fnc/v1/route?end=${c.x},${c.y}" target="_blank" rel="noopener">${icon('nav')}Navigovat</a>`,
+    `<a class="btn primary" href="https://mapy.com/fnc/v1/route?end=${c.x},${c.y}" target="_blank" rel="noopener">${icon('nav')}${t.navigate}</a>`,
   ];
-  if (c.w) actions.push(`<a class="btn" href="${esc(c.w)}" target="_blank" rel="noopener">${icon('globe')}Web</a>`);
-  if (c.p) actions.push(`<a class="btn" href="tel:${esc(c.p.replace(/[^\d+]/g, ''))}">${icon('phone')}Zavolat</a>`);
+  if (c.w) actions.push(`<a class="btn" href="${esc(c.w)}" target="_blank" rel="noopener">${icon('globe')}${t.web}</a>`);
+  if (c.p) actions.push(`<a class="btn" href="tel:${esc(c.p.replace(/[^\d+]/g, ''))}">${icon('phone')}${t.call}</a>`);
   if (c.ig) actions.push(`<a class="btn" href="${esc(c.ig)}" target="_blank" rel="noopener">${icon('insta')}Instagram</a>`);
   if (c.fb) actions.push(`<a class="btn" href="${esc(c.fb)}" target="_blank" rel="noopener">${icon('fb')}Facebook</a>`);
-  actions.push(`<button class="btn" id="btnShare">${icon('share')}Sdílet</button>`);
+  actions.push(`<button class="btn" id="btnShare">${icon('share')}${t.share}</button>`);
 
   $('#detail').innerHTML = `
-    <button class="link-btn back" id="btnBack">${icon('back')}Zpět na seznam</button>
+    <button class="link-btn back" id="btnBack">${icon('back')}${t.back}</button>
     <div class="kind">${kind}</div>
     <h2>${esc(c.n)}</h2>
     ${addr ? `<p class="addr">${icon('pin')}<span>${esc(addr)}</span></p>` : ''}
     <span class="status-pill ${c.status.cls}">${c.status.cls !== 'unknown' ? `<i class="dot dot-${c.status.cls === 'soon' ? 'open' : c.status.cls}"></i>` : icon('clock')}${esc(c.status.text)}</span>
     <div class="actions">${actions.join('')}</div>
-    ${c.d ? `<div class="section"><h3>Popis</h3><p class="desc">${esc(c.d)}</p></div>` : ''}
-    <div class="section"><h3>Otevírací doba</h3>${hours}
+    ${c.d ? `<div class="section"><h3>${t.description}</h3><p class="desc">${esc(c.d)}</p></div>` : ''}
+    <div class="section"><h3>${t.hours}</h3>${hours}
       <details class="help-box"${c.o ? '' : ' data-primary'}>
-        <summary>${c.o ? 'Nesedí otevírací doba? Opravte ji' : 'Znáte otevírací dobu? Pomozte ji doplnit'}</summary>
+        <summary>${c.o ? t.fixHours : t.addHours}</summary>
         <div data-hours-editor></div>
       </details>
     </div>
-    ${feats.length ? `<div class="section"><h3>Vybavení</h3><div class="feats">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>` : ''}
+    ${feats.length ? `<div class="section"><h3>${t.amenities}</h3><div class="feats">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>` : ''}
     <details class="help-box report-box">
-      <summary>Zavřeno nebo je tu chyba? Nahlaste to</summary>
+      <summary>${t.report}</summary>
       <div data-report></div>
     </details>
     <div class="osm-links">
-      ${cafePath(c, c.city?.n) ? `<a href="${cafePath(c, c.city?.n)}">${icon('globe')}Stránka kavárny</a>` : ''}
-      <a href="${osmUrl(c, true)}" target="_blank" rel="noopener">${icon('edit')}Upravit v OSM</a>
+      ${cafePath(c, c.city?.n, LANG) ? `<a href="${cafePath(c, c.city?.n, LANG)}">${icon('globe')}${t.cafePage}</a>` : ''}
+      <a href="${osmUrl(c, true)}" target="_blank" rel="noopener">${icon('edit')}${t.editOsm}</a>
       <a href="https://www.google.com/maps/search/?api=1&query=${c.y},${c.x}" target="_blank" rel="noopener">${icon('globe')}Google Maps</a>
       <a href="https://mapy.com/fnc/v1/showmap?center=${c.x},${c.y}&zoom=18&marker=true" target="_blank" rel="noopener">${icon('pin')}Mapy.com</a>
     </div>`;
@@ -455,10 +456,10 @@ function renderDetail(c) {
   $('#btnShare').onclick = async (e) => {
     const url = location.href;
     if (navigator.share) {
-      try { await navigator.share({ title: c.n, text: `${c.n} na Kafemapě`, url }); } catch {}
+      try { await navigator.share({ title: c.n, text: t.shareText(c.n), url }); } catch {}
     } else {
       await navigator.clipboard?.writeText(url);
-      e.currentTarget.lastChild.textContent = 'Odkaz zkopírován';
+      e.currentTarget.lastChild.textContent = t.copied;
     }
   };
 }
@@ -470,31 +471,32 @@ function renderRank(tab) {
   let rows;
   if (tab === 'perCapita') {
     rows = state.cities.filter((c) => c.pop >= 10000).sort((a, b) => per(b) - per(a)).slice(0, 30);
-    $('#rankNote').textContent = 'Města nad 10 000 obyvatel. Počet kaváren na 10 000 obyvatel. Kavárny se přiřazují k nejbližšímu městu, takže čísla jsou orientační.';
+    $('#rankNote').textContent = t.rankNotePer;
   } else {
     rows = state.cities.slice(0, 30);
-    $('#rankNote').textContent = 'Kavárny, pražírny a obchody s kávou v okolí centra města.';
+    $('#rankNote').textContent = t.rankNoteTotal;
   }
   const val = (c) => (tab === 'perCapita' ? per(c) : c.count);
   const max = val(rows[0]);
   $('#rankList').innerHTML = rows
     .map((c) => {
       const v = val(c);
-      const shown = tab === 'perCapita' ? v.toFixed(1).replace('.', ',') : fmtNum(v);
-      const sub = tab === 'perCapita' ? `${fmtNum(c.count)} míst · ${fmtNum(c.pop)} obyvatel` : `${fmtNum(c.pop)} obyvatel`;
+      const shown = tab === 'perCapita' ? v.toLocaleString(LANG === 'en' ? 'en-GB' : 'cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : fmtNum(v);
+      const sub = tab === 'perCapita' ? `${fmtNum(c.count)} ${plural(c.count, t.places)} · ${fmtNum(c.pop)} ${t.inhabitants}` : `${fmtNum(c.pop)} ${t.inhabitants}`;
       return `<li><button data-city="${state.cities.indexOf(c)}">
-        <span><span class="city">${esc(c.n)}</span><br><span class="sub">${sub}</span><div class="bar" style="width:${((v / max) * 100).toFixed(1)}%"></div></span>
+        <span><span class="city">${esc(cityLabel(c))}</span><br><span class="sub">${sub}</span><div class="bar" style="width:${((v / max) * 100).toFixed(1)}%"></div></span>
         <span class="val">${shown}</span></button></li>`;
     })
     .join('');
 }
 
-// Odkaz ze stránky města: /?mesto=brno
+// Odkaz ze stránky města: /?mesto=brno (anglicky /en/?city=prague)
 async function openCityFromQuery() {
-  const slug = new URLSearchParams(location.search).get('mesto');
+  const q = new URLSearchParams(location.search);
+  const slug = q.get('mesto') || q.get('city');
   if (!slug) return;
   try {
-    const idx = (await (await fetch('data/mesta.json')).json())[slug];
+    const idx = (await (await fetch('/data/mesta.json')).json())[slug];
     if (idx != null) goToCity(idx);
   } catch {}
 }
@@ -520,7 +522,7 @@ function setSheet(s) {
   document.body.classList.remove(...SHEET.map((x) => 'sheet-' + x));
   document.body.classList.add('sheet-' + s);
   document.body.style.removeProperty('--sheet-h');
-  $('#sheetHandle').setAttribute('aria-label', s === 'expanded' ? 'Sbalit seznam' : 'Rozbalit seznam');
+  $('#sheetHandle').setAttribute('aria-label', s === 'expanded' ? t.collapse : t.expand);
   setTimeout(() => map.invalidateSize(), 300);
 }
 const sheetState = () => SHEET.find((s) => document.body.classList.contains('sheet-' + s)) || 'half';
@@ -635,7 +637,7 @@ $('#btnRandom').addEventListener('click', () => {
 });
 
 $('#btnLocate').addEventListener('click', () => {
-  if (!navigator.geolocation) return alert('Váš prohlížeč neumí zjistit polohu.');
+  if (!navigator.geolocation) return alert(t.noGeo);
   const btn = $('#btnLocate');
   btn.classList.add('busy');
   navigator.geolocation.getCurrentPosition(
@@ -654,7 +656,7 @@ $('#btnLocate').addEventListener('click', () => {
     },
     (err) => {
       btn.classList.remove('busy');
-      alert(err.code === 1 ? 'Přístup k poloze byl zamítnut.' : 'Polohu se nepodařilo zjistit.');
+      alert(err.code === 1 ? t.geoDenied : t.geoFailed);
     },
     { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 }
   );
@@ -686,6 +688,7 @@ if (isMobile()) setSheet('half');
 // Upoutávka na aktuální Kavárenský index, dokud ji člověk nezavře.
 (function promo() {
   const box = $('#promo');
+  if (!box) return; // anglická verze upoutávku nemá (index je jen česky)
   const key = `kafemapa:promo:${box.dataset.key}`;
   let dismissed = false;
   try {
@@ -702,7 +705,7 @@ if (isMobile()) setSheet('half');
 
 load().catch((err) => {
   console.error(err);
-  $('#count').textContent = 'Data se nepodařilo načíst. Zkuste stránku obnovit.';
+  $('#count').textContent = t.loadError;
 });
 
 // Pro ladění v konzoli prohlížeče.

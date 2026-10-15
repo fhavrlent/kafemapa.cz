@@ -9,6 +9,8 @@ import { fileURLToPath } from 'node:url';
 import { buildPages, assignCitySlugs } from './build-pages.mjs';
 import { buildCafes } from './build-cafes.mjs';
 import { buildChanges } from './build-changes.mjs';
+import { buildEn } from './build-en.mjs';
+import { buildEnMap } from './build-en-map.mjs';
 import { buildReport } from './build-report.mjs';
 import { findKey } from './indexnow.mjs';
 import { createHash } from 'node:crypto';
@@ -40,7 +42,8 @@ assignCitySlugs(data);
 const cafes = await buildCafes(OUT, data);
 const reportUrls = await buildReport(ROOT, OUT, data);
 const changeUrls = await buildChanges(ROOT, OUT, data);
-const nPages = await buildPages(OUT, data, { extraUrls: [...changeUrls, ...reportUrls, ...cafes.urls], cafePaths: cafes.pathById });
+const enUrls = [...(await buildEnMap(ROOT, OUT)), ...(await buildEn(OUT, data, cafes))];
+const nPages = await buildPages(OUT, data, { extraUrls: [...changeUrls, ...reportUrls, ...cafes.urls, ...enUrls], cafePaths: cafes.pathById });
 
 // IndexNow: klíč do kořene webu a manifest hashů stránek, podle kterého
 // scripts/indexnow.mjs po nasazení pozná, co se změnilo.
@@ -58,4 +61,4 @@ for (const entry of await readdir(OUT, { recursive: true })) {
 }
 await writeFile(join(OUT, 'indexnow-manifest.json'), JSON.stringify(manifest));
 
-console.log(`Sestaveno do _site/, ${nPages} stránek měst, ${cafes.urls.length} stránek kaváren (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);
+console.log(`Sestaveno do _site/, ${nPages} stránek měst, ${cafes.urls.length} stránek kaváren, ${enUrls.length} anglických stránek (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);

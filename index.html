@@ -6,6 +6,9 @@
   <title>Kafemapa — všechny kavárny v Česku na jedné mapě</title>
   <meta name="description" content="Přes 4 000 kaváren, pražíren a obchodů s kávou v Česku. Zjistěte, co má právě otevřeno, kde je zahrádka, Wi‑Fi nebo bezbariérový vstup. Otevřená data z OpenStreetMap.">
   <link rel="canonical" href="https://kafemapa.cz/">
+  <link rel="alternate" hreflang="cs" href="https://kafemapa.cz/">
+  <link rel="alternate" hreflang="en" href="https://kafemapa.cz/en/">
+  <link rel="alternate" hreflang="x-default" href="https://kafemapa.cz/">
   <meta name="seznam-wmt" content="itmNiIUkqX7YPNZ1CQG1q20o3knFlcca" />
   <meta name="theme-color" content="#f6efe6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1b1411" media="(prefers-color-scheme: dark)">
@@ -16,15 +19,15 @@
   <meta property="og:image" content="https://kafemapa.cz/og-image.png">
   <meta property="og:locale" content="cs_CZ">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="preload" href="data/cafes.json" as="fetch" crossorigin>
-  <link rel="stylesheet" href="assets/vendor/leaflet.css">
-  <link rel="stylesheet" href="assets/vendor/MarkerCluster.css">
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="preload" href="/data/cafes.json" as="fetch" crossorigin>
+  <link rel="stylesheet" href="/assets/vendor/leaflet.css">
+  <link rel="stylesheet" href="/assets/vendor/MarkerCluster.css">
+  <link rel="stylesheet" href="/assets/style.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -64,8 +67,8 @@
     <aside class="panel" id="panel" aria-label="Kavárny">
       <button class="sheet-handle" id="sheetHandle" aria-label="Rozbalit seznam"><span></span></button>
       <header class="brand">
-        <a href="./" class="logo" aria-label="Kafemapa — úvod">
-          <svg viewBox="0 0 40 40" aria-hidden="true" class="logo-mark"><use href="favicon.svg#mark"/></svg>
+        <a href="/" class="logo" aria-label="Kafemapa — úvod">
+          <svg viewBox="0 0 40 40" aria-hidden="true" class="logo-mark"><use href="/favicon.svg#mark"/></svg>
           <span>kafe<b>mapa</b></span>
         </a>
         <nav class="brand-actions">
@@ -73,7 +76,7 @@
           <button class="icon-btn menu-btn" id="btnAbout" title="Menu" aria-label="Menu: města, index, novinky, o projektu"><svg><use href="#i-menu"/></svg><span>Menu</span></button>
         </nav>
       </header>
-      <p class="tagline"><span id="tagline">Všechny kavárny v Česku na jedné mapě.</span> <a href="kavarny/">Podle měst&nbsp;→</a></p>
+      <p class="tagline"><span id="tagline">Všechny kavárny v Česku na jedné mapě.</span> <a href="/kavarny/">Podle měst&nbsp;→</a> <a href="/en/" lang="en" hreflang="en" class="lang-link">English</a></p>
 
       <div class="search">
         <svg aria-hidden="true"><use href="#i-search"/></svg>
@@ -98,7 +101,7 @@
 
       <div class="scroll" id="scroll">
         <div class="promo" id="promo" data-key="podzim-2026" hidden>
-          <a href="kavarensky-index/podzim-2026/">
+          <a href="/kavarensky-index/podzim-2026/">
             <span class="promo-eyebrow">Kavárenský index · podzim 2026</span>
             <strong>Brno je kavárenštější než Praha</strong>
             <span class="promo-more">Kde je kaváren nejvíc, kdy otevírají a kdo vaří kafe ve tři ráno<svg aria-hidden="true"><use href="#i-arrow"/></svg></span>
@@ -133,7 +136,7 @@
     </div>
     <p class="muted small" id="rankNote"></p>
     <ol class="rank" id="rankList"></ol>
-    <p class="rank-more"><a href="kavarensky-index/">Celý Kavárenský index: otevírací doby, řetězce a další čísla&nbsp;→</a></p>
+    <p class="rank-more"><a href="/kavarensky-index/">Celý Kavárenský index: otevírací doby, řetězce a další čísla&nbsp;→</a></p>
   </dialog>
 
   <dialog id="dlgAbout" class="dialog" aria-labelledby="aboutTitle">
@@ -142,21 +145,22 @@
       <button class="icon-btn" data-close aria-label="Zavřít"><svg><use href="#i-x"/></svg></button>
     </header>
     <nav class="menu-cards" aria-label="Další části webu">
-      <a href="kavarny/"><strong>Kavárny podle měst</strong><span>Všechna místa s kávou ve vašem městě, s otevírací dobou</span></a>
-      <a href="kavarensky-index/podzim-2026/"><strong>Kavárenský index</strong><span>Brno je kavárenštější než Praha a další čísla</span></a>
-      <a href="nove/"><strong>Nově na mapě</strong><span>Nové kavárny a změny, každý týden</span></a>
-      <a href="doplnit/"><strong>Pomozte doplnit data</strong><span>U třetiny kaváren chybí otevírací doba</span></a>
+      <a href="/kavarny/"><strong>Kavárny podle měst</strong><span>Všechna místa s kávou ve vašem městě, s otevírací dobou</span></a>
+      <a href="/kavarensky-index/podzim-2026/"><strong>Kavárenský index</strong><span>Brno je kavárenštější než Praha a další čísla</span></a>
+      <a href="/nove/"><strong>Nově na mapě</strong><span>Nové kavárny a změny, každý týden</span></a>
+      <a href="/doplnit/"><strong>Pomozte doplnit data</strong><span>U třetiny kaváren chybí otevírací doba</span></a>
+      <a href="/en/" lang="en" hreflang="en"><strong>English version</strong><span>Kafemapa in English for visitors</span></a>
     </nav>
     <div class="prose">
       <h3>O projektu</h3>
       <p>Kafemapa ukazuje kavárny, pražírny a obchody s kávou z celého Česka. Nejde o placený katalog ani žebříček „nejlepších“. Je tu každé místo, které někdo zapsal do <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>, otevřené mapy, kterou tvoří dobrovolníci.</p>
       <h3>Chybí vaše kavárna, nebo je tu chyba?</h3>
-      <p>U třetiny kaváren zatím chybí otevírací doba. <a href="doplnit/">Pomozte ji doplnit</a>, u každé kavárny k tomu najdete jednoduchý formulář.</p>
+      <p>U třetiny kaváren zatím chybí otevírací doba. <a href="/doplnit/">Pomozte ji doplnit</a>, u každé kavárny k tomu najdete jednoduchý formulář.</p>
       <p>Opravit to může kdokoli. U každého podniku je odkaz <em>Upravit v OSM</em>. Po registraci na openstreetmap.org doplníte otevírací dobu, web nebo zahrádku a změna se tu objeví při další aktualizaci dat. Nový podnik přidáte v <a href="https://www.openstreetmap.org/edit" target="_blank" rel="noopener">editoru OSM</a> jako <em>Kavárna</em>.</p>
       <h3>Nově na mapě</h3>
-      <p>Každý týden přehled nových kaváren a doplněných otevíracích dob: <a href="nove/">Nově na mapě</a> (i jako <a href="nove/feed.xml">RSS</a>).</p>
+      <p>Každý týden přehled nových kaváren a doplněných otevíracích dob: <a href="/nove/">Nově na mapě</a> (i jako <a href="/nove/feed.xml">RSS</a>).</p>
       <h3>Kavárenský index</h3>
-      <p>Dvakrát do roka z dat vychází <a href="kavarensky-index/">Kavárenský index</a>: kolik kaváren připadá na obyvatele, kdy otevírají a kde na mapě chybí. A <a href="kavarny/">stránky měst</a> ukazují všechny kavárny ve vašem městě.</p>
+      <p>Dvakrát do roka z dat vychází <a href="/kavarensky-index/">Kavárenský index</a>: kolik kaváren připadá na obyvatele, kdy otevírají a kde na mapě chybí. A <a href="/kavarny/">stránky měst</a> ukazují všechny kavárny ve vašem městě.</p>
       <h3>Jak to funguje</h3>
       <ul>
         <li>Údaje se pravidelně stahují z OpenStreetMap. <span id="aboutData"></span></li>
@@ -170,9 +174,9 @@
 
   <noscript><p class="noscript">Kafemapa potřebuje ke svému běhu JavaScript.</p></noscript>
 
-  <script src="assets/vendor/leaflet.js"></script>
-  <script src="assets/vendor/leaflet.markercluster.js"></script>
-  <script type="module" src="assets/app.js"></script>
+  <script src="/assets/vendor/leaflet.js"></script>
+  <script src="/assets/vendor/leaflet.markercluster.js"></script>
+  <script type="module" src="/assets/app.js"></script>
   <!-- Cloudflare Web Analytics: anonymní návštěvnost bez cookies -->
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "0e1d42365ab846fdb996803ff6628e9a"}'></script>
 </body>

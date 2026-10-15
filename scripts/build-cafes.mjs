@@ -117,7 +117,7 @@ function cafePage(c, ctx) {
   }
 
   return (
-    head({ title, description, path, jsonLd: [breadcrumbLd(crumbs), business] }) +
+    head({ title, description, path, jsonLd: [breadcrumbLd(crumbs), business], alternates: { cs: path, en: cafePath(c, city?.n, 'en') } }) +
     `
   <main class="page-main cafe-page">
     <nav class="crumbs" aria-label="Drobečková navigace">${crumbs
@@ -203,5 +203,9 @@ export async function buildCafes(outDir, data) {
       })
     );
   }
-  return { urls: pages.map((p) => p.path), pathById: new Map(pages.map((p) => [p.c.i, p.path])) };
+  return {
+    urls: pages.map((p) => p.path),
+    pathById: new Map(pages.map((p) => [p.c.i, p.path])),
+    nearbyById: new Map(pages.map((p) => [p.c.i, neighbours(p).map(({ n, d }) => ({ c: n.c, d }))])),
+  };
 }

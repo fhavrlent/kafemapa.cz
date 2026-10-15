@@ -87,3 +87,13 @@ test('buildOpeningHours: skládání a zpětné čtení', async () => {
   for (const oh of [buildOpeningHours(wk), late, 'Mo off; Tu-Su 10:00-24:00']) assert.ok(parseHours(oh), oh);
   assert.deepEqual(parseHours('Mo off; Tu-Su 10:00-24:00')[1], [[600, 1440]]);
 });
+
+test('angličtina: formatWeek a statusLabel', async () => {
+  const { formatWeek, statusLabel } = await import('../assets/hours.js');
+  const w = parseHours('Mo-Fr 08:00-18:00; Sa 09:00-14:00');
+  assert.equal(formatWeek(w, 'en'), 'Mon–Fri 8:00–18:00 · Sat 9:00–14:00 · Sun closed');
+  assert.equal(formatWeek(w), 'po–pá 8:00–18:00 · so 9:00–14:00 · ne zavřeno');
+  assert.equal(statusLabel(w, at('2026-10-14T12:00:00'), 'en').text, 'Open until 18:00');
+  assert.equal(statusLabel(w, at('2026-10-14T19:00:00'), 'en').text, 'Closed · opens tomorrow at 8:00');
+  assert.equal(statusLabel(parseHours('24/7'), at('2026-10-14T03:00:00'), 'en').text, 'Open 24/7');
+});

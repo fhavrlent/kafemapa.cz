@@ -12,7 +12,10 @@ export const MIN_CAFES = 5; // menší města by měla příliš tenký obsah
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
 
 export { slugify } from '../assets/slug.js';
-import { slugify } from '../assets/slug.js';
+import { slugify, cityNameIn } from '../assets/slug.js';
+
+// /en/cities/<slug>/: anglické jméno, kde existuje (Prague), jinak stejný slug jako česky.
+export const cityEnSlug = (city) => (cityNameIn(city.n, 'en') !== city.n ? slugify(cityNameIn(city.n, 'en')) : city.slug);
 export const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 export const plural = (n, [one, few, many]) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
@@ -30,23 +33,38 @@ function km(a, b) {
 
 /* ---------------- společné části stránky ---------------- */
 
-export function head({ title, description, path, jsonLd, image = '/og-image.png', extraCss = '' }) {
+const NAV = {
+  cs: { home: '/', label: 'Hlavní', logo: 'Kafemapa — mapa kaváren', links: [['/', 'Mapa'], ['/kavarny/', 'Města'], ['/nove/', 'Nově'], ['/doplnit/', 'Doplnit'], ['/kavarensky-index/', 'Index']], other: ['en', 'English'] },
+  en: { home: '/en/', label: 'Main', logo: 'Kafemapa — café map', links: [['/en/', 'Map'], ['/en/cities/', 'Towns'], ['/en/help/', 'Help']], other: ['cs', 'Česky'] },
+};
+
+/**
+ * Hlavička stránky. `alternates` = { cs: '/kavarny/brno/', en: '/en/cities/brno/' } → hreflang a přepínač jazyka.
+ */
+export function head({ title, description, path, jsonLd, image = '/og-image.png', extraCss = '', lang = 'cs', alternates = null }) {
+  const nav = NAV[lang];
+  const [otherLang, otherLabel] = nav.other;
+  const otherPath = alternates?.[otherLang] || NAV[otherLang].home;
+  const hreflang = alternates
+    ? Object.entries(alternates).map(([l, p]) => `  <link rel="alternate" hreflang="${l}" href="${SITE}${p}">\n`).join('') +
+      (alternates.cs ? `  <link rel="alternate" hreflang="x-default" href="${SITE}${alternates.cs}">\n` : '')
+    : '';
   return `<!doctype html>
-<html lang="cs">
+<html lang="${lang}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(description)}">
   <link rel="canonical" href="${SITE}${path}">
-  <meta name="theme-color" content="#f6efe6" media="(prefers-color-scheme: light)">
+${hreflang}  <meta name="theme-color" content="#f6efe6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1b1411" media="(prefers-color-scheme: dark)">
   <meta property="og:type" content="website">
   <meta property="og:url" content="${SITE}${path}">
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(description)}">
   <meta property="og:image" content="${SITE}${image}">
-  <meta property="og:locale" content="cs_CZ">
+  <meta property="og:locale" content="${lang === 'en' ? 'en_GB' : 'cs_CZ'}">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -60,28 +78,36 @@ ${extraCss}  <script type="application/ld+json">${JSON.stringify(jsonLd).replace
 </head>
 <body class="page">
   <header class="site-head">
-    <a href="/" class="logo" aria-label="Kafemapa — mapa kaváren">
+    <a href="${nav.home}" class="logo" aria-label="${nav.logo}">
       <svg viewBox="0 0 40 40" aria-hidden="true" class="logo-mark"><use href="/favicon.svg#mark"/></svg>
       <span>kafe<b>mapa</b></span>
     </a>
-    <nav class="site-nav" aria-label="Hlavní">
-      <a href="/">Mapa</a>
-      <a href="/kavarny/">Města</a>
-      <a href="/nove/">Nově</a>
-      <a href="/doplnit/">Doplnit</a>
-      <a href="/kavarensky-index/">Index</a>
+    <nav class="site-nav" aria-label="${nav.label}">
+      ${nav.links.map(([h, l]) => `<a href="${h}">${l}</a>`).join('\n      ')}
+      <a href="${otherPath}" lang="${otherLang}" hreflang="${otherLang}" class="lang-link">${otherLabel}</a>
     </nav>
   </header>
 `;
 }
 
-export function foot(meta) {
-  const when = new Date(meta.osmBase || meta.generated).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+export function foot(meta, lang = 'cs') {
+  const when = new Date(meta.osmBase || meta.generated).toLocaleDateString(lang === 'en' ? 'en-GB' : 'cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+  if (lang === 'en') {
+    return `
+  <footer class="site-foot">
+    <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL), updated ${esc(when)}.
+    Missing café or wrong data? Anyone can fix it directly on OpenStreetMap.</p>
+    <p><a href="/en/">Kafemapa</a> · <a href="/en/cities/">Cafés by town</a> · <a href="/en/help/">Help improve the data</a> · <a href="/" lang="cs">Česky</a></p>
+  </footer>
+</body>
+</html>
+`;
+  }
   return `
   <footer class="site-foot">
     <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL), aktualizace ${esc(when)}.
     Chybí kavárna nebo je údaj špatně? Opravit ho může kdokoli přímo v OpenStreetMap.</p>
-    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a></p>
+    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a> · <a href="/en/" lang="en">English</a></p>
   </footer>
 </body>
 </html>
@@ -167,6 +193,7 @@ function cityPage(city, ctx) {
       description,
       path,
       jsonLd: breadcrumbLd([['Kafemapa', '/'], ['Kavárny podle měst', '/kavarny/'], [city.n, path]]),
+      alternates: { cs: path, en: `/en/cities/${cityEnSlug(city)}/` },
     }) +
     `
   <main class="page-main">
@@ -249,6 +276,7 @@ function contributePage(pages, data) {
       description: `U ${num(all.length - withHours)} kaváren v Česku chybí otevírací doba. Doplníte ji za minutu přímo do OpenStreetMap a pomůžete všem mapám, které z něj čerpají.`,
       path: '/doplnit/',
       jsonLd: breadcrumbLd([['Kafemapa', '/'], ['Pomozte doplnit data', '/doplnit/']]),
+      alternates: { cs: '/doplnit/', en: '/en/help/' },
     }) +
     `
   <main class="page-main report">
@@ -312,6 +340,7 @@ function indexPage(pages, meta, totalCafes) {
       description: `Kavárny, pražírny a obchody s kávou v ${pages.length} českých městech. Otevírací doby, zahrádky a Wi‑Fi z otevřených dat OpenStreetMap.`,
       path: '/kavarny/',
       jsonLd: breadcrumbLd([['Kafemapa', '/'], ['Kavárny podle měst', '/kavarny/']]),
+      alternates: { cs: '/kavarny/', en: '/en/cities/' },
     }) +
     `
   <main class="page-main">
@@ -383,7 +412,10 @@ export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new
   await writeFile(join(outDir, 'doplnit', 'index.html'), contributePage(pages, data));
 
   // Slugy měst pro odkaz /?mesto=… z mapy
-  await writeFile(join(outDir, 'data', 'mesta.json'), JSON.stringify(Object.fromEntries(pages.map((p) => [p.city.slug, data.cities.indexOf(p.city)]))));
+  await writeFile(
+    join(outDir, 'data', 'mesta.json'),
+    JSON.stringify(Object.fromEntries(pages.flatMap((p) => [[p.city.slug, data.cities.indexOf(p.city)], [cityEnSlug(p.city), data.cities.indexOf(p.city)]])))
+  );
 
   const lastmod = (data.osmBase || data.generated).slice(0, 10);
   const urls = ['/', '/kavarny/', '/doplnit/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];

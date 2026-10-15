@@ -93,6 +93,14 @@ Kafemapa sama do OSM nezapisuje, lidé upravují pod vlastním účtem. Pomáhá
 
 Týdenní přehled změn na `/nove/` a v RSS `/nove/feed.xml` (`scripts/build-changes.mjs`). Při každé aktualizaci dat `scripts/fetch-data.mjs` porovná nová data s předchozími (`scripts/changes.mjs`) a do `data/changes.json` přidá nová místa, zmizelá místa a doplněné nebo změněné otevírací doby (nejvýš 52 týdnů). Překreslení podniku v OSM (nové id, stejné jméno do 100 m) se nepočítá jako nová kavárna. První stažení a opakované stažení téhož dne se nezapisují.
 
+## Anglická verze
+
+Pod `/en/` pro turisty: mapa (`/en/`), města (`/en/cities/`, Praha a Plzeň jako `prague`, `pilsen`), stránky kaváren (`/en/cafe/…/`) a návod k doplňování (`/en/help/`). Kavárenský index a „Nově na mapě“ jsou zatím jen česky (odkazy na ně jsou označené „in Czech“).
+
+- Texty interaktivních částí jsou v `assets/i18n.js` (mapa, živé stavy) a ve slovnících `hours-editor.js` a `osm-note.js`; jazyk určuje `<html lang>`. Poznámky do OSM jsou vždy česky, čtou je místní mapeři.
+- `scripts/build-en-map.mjs` vyrobí `/en/index.html` z `index.html` seznamem náhrad; když se český text změní a náhrada nesedí, build selže.
+- `scripts/build-en.mjs` generuje anglické statické stránky, české stránky na ně odkazují přes `hreflang` a přepínač jazyka.
+
 ## Kavárenský index
 
 Datová zpráva na `/kavarensky-index/<edice>/` (první edice: [podzim 2026](https://kafemapa.cz/kavarensky-index/podzim-2026/)). Čísla edice jsou **zmrazená** v `data/kavarensky-index/<edice>.json` (+ tečková mapa `-mapa.svg` a obrázek pro sdílení `-og.png`), takže citovaná čísla se týdenní aktualizací dat nezmění.

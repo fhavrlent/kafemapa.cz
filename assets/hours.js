@@ -151,23 +151,38 @@ export function statusAt(week, date = new Date()) {
   return { open: false };
 }
 
-const CZ_DAYS = ['po', 'út', 'st', 'čt', 'pá', 'so', 'ne'];
+// Texty pro formatWeek / statusLabel v obou jazycích webu.
+const TXT = {
+  cs: {
+    days: ['po', 'út', 'st', 'čt', 'pá', 'so', 'ne'],
+    closed: 'zavřeno', nonstop: 'nonstop', daily: 'denně', pair: ', ',
+    open247: 'Nonstop', closesAt: (t) => `Zavírá v ${t}`, openUntil: (t) => `Otevřeno do ${t}`, midnight: 'půlnoci',
+    closedNow: 'Zavřeno', opens: (w) => `Zavřeno · otevře ${w}`, at: (t) => `v ${t}`, tomorrow: (t) => `zítra v ${t}`, dayAt: (d, t) => `${d} v ${t}`,
+  },
+  en: {
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    closed: 'closed', nonstop: 'open 24/7', daily: 'daily', pair: ', ',
+    open247: 'Open 24/7', closesAt: (t) => `Closes at ${t}`, openUntil: (t) => `Open until ${t}`, midnight: 'midnight',
+    closedNow: 'Closed', opens: (w) => `Closed · opens ${w}`, at: (t) => `at ${t}`, tomorrow: (t) => `tomorrow at ${t}`, dayAt: (d, t) => `${d} at ${t}`,
+  },
+};
 
 /**
- * Lidsky čitelný týden: „po–pá 8:00–18:00, so 9:00–14:00, ne zavřeno“.
+ * Lidsky čitelný týden: „po–pá 8:00–18:00 · so 9:00–14:00 · ne zavřeno“ (en: „Mon–Fri 8:00–18:00 · …“).
  * Stejné po sobě jdoucí dny slučuje, celý týden stejně = „denně …“.
  */
-export function formatWeek(week) {
+export function formatWeek(week, lang = 'cs') {
   if (!week) return null;
+  const T = TXT[lang] || TXT.cs;
   const txt = week.map((iv) =>
-    !iv.length ? 'zavřeno' : iv.map(([a, b]) => (a === 0 && b >= 1440 ? 'nonstop' : `${fmtMin(a)}–${fmtMin(b)}`)).join(', ')
+    !iv.length ? T.closed : iv.map(([a, b]) => (a === 0 && b >= 1440 ? T.nonstop : `${fmtMin(a)}–${fmtMin(b)}`)).join(', ')
   );
-  if (txt.every((t) => t === txt[0])) return txt[0] === 'nonstop' ? 'nonstop' : `denně ${txt[0]}`;
+  if (txt.every((t) => t === txt[0])) return txt[0] === T.nonstop ? T.nonstop : `${T.daily} ${txt[0]}`;
   const parts = [];
   for (let i = 0; i < 7; ) {
     let j = i;
     while (j + 1 < 7 && txt[j + 1] === txt[i]) j++;
-    const days = i === j ? CZ_DAYS[i] : `${CZ_DAYS[i]}${j === i + 1 ? ', ' : '–'}${CZ_DAYS[j]}`;
+    const days = i === j ? T.days[i] : `${T.days[i]}${j === i + 1 ? T.pair : '–'}${T.days[j]}`;
     parts.push(`${days} ${txt[i]}`);
     i = j + 1;
   }
@@ -177,17 +192,18 @@ export function formatWeek(week) {
 /**
  * Stav pro zobrazení: { cls: 'open' | 'soon' | 'closed', text }, nebo null, když doba není známa.
  */
-export function statusLabel(week, now = new Date()) {
+export function statusLabel(week, now = new Date(), lang = 'cs') {
   if (!week) return null;
-  if (week.every((d) => d.length === 1 && d[0][0] === 0 && d[0][1] >= 1440)) return { cls: 'open', text: 'Nonstop' };
+  const T = TXT[lang] || TXT.cs;
+  if (week.every((d) => d.length === 1 && d[0][0] === 0 && d[0][1] >= 1440)) return { cls: 'open', text: T.open247 };
   const s = statusAt(week, now);
   if (s.open) {
-    if (s.soon) return { cls: 'soon', text: `Zavírá v ${fmtMin(s.until)}` };
-    return { cls: 'open', text: `Otevřeno do ${s.until % 1440 === 0 ? 'půlnoci' : fmtMin(s.until)}` };
+    if (s.soon) return { cls: 'soon', text: T.closesAt(fmtMin(s.until)) };
+    return { cls: 'open', text: T.openUntil(s.until % 1440 === 0 ? T.midnight : fmtMin(s.until)) };
   }
-  if (!s.next) return { cls: 'closed', text: 'Zavřeno' };
+  if (!s.next) return { cls: 'closed', text: T.closedNow };
   const at = fmtMin(s.next.at);
   const day = (dayIndex(now) + s.next.day) % 7;
-  const when = s.next.day === 0 ? `v ${at}` : s.next.day === 1 ? `zítra v ${at}` : `${CZ_DAYS[day]} v ${at}`;
-  return { cls: 'closed', text: `Zavřeno · otevře ${when}` };
+  const when = s.next.day === 0 ? T.at(at) : s.next.day === 1 ? T.tomorrow(at) : T.dayAt(T.days[day], at);
+  return { cls: 'closed', text: T.opens(when) };
 }

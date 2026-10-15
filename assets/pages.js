@@ -1,19 +1,19 @@
 // Statické stránky měst: živý stav „otevřeno / zavřeno“ a filtry nad vygenerovaným seznamem.
 import { parseHours, statusLabel } from './hours.js';
+import { LANG, t, pluralIn } from './i18n.js';
 
 const F = { WIFI: 1, OUTDOOR: 2, CHAIN: 16 };
-const plural = (n, [one, few, many]) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
 const items = [...document.querySelectorAll('.cafe, [data-live]')];
 const filters = new Set();
 
 function refresh() {
   const now = new Date();
   for (const el of items) {
-    const s = el.dataset.o ? statusLabel(parseHours(el.dataset.o, now), now) : null;
+    const s = el.dataset.o ? statusLabel(parseHours(el.dataset.o, now), now, LANG) : null;
     el.dataset.open = s && s.cls !== 'closed' ? '1' : '';
     const out = el.querySelector('[data-status]');
     out.className = `status ${s ? s.cls : 'unknown'}`;
-    out.textContent = s ? s.text.replace(' · otevře ', ', otevře ') : '';
+    out.textContent = s ? s.text.replace(' · otevře ', ', otevře ').replace(' · opens ', ', opens ') : '';
   }
   // Stránka kavárny: zvýraznit dnešní den v tabulce otevírací doby
   const today = (now.getDay() + 6) % 7;
@@ -39,7 +39,7 @@ function apply() {
   const count = document.querySelector('[data-count]');
   if (count) {
     count.textContent = filters.size
-      ? `Zobrazeno ${shown} z ${cards.length} ${plural(cards.length, ['místa', 'míst', 'míst'])}`
+      ? t.shownOf(shown, cards.length) + (LANG === 'en' ? '' : ` ${pluralIn('cs', cards.length, ['místa', 'míst', 'míst'])}`)
       : '';
   }
 }
