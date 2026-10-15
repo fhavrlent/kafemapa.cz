@@ -46,6 +46,8 @@
       <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
       <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></symbol>
       <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
       <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
       <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
       <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
@@ -68,7 +70,7 @@
         </a>
         <nav class="brand-actions">
           <button class="icon-btn" id="btnRank" title="Žebříček měst" aria-label="Žebříček měst"><svg><use href="#i-trophy"/></svg></button>
-          <button class="icon-btn" id="btnAbout" title="O projektu" aria-label="O projektu"><svg><use href="#i-info"/></svg></button>
+          <button class="icon-btn menu-btn" id="btnAbout" title="Menu" aria-label="Menu: města, index, novinky, o projektu"><svg><use href="#i-menu"/></svg><span>Menu</span></button>
         </nav>
       </header>
       <p class="tagline"><span id="tagline">Všechny kavárny v Česku na jedné mapě.</span> <a href="kavarny/">Podle měst&nbsp;→</a></p>
@@ -95,6 +97,14 @@
       </div>
 
       <div class="scroll" id="scroll">
+        <div class="promo" id="promo" data-key="podzim-2026" hidden>
+          <a href="kavarensky-index/podzim-2026/">
+            <span class="promo-eyebrow">Kavárenský index · podzim 2026</span>
+            <strong>Brno je kavárenštější než Praha</strong>
+            <span class="promo-more">Kde je kaváren nejvíc, kdy otevírají a kdo vaří kafe ve tři ráno<svg aria-hidden="true"><use href="#i-arrow"/></svg></span>
+          </a>
+          <button class="promo-close" id="promoClose" aria-label="Skrýt"><svg><use href="#i-x"/></svg></button>
+        </div>
         <div id="cityHint"></div>
         <ol class="list" id="list"></ol>
         <section class="detail" id="detail" hidden></section>
@@ -128,10 +138,17 @@
 
   <dialog id="dlgAbout" class="dialog" aria-labelledby="aboutTitle">
     <header>
-      <h2 id="aboutTitle">O Kafemapě</h2>
+      <h2 id="aboutTitle">Kafemapa</h2>
       <button class="icon-btn" data-close aria-label="Zavřít"><svg><use href="#i-x"/></svg></button>
     </header>
+    <nav class="menu-cards" aria-label="Další části webu">
+      <a href="kavarny/"><strong>Kavárny podle měst</strong><span>Všechna místa s kávou ve vašem městě, s otevírací dobou</span></a>
+      <a href="kavarensky-index/podzim-2026/"><strong>Kavárenský index</strong><span>Brno je kavárenštější než Praha a další čísla</span></a>
+      <a href="nove/"><strong>Nově na mapě</strong><span>Nové kavárny a změny, každý týden</span></a>
+      <a href="doplnit/"><strong>Pomozte doplnit data</strong><span>U třetiny kaváren chybí otevírací doba</span></a>
+    </nav>
     <div class="prose">
+      <h3>O projektu</h3>
       <p>Kafemapa ukazuje kavárny, pražírny a obchody s kávou z celého Česka. Nejde o placený katalog ani žebříček „nejlepších“. Je tu každé místo, které někdo zapsal do <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>, otevřené mapy, kterou tvoří dobrovolníci.</p>
       <h3>Chybí vaše kavárna, nebo je tu chyba?</h3>
       <p>U třetiny kaváren zatím chybí otevírací doba. <a href="doplnit/">Pomozte ji doplnit</a>, u každé kavárny k tomu najdete jednoduchý formulář.</p>

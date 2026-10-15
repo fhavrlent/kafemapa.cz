@@ -147,6 +147,11 @@ function cafePage(c, ctx) {
       ${city && cityHasPage ? `<p><a href="/kavarny/${city.slug}/">Všechny kavárny: ${esc(city.n)}</a></p>` : ''}
     </section>` : ''}
 
+    <details class="help-box report-box">
+      <summary>Zavřeno nebo je tu chyba? Nahlaste to</summary>
+      <div data-report data-i="${c.i}" data-n="${esc(c.n)}" data-y="${c.y}" data-x="${c.x}"></div>
+    </details>
+
     <p class="small muted osm-note">Údaje pocházejí z <a href="${osmUrl(c)}" rel="noopener">OpenStreetMap</a>. Je tu chyba nebo něco chybí? <a href="${osmUrl(c, true)}" rel="noopener">Upravte to v OSM</a>, oprava se tu objeví do týdne.</p>
   </main>
   <script type="module" src="/assets/pages.js"></script>` +

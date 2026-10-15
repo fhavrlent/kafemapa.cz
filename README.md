@@ -86,6 +86,7 @@ Kafemapa sama do OSM nezapisuje, lidé upravují pod vlastním účtem. Pomáhá
 
 - `assets/hours-editor.js`: formulář po dnech, ze kterého se složí hodnota `opening_hours` (ověřená vlastním parserem), plus tlačítko na editor OSM přímo pro danou kavárnu. Je na stránkách kaváren i v detailu na mapě, načte se až po rozbalení. Upozorňuje, že se nesmí přebírat data z Google Map.
 - `/doplnit/`: jak pomoct, pravidla a města s nejvíce chybějícími údaji. Stránka města má sekci „Chybí otevírací doba“ (`#chybi`).
+- Hlášení „Zavřeno nebo je tu chyba?“ (`assets/osm-note.js`): vytvoří anonymní poznámku v OpenStreetMap (OSM Notes API) s odkazem na objekt; data sami neměníme, poznámku ověří místní mapeři. Na localhostu jde hlášení na testovací server OSM (`master.apis.dev.openstreetmap.org`), ne do skutečné mapy. V moderovaných oblastech (HTTP 403) nabídne založení poznámky přímo na openstreetmap.org.
 - `data/stats-history.json`: týdenní záznam úplnosti dat (otevírací doba, adresa, web), doplňuje ho `scripts/fetch-data.mjs`. Poslouží dalším edicím indexu.
 
 ## Nově na mapě

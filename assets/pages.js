@@ -62,12 +62,24 @@ refresh();
 setInterval(refresh, 60_000);
 
 // Pomocník pro otevírací dobu: modul se načte, až ho někdo rozbalí.
-for (const box of document.querySelectorAll('.help-box')) {
+for (const box of document.querySelectorAll('.help-box:not(.report-box)')) {
   box.addEventListener('toggle', async () => {
     const host = box.querySelector('[data-hours-editor]');
     if (!box.open || host.dataset.mounted) return;
     host.dataset.mounted = '1';
     const { mountHoursEditor } = await import('./hours-editor.js');
     mountHoursEditor(host, { osmEditUrl: host.dataset.osmEdit, current: host.dataset.current });
+  });
+}
+
+// Hlášení zavřeného podniku nebo chyby (OSM poznámka), načte se až po rozbalení.
+for (const box of document.querySelectorAll('.report-box')) {
+  box.addEventListener('toggle', async () => {
+    const host = box.querySelector('[data-report]');
+    if (!box.open || host.dataset.mounted) return;
+    host.dataset.mounted = '1';
+    const { mountReportForm } = await import('./osm-note.js');
+    const d = host.dataset;
+    mountReportForm(host, { i: d.i, n: d.n, y: +d.y, x: +d.x });
   });
 }

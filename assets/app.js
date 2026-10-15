@@ -424,6 +424,10 @@ function renderDetail(c) {
       </details>
     </div>
     ${feats.length ? `<div class="section"><h3>Vybavení</h3><div class="feats">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>` : ''}
+    <details class="help-box report-box">
+      <summary>Zavřeno nebo je tu chyba? Nahlaste to</summary>
+      <div data-report></div>
+    </details>
     <div class="osm-links">
       ${cafePath(c, c.city?.n) ? `<a href="${cafePath(c, c.city?.n)}">${icon('globe')}Stránka kavárny</a>` : ''}
       <a href="${osmUrl(c, true)}" target="_blank" rel="noopener">${icon('edit')}Upravit v OSM</a>
@@ -432,7 +436,15 @@ function renderDetail(c) {
     </div>`;
 
   $('#btnBack').onclick = leaveDetail;
-  const helpBox = $('#detail .help-box');
+  const reportBox = $('#detail .report-box');
+  reportBox.addEventListener('toggle', async () => {
+    const host = reportBox.querySelector('[data-report]');
+    if (!reportBox.open || host.dataset.mounted) return;
+    host.dataset.mounted = '1';
+    const { mountReportForm } = await import('./osm-note.js');
+    mountReportForm(host, c);
+  });
+  const helpBox = $('#detail .help-box:not(.report-box)');
   helpBox.addEventListener('toggle', async () => {
     const host = helpBox.querySelector('[data-hours-editor]');
     if (!helpBox.open || host.dataset.mounted) return;
@@ -670,6 +682,23 @@ document.addEventListener('keydown', (e) => {
 });
 
 if (isMobile()) setSheet('half');
+
+// Upoutávka na aktuální Kavárenský index, dokud ji člověk nezavře.
+(function promo() {
+  const box = $('#promo');
+  const key = `kafemapa:promo:${box.dataset.key}`;
+  let dismissed = false;
+  try {
+    dismissed = localStorage.getItem(key) === '1';
+  } catch {}
+  box.hidden = dismissed;
+  $('#promoClose').addEventListener('click', () => {
+    box.hidden = true;
+    try {
+      localStorage.setItem(key, '1');
+    } catch {}
+  });
+})();
 
 load().catch((err) => {
   console.error(err);
