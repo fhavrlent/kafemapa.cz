@@ -160,3 +160,26 @@ body.page { height: auto; }
 .editions a { display: flex; flex-direction: column; gap: 6px; padding: 20px; border-radius: var(--radius); background: var(--panel); border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
 .editions a:hover { border-color: var(--accent); }
 .editions strong { font: 700 26px/1.2 var(--display); }
+
+/* ---------- stránka kavárny ---------- */
+
+.cafe-page { max-width: 760px; }
+.cafe-page h1 { font-size: clamp(32px, 6vw, 46px); overflow-wrap: anywhere; }
+.cafe-page .lead { margin-bottom: 14px; }
+.cafe-live .status { font-size: 15px; padding: 6px 12px; border-radius: 999px; display: inline-flex; }
+.cafe-live .status:empty { display: none; }
+.cafe-live .status.open { background: var(--open-soft); }
+.cafe-live .status.soon { background: var(--soon-soft); }
+.cafe-live .status.closed { background: var(--closed-soft); }
+.cafe-page .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px; }
+.cafe-page .actions .btn { width: auto; }
+.cafe-page h2 { font-size: 20px; margin: 32px 0 10px; }
+.week { border-collapse: collapse; width: 100%; max-width: 420px; font-variant-numeric: tabular-nums; }
+.week th { text-align: left; font-weight: 400; padding: 5px 16px 5px 0; }
+.week td { text-align: right; color: var(--ink-2); padding: 5px 0; }
+.week tr { border-bottom: 1px solid var(--line); }
+.week tr.today th, .week tr.today td { font-weight: 600; color: var(--ink); }
+.near { list-style: none; padding: 0; margin: 0; }
+.near li { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.near a { font-weight: 600; }
+.osm-note { margin-top: 36px; }

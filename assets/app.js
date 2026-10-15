@@ -1,4 +1,5 @@
 import { parseHours, statusLabel, fmtMin } from './hours.js';
+import { cafePath } from './slug.js';
 
 // Bitové příznaky — musí odpovídat scripts/fetch-data.mjs
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
@@ -419,6 +420,7 @@ function renderDetail(c) {
     <div class="section"><h3>Otevírací doba</h3>${hours}</div>
     ${feats.length ? `<div class="section"><h3>Vybavení</h3><div class="feats">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>` : ''}
     <div class="osm-links">
+      ${cafePath(c, c.city?.n) ? `<a href="${cafePath(c, c.city?.n)}">${icon('globe')}Stránka kavárny</a>` : ''}
       <a href="${osmUrl(c, true)}" target="_blank" rel="noopener">${icon('edit')}Upravit v OSM</a>
       <a href="https://www.google.com/maps/search/?api=1&query=${c.y},${c.x}" target="_blank" rel="noopener">${icon('globe')}Google Maps</a>
       <a href="https://mapy.com/fnc/v1/showmap?center=${c.x},${c.y}&zoom=18&marker=true" target="_blank" rel="noopener">${icon('pin')}Mapy.com</a>

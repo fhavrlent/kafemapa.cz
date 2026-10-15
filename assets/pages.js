@@ -3,7 +3,7 @@ import { parseHours, statusLabel } from './hours.js';
 
 const F = { WIFI: 1, OUTDOOR: 2, CHAIN: 16 };
 const plural = (n, [one, few, many]) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
-const items = [...document.querySelectorAll('.cafe')];
+const items = [...document.querySelectorAll('.cafe, [data-live]')];
 const filters = new Set();
 
 function refresh() {
@@ -15,12 +15,17 @@ function refresh() {
     out.className = `status ${s ? s.cls : 'unknown'}`;
     out.textContent = s ? s.text.replace(' · otevře ', ', otevře ') : '';
   }
+  // Stránka kavárny: zvýraznit dnešní den v tabulce otevírací doby
+  const today = (now.getDay() + 6) % 7;
+  for (const tr of document.querySelectorAll('[data-week] tr')) tr.classList.toggle('today', +tr.dataset.day === today);
   apply();
 }
 
 function apply() {
   let shown = 0;
+  const cards = items.filter((el) => el.classList.contains('cafe'));
   for (const el of items) {
+    if (!el.classList.contains('cafe')) continue;
     const f = +el.dataset.f;
     const ok =
       (!filters.has('open') || el.dataset.open) &&
@@ -34,7 +39,7 @@ function apply() {
   const count = document.querySelector('[data-count]');
   if (count) {
     count.textContent = filters.size
-      ? `Zobrazeno ${shown} z ${items.length} ${plural(items.length, ['místa', 'míst', 'míst'])}`
+      ? `Zobrazeno ${shown} z ${cards.length} ${plural(cards.length, ['místa', 'míst', 'míst'])}`
       : '';
   }
 }

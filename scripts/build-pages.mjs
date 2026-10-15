@@ -11,8 +11,8 @@ export const MIN_CAFES = 5; // menší města by měla příliš tenký obsah
 // Bitové příznaky — musí odpovídat scripts/fetch-data.mjs
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
 
-export const slugify = (s) =>
-  s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+export { slugify } from '../assets/slug.js';
+import { slugify } from '../assets/slug.js';
 export const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
 export const plural = (n, [one, few, many]) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
@@ -94,7 +94,10 @@ export const breadcrumbLd = (items) => ({
 
 /* ---------------- stránka města ---------------- */
 
+let cafeLinks = new Map(); // id → /kavarna/…/, nastavuje buildPages
+
 function cafeItem(c) {
+  const href = cafeLinks.get(c.i) || `/#${c.i}`;
   const week = parseHours(c.o);
   const hours = week ? formatWeek(week) : c.o ? c.o : null;
   const tags = [];
@@ -108,7 +111,7 @@ function cafeItem(c) {
   if (c.b) tags.push(c.b);
   return `<li class="cafe" data-f="${c.f || 0}"${c.k || c.r ? ' data-beans' : ''}${c.o ? ` data-o="${esc(c.o)}"` : ''}>
       <div class="cafe-top">
-        <h3><a href="/#${c.i}">${esc(c.n)}</a></h3>
+        <h3><a href="${href}">${esc(c.n)}</a></h3>
         <span class="status" data-status></span>
       </div>
       ${c.a ? `<p class="cafe-addr">${esc(c.a)}</p>` : ''}
@@ -256,14 +259,15 @@ function indexPage(pages, meta, totalCafes) {
 
 /* ---------------- sestavení ---------------- */
 
-export async function buildPages(outDir, data, { extraUrls = [] } = {}) {
+// Stránku má město s aspoň MIN_CAFES místy; nastaví city.slug (shodná jména → -2, -3…).
+// Volá se před ostatními částmi buildu, aby odkazy na města znaly svou adresu.
+export function assignCitySlugs(data) {
   const byCity = new Map();
   for (const c of data.cafes) {
     if (c.c == null) continue;
     if (!byCity.has(c.c)) byCity.set(c.c, []);
     byCity.get(c.c).push(c);
   }
-
   const used = new Set();
   const pages = [];
   data.cities.forEach((city, idx) => {
@@ -275,6 +279,12 @@ export async function buildPages(outDir, data, { extraUrls = [] } = {}) {
     city.slug = slug;
     pages.push({ city, cafes });
   });
+  return pages;
+}
+
+export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new Map() } = {}) {
+  const pages = assignCitySlugs(data);
+  cafeLinks = cafePaths;
 
   const ranked = data.cities.filter((c) => c.pop >= 10000).sort((a, b) => b.count / b.pop - a.count / a.pop);
   const rankPerCapita = new Map(ranked.map((c, i) => [c, { pos: i + 1, of: ranked.length }]));

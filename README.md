@@ -18,6 +18,8 @@ data/cafes.json          kompaktní data (~600 kB, gzip ~200 kB)
 scripts/fetch-data.mjs   stažení dat z Overpass API → data/cafes.json
 scripts/build.mjs        sestavení _site/ pro nasazení (kopie souborů + klíč)
 scripts/build-pages.mjs  statické stránky měst /kavarny/<mesto>/ a sitemap.xml
+scripts/build-cafes.mjs  stránky kaváren /kavarna/<slug>/
+assets/slug.js           sdílený výpočet URL kaváren (mapa i build)
 assets/pages.{css,js}    vzhled a živý stav „otevřeno“ na stránkách měst
 scripts/hours.test.mjs   testy parseru otevírací doby
 .github/workflows/       nasazení na GitHub Pages + týdenní aktualizace dat
@@ -71,6 +73,10 @@ Klíč pro dlaždice je v prohlížeči vždy veřejně vidět, protože se pos�
 ## Stránky měst
 
 Kvůli vyhledávačům má každé město s aspoň 5 kavárnami vlastní statickou stránku (`/kavarny/brno/`): počty, žebříček na obyvatele, seznam všech míst s čitelnou otevírací dobou, filtry a okolní města. Rozcestník je na `/kavarny/`. Generují se při každém buildu z `data/cafes.json`, takže je týdenní aktualizace dat obnoví sama. Texty se vyhýbají skloňování názvů měst („v okolí centra města Brno“), protože automatické skloňování by dělalo chyby.
+
+## Stránky kaváren
+
+Každá nezávislá kavárna s adresou, otevírací dobou nebo webem má vlastní stránku `/kavarna/<jméno>-<město>-<osm id>/` (`scripts/build-cafes.mjs`), kvůli hledání podle jména. Obsahuje adresu, týdenní otevírací dobu s dneškem a živým stavem, vybavení, odkazy (navigace, web, Instagram…), 6 nejbližších kaváren a strukturovaná data `CafeOrCoffeeShop` (u obchodů s kávou `Store`). Do schema.org `openingHours` jde jen jednoduchý zápis bez svátků a měsíců. Řetězce a podniky jen se jménem stránku nemají. URL počítá sdílený `assets/slug.js`, takže na ni umí odkázat mapa, stránky měst i build. OSM id na konci drží adresu stabilní.
 
 ## Kavárenský index
 
