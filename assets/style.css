@@ -204,13 +204,13 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .map-wrap { position: relative; min-width: 0; }
 #map { position: absolute; inset: 0; background: var(--bg); }
 .leaflet-container { font-family: var(--font); }
-/* teplejší tón standardních dlaždic OSM, v tmavém režimu inverze */
+/* teplejší tón dlaždic OSM, v tmavém režimu inverze */
 .tiles-osm .leaflet-tile-pane { filter: grayscale(.35) sepia(.22) saturate(.8) brightness(1.04) contrast(.9); }
-.tiles-mapy .leaflet-tile-pane { filter: sepia(.12) saturate(.9); }
+/* Dlaždice Mapy.com se nesmí upravovat (podmínky API, čl. 4.6.2), proto bez filtru. */
 .mapy-logo { display: block; line-height: 0; margin: 0 10px 4px 0 !important; }
 .mapy-logo img { width: 100px; height: auto; }
 @media (prefers-color-scheme: dark) {
-  .leaflet-tile-pane { filter: invert(1) hue-rotate(185deg) sepia(.25) saturate(.55) brightness(.82) contrast(.92) !important; }
+  .tiles-osm .leaflet-tile-pane { filter: invert(1) hue-rotate(185deg) sepia(.25) saturate(.55) brightness(.82) contrast(.92); }
 }
 .fab {
   position: absolute; right: 16px; bottom: 96px; z-index: 500;

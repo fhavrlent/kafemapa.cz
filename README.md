@@ -47,7 +47,11 @@ Klíč pro dlaždice je v prohlížeči vždy veřejně vidět, protože se pos�
 
 ## Poznámky a limity
 
-- **Podkladová mapa** je z [Mapy.com](https://developer.mapy.com/). Podle podmínek API musí být nad mapou jejich logo, to web přidává sám.
+- **Podkladová mapa** je z [Mapy.com](https://developer.mapy.com/) a řídí se jejich [podmínkami](https://developer.mapy.com/terms-and-conditions/):
+  - nad mapou musí být logo Mapy.com a copyright (web přidává sám),
+  - dlaždice se **nesmí ukládat ani cachovat** (žádná proxy ani cache na Cloudflare) a **nesmí se upravovat**, proto na ně neaplikujeme CSS filtry a v tmavém režimu zůstává mapa světlá,
+  - klíč musí být zabezpečený proti zneužití: v konzoli je omezený na referery `kafemapa.cz` a `www.kafemapa.cz` a jen na službu `v1/maptiles`,
+  - jsme na výchozím tarifu Basic. Rozšířený tarif (Extended) mimo jiné zakazuje kombinovat mapová data Mapy.com s jinými mapovými daty, a naše kavárny jsou z OpenStreetMap, takže o něj bez dohody se Seznamem nežádat.
 - **„Otevřeno teď“** se počítá z `opening_hours` v čase prohlížeče. Parser zvládá přes 99 % zápisů v ČR včetně sezónních (`May-Sep: …`), svátky (`PH`) ignoruje. Nečitelné zápisy se zobrazí jako text.
 - **Města**: v OSM má `addr:city` jen menšina podniků, proto se každý přiřazuje k nejbližšímu městu (dosah roste s velikostí města). Žebříček je tedy orientační.
 - Podniky bez jména (~270) se vynechávají.
