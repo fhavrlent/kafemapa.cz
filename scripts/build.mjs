@@ -8,6 +8,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPages } from './build-pages.mjs';
 import { buildReport } from './build-report.mjs';
+import { findKey } from './indexnow.mjs';
+import { createHash } from 'node:crypto';
+import { readdir } from 'node:fs/promises';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '_site');
@@ -33,5 +36,21 @@ await writeFile(join(OUT, 'assets', 'config.js'), `export const MAPY_API_KEY = $
 const data = JSON.parse(await readFile(join(ROOT, 'data', 'cafes.json'), 'utf8'));
 const reportUrls = await buildReport(ROOT, OUT, data);
 const nPages = await buildPages(OUT, data, { extraUrls: reportUrls });
+
+// IndexNow: klíč do kořene webu a manifest hashů stránek, podle kterého
+// scripts/indexnow.mjs po nasazení pozná, co se změnilo.
+const indexNowKey = await findKey(ROOT);
+if (indexNowKey) await cp(join(ROOT, `${indexNowKey}.txt`), join(OUT, `${indexNowKey}.txt`));
+const sha = (buf) => createHash('sha256').update(buf).digest('hex').slice(0, 16);
+const manifest = {};
+for (const entry of await readdir(OUT, { recursive: true })) {
+  if (!entry.endsWith('index.html')) continue;
+  const path = '/' + entry.replace(/index\.html$/, '');
+  let content = await readFile(join(OUT, entry));
+  // Úvodní stránka se mění s daty, ne s HTML.
+  if (path === '/') content = Buffer.concat([content, await readFile(join(OUT, 'data', 'cafes.json'))]);
+  manifest[path] = sha(content);
+}
+await writeFile(join(OUT, 'indexnow-manifest.json'), JSON.stringify(manifest));
 
 console.log(`Sestaveno do _site/, ${nPages} stránek měst (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);

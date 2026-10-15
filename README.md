@@ -41,6 +41,13 @@ Web běží na **Cloudflare Workers** (statické soubory, bez kódu Workeru), zd
 - Každý push do `main` spustí Cloudflare Workers Builds: `npm test && npm run build` (sestaví `_site/`) a `npx wrangler deploy`. Nastavení je ve [`wrangler.jsonc`](wrangler.jsonc), bezpečnostní a cache hlavičky v [`_headers`](_headers).
 - Každé pondělí ráno workflow [`refresh-data.yml`](.github/workflows/refresh-data.yml) stáhne čerstvá data z OSM a commitne je, čímž spustí nové nasazení. Ručně jde spustit v záložce Actions.
 - Domény `kafemapa.cz` a `www.kafemapa.cz` jsou na Worker napojené jako custom domains, DNS záznamy spravuje Cloudflare sám.
+- Deploy příkaz je `node scripts/indexnow.mjs prepare && npx wrangler deploy && node scripts/indexnow.mjs submit`. Build zveřejní `indexnow-manifest.json` s hashem každé stránky; `prepare` ho porovná s manifestem, který je právě na webu, a `submit` po nasazení oznámí změněné URL přes [IndexNow](https://www.indexnow.org/) (Seznam, Bing a další). Klíč je veřejný soubor `<klíč>.txt` v kořeni repozitáře. Selhání IndexNow nasazení neshodí.
+
+### Vyhledávače a e-mail
+
+- Google Search Console: ověřeno přes Cloudflare (TXT záznam `google-site-verification`).
+- Seznam Webmaster: ověřeno meta tagem `seznam-wmt` v `index.html`. Seznam ověření čas od času opakuje, tag nemazat.
+- E-mail `info@kafemapa.cz` je na Seznam Email Profi (MX v Cloudflare, „DNS only“: e-mail nejde přes proxy). SPF povoluje odesílání jen přes Seznam, DMARC je zatím v režimu `p=none` (sledování).
 
 ### Klíč Mapy.com
 

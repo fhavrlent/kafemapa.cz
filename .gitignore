@@ -5,3 +5,4 @@ assets/config.js
 .claude/
 _site/
 .wrangler/
+.indexnow-pending.json
