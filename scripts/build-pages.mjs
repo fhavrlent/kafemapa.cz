@@ -13,11 +13,11 @@ const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN:
 
 export const slugify = (s) =>
   s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const esc = (s) =>
+export const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
-const plural = (n, [one, few, many]) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
-const num = (n) => n.toLocaleString('cs-CZ');
-const dec = (n) => n.toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+export const plural = (n, [one, few, many]) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
+export const num = (n) => n.toLocaleString('cs-CZ');
+export const dec = (n) => n.toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const collator = new Intl.Collator('cs');
 
 function km(a, b) {
@@ -30,7 +30,7 @@ function km(a, b) {
 
 /* ---------------- společné části stránky ---------------- */
 
-function head({ title, description, path, jsonLd }) {
+export function head({ title, description, path, jsonLd, image = '/og-image.png', extraCss = '' }) {
   return `<!doctype html>
 <html lang="cs">
 <head>
@@ -45,7 +45,7 @@ function head({ title, description, path, jsonLd }) {
   <meta property="og:url" content="${SITE}${path}">
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(description)}">
-  <meta property="og:image" content="${SITE}/og-image.png">
+  <meta property="og:image" content="${SITE}${image}">
   <meta property="og:locale" content="cs_CZ">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -55,7 +55,7 @@ function head({ title, description, path, jsonLd }) {
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css">
   <link rel="stylesheet" href="/assets/pages.css">
-  <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
+${extraCss}  <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
 </head>
 <body class="page">
   <header class="site-head">
@@ -66,25 +66,26 @@ function head({ title, description, path, jsonLd }) {
     <nav class="site-nav" aria-label="Hlavní">
       <a href="/">Mapa</a>
       <a href="/kavarny/">Města</a>
+      <a href="/kavarensky-index/">Index</a>
     </nav>
   </header>
 `;
 }
 
-function foot(meta) {
+export function foot(meta) {
   const when = new Date(meta.osmBase || meta.generated).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
   return `
   <footer class="site-foot">
     <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL), aktualizace ${esc(when)}.
     Chybí kavárna nebo je údaj špatně? Opravit ho může kdokoli přímo v OpenStreetMap.</p>
-    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a></p>
+    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a></p>
   </footer>
 </body>
 </html>
 `;
 }
 
-const breadcrumbLd = (items) => ({
+export const breadcrumbLd = (items) => ({
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: SITE + path })),
@@ -254,7 +255,7 @@ function indexPage(pages, meta, totalCafes) {
 
 /* ---------------- sestavení ---------------- */
 
-export async function buildPages(outDir, data) {
+export async function buildPages(outDir, data, { extraUrls = [] } = {}) {
   const byCity = new Map();
   for (const c of data.cafes) {
     if (c.c == null) continue;
@@ -288,7 +289,7 @@ export async function buildPages(outDir, data) {
   await writeFile(join(outDir, 'data', 'mesta.json'), JSON.stringify(Object.fromEntries(pages.map((p) => [p.city.slug, data.cities.indexOf(p.city)]))));
 
   const lastmod = (data.osmBase || data.generated).slice(0, 10);
-  const urls = ['/', '/kavarny/', ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
+  const urls = ['/', '/kavarny/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
   await writeFile(
     join(outDir, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +

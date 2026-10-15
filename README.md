@@ -63,6 +63,18 @@ Klíč pro dlaždice je v prohlížeči vždy veřejně vidět, protože se pos�
 
 Kvůli vyhledávačům má každé město s aspoň 5 kavárnami vlastní statickou stránku (`/kavarny/brno/`): počty, žebříček na obyvatele, seznam všech míst s čitelnou otevírací dobou, filtry a okolní města. Rozcestník je na `/kavarny/`. Generují se při každém buildu z `data/cafes.json`, takže je týdenní aktualizace dat obnoví sama. Texty se vyhýbají skloňování názvů měst („v okolí centra města Brno“), protože automatické skloňování by dělalo chyby.
 
+## Kavárenský index
+
+Datová zpráva na `/kavarensky-index/<edice>/` (první edice: [podzim 2026](https://kafemapa.cz/kavarensky-index/podzim-2026/)). Čísla edice jsou **zmrazená** v `data/kavarensky-index/<edice>.json` (+ tečková mapa `-mapa.svg` a obrázek pro sdílení `-og.png`), takže citovaná čísla se týdenní aktualizací dat nezmění.
+
+Nová edice:
+
+1. `node scripts/make-index-snapshot.mjs jaro-2027 "Jaro 2027"` vytvoří snapshot z aktuálních dat.
+2. V `scripts/build-report.mjs` přidejte funkci s texty edice a zapište ji do `EDITIONS`. Tvrzení v textu hlídejte přes `assert()`, build pak selže, když by neodpovídala číslům.
+3. Volitelně vyrenderujte `data/kavarensky-index/jaro-2027-og.png` (1200×630).
+
+Grafy jsou statické HTML/SVG bez knihoven: žebříčky jsou tabulky s pruhy (každá hodnota je popsaná), histogram má tooltip i tabulkovou verzi. Barva grafů je ověřená validátorem palet: `#b5652b` na světlém a `#cf7f3c` na tmavém pozadí.
+
 ## Nápady na další rozvoj
 
 - Vlastní vektorový styl mapy (MapLibre + OpenFreeMap) místo rastrových dlaždic

@@ -302,6 +302,9 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .rank .city { font-weight: 600; }
 .rank .sub { font-size: 12.5px; color: var(--ink-3); }
 .rank .val { font: 700 18px/1 var(--display); font-variant-numeric: tabular-nums; }
+.rank-more { margin: 0; padding: 4px 24px 22px; font-size: 14px; }
+.rank-more a { font-weight: 600; text-decoration: none; }
+.rank-more a:hover { text-decoration: underline; }
 
 .noscript { position: fixed; inset: auto 0 0; padding: 16px; background: var(--espresso); color: #fff; text-align: center; margin: 0; z-index: 9999; }
 

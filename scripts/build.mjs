@@ -7,6 +7,7 @@ import { cp, mkdir, rm, writeFile, readFile, access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPages } from './build-pages.mjs';
+import { buildReport } from './build-report.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '_site');
@@ -30,6 +31,7 @@ if (!key) {
 await writeFile(join(OUT, 'assets', 'config.js'), `export const MAPY_API_KEY = ${JSON.stringify(key)};\n`);
 
 const data = JSON.parse(await readFile(join(ROOT, 'data', 'cafes.json'), 'utf8'));
-const nPages = await buildPages(OUT, data);
+const reportUrls = await buildReport(ROOT, OUT, data);
+const nPages = await buildPages(OUT, data, { extraUrls: reportUrls });
 
 console.log(`Sestaveno do _site/, ${nPages} stránek měst (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);
