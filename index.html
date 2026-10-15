@@ -25,6 +25,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="preload" href="/data/cafes.json" as="fetch" crossorigin>
+  <!-- Celý řetězec modulů najednou, ať dlaždice nečekají na postupné načítání (app → moduly → config) -->
+  <link rel="modulepreload" href="/assets/app.js">
+  <link rel="modulepreload" href="/assets/hours.js">
+  <link rel="modulepreload" href="/assets/slug.js">
+  <link rel="modulepreload" href="/assets/i18n.js">
+  <link rel="modulepreload" href="/assets/config.js">
+  <link rel="preconnect" href="https://api.mapy.com">
   <link rel="stylesheet" href="/assets/vendor/leaflet.css">
   <link rel="stylesheet" href="/assets/vendor/MarkerCluster.css">
   <link rel="stylesheet" href="/assets/style.css">
