@@ -412,7 +412,7 @@ function renderDetail(c) {
   if (c.p) actions.push(`<a class="btn" href="tel:${esc(c.p.replace(/[^\d+]/g, ''))}">${icon('phone')}${t.call}</a>`);
   if (c.ig) actions.push(`<a class="btn" href="${esc(c.ig)}" target="_blank" rel="noopener">${icon('insta')}Instagram</a>`);
   if (c.fb) actions.push(`<a class="btn" href="${esc(c.fb)}" target="_blank" rel="noopener">${icon('fb')}Facebook</a>`);
-  actions.push(`<button class="btn" id="btnShare">${icon('share')}${t.share}</button>`);
+  actions.push(`<button class="btn" id="btnShare" aria-live="polite">${icon('share')}${t.share}</button>`);
 
   $('#detail').innerHTML = `
     <button class="link-btn back" id="btnBack">${icon('back')}${t.back}</button>
@@ -458,13 +458,34 @@ function renderDetail(c) {
     mountHoursEditor(host, { osmEditUrl: osmUrl(c, true), current: c.o });
   });
   $('#btnShare').onclick = async (e) => {
-    const url = location.href;
+    // Odkaz na tlačítko si podržet hned: po await už e.currentTarget je null.
+    const btn = e.currentTarget;
+    // Stránka kavárny má v náhledu jméno, adresu a otevírací dobu; jinak odkaz na místo na mapě.
+    const page = cafePath(c, c.city?.n, LANG);
+    const url = page ? location.origin + page : location.href;
     if (navigator.share) {
       try { await navigator.share({ title: c.n, text: t.shareText(c.n), url }); } catch {}
-    } else {
-      await navigator.clipboard?.writeText(url);
-      e.currentTarget.lastChild.textContent = t.copied;
+      return;
     }
+    const label = btn.lastChild;
+    const original = label.textContent;
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(url);
+      ok = true;
+    } catch {}
+    if (!ok) {
+      // Schránka nedostupná (např. bez HTTPS nebo bez oprávnění): nabídnout odkaz k ručnímu zkopírování.
+      prompt(t.copyManually, url);
+      return;
+    }
+    label.textContent = t.copied;
+    btn.classList.add('done');
+    clearTimeout(btn._reset);
+    btn._reset = setTimeout(() => {
+      label.textContent = original;
+      btn.classList.remove('done');
+    }, 2200);
   };
 }
 

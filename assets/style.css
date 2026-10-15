@@ -408,3 +408,6 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .promo-close { position: absolute; top: 8px; right: 8px; border: 0; background: none; color: #e9d9c8; padding: 6px; border-radius: 8px; display: grid; }
 .promo-close:hover { background: rgb(255 255 255 / .1); }
 .promo-close svg { width: 16px; height: 16px; }
+
+/* potvrzení po zkopírování odkazu */
+.btn.done { border-color: var(--open); color: var(--open); }
