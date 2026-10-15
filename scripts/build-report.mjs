@@ -117,7 +117,7 @@ function podzim2026(s) {
 
   // Tvrzení, na kterých texty stojí:
   assert(brno.r > praha.r && olomouc.r > praha.r, 'Brno i Olomouc nad Prahou');
-  assert(s.regional[0] === brno && s.regional[1] === olomouc && s.regional[2].n === 'České Budějovice' && s.regional.indexOf(praha) === 3, 'pořadí krajských měst');
+  assert(s.regional.slice(0, 5).map((c) => c.n).join() === 'Brno,Olomouc,České Budějovice,Pardubice,Praha', 'pořadí krajských měst');
   assert(s.regional.at(-1) === usti && brno.r / usti.r > 5, 'Ústí poslední, rozdíl přes 5×');
   assert(krumlov.n === 'Český Krumlov', 'Krumlov první');
   assert(peak.h === 8, 'nejčastěji se otevírá mezi 8. a 9. hodinou');
@@ -126,7 +126,7 @@ function podzim2026(s) {
   assert(s.nonstop.chains / s.nonstop.n > 0.9, 'nonstop téměř jen řetězce');
   assert(cafeWord.n > kavarnaWord.n, 'café častěji než kavárna');
   assert(orlova.n === 'Orlová' && orlova.count === 0, 'Orlová bez kavárny');
-  assert(lowRest.slice(0, 3).map((c) => c.n).join() === 'Jirkov,Krnov,Chomutov', 'ručně skloňovaná města');
+  assert(lowRest.slice(0, 3).map((c) => c.n).join() === 'Chomutov,Krnov,Most', 'ručně skloňovaná města');
   const usMs = ['Orlová', 'Jirkov', 'Krnov', 'Chomutov', 'Most', 'Havířov', 'Karviná', 'Teplice', 'Litvínov', 'Děčín', 'Bohumín', 'Frýdek-Místek', 'Opava', 'Třinec', 'Nový Jičín'];
   assert(s.perCapitaBottom.filter((c) => usMs.includes(c.n)).length > s.perCapitaBottom.length / 2, 'konec žebříčku hlavně Ústecký a Moravskoslezský kraj');
   assert(s.completeness.best[0].n === 'Hradec Králové' && s.completeness.worst[0].n === 'Jihlava', 'úplnost dat');
@@ -161,13 +161,13 @@ function podzim2026(s) {
 
     <section>
       <h2>Krajská města: Brno a Olomouc před Prahou</h2>
-      <p>Mezi krajskými městy vede Brno (${dec(brno.r)}) těsně před Olomoucí (${dec(olomouc.r)}). Praha je až čtvrtá, za Českými Budějovicemi. Na opačném konci je Ústí nad Labem, kde na 10 000 obyvatel připadá jen ${dec(usti.r)} místa s kávou. Rozdíl proti Brnu je víc než ${Math.floor(brno.r / usti.r)}násobný.</p>
+      <p>Mezi krajskými městy vede Brno (${brno.r.toFixed(2).replace('.', ',')}) jen o setiny před Olomoucí (${olomouc.r.toFixed(2).replace('.', ',')}). Praha je až pátá, za Českými Budějovicemi a Pardubicemi. Na opačném konci je Ústí nad Labem, kde na 10 000 obyvatel připadá jen ${dec(usti.r)} místa s kávou. Rozdíl proti Brnu je víc než ${Math.floor(brno.r / usti.r)}násobný.</p>
       ${barTable({ title: 'Krajská města: míst s kávou na 10 000 obyvatel', rows: cityRows(s.regional) })}
     </section>
 
     <section>
       <h2>Kde kavárny na mapě chybí</h2>
-      <p>Na konci žebříčku jsou hlavně menší průmyslová města v Ústeckém a Moravskoslezském kraji. V Orlové (${thousands(orlova.pop)} obyvatel) zatím OpenStreetMap neeviduje jedinou kavárnu. V ${lowRest.slice(0, 3).map((c) => c.n.replace('Jirkov', 'Jirkově').replace('Krnov', 'Krnově').replace('Chomutov', 'Chomutově')).join(', ').replace(/, ([^,]*)$/, ' nebo $1')} připadá jedno místo s kávou zhruba na ${Math.min(...lowRange)} až ${Math.max(...lowRange)} tisíc obyvatel.</p>
+      <p>Na konci žebříčku jsou hlavně menší průmyslová města v Ústeckém a Moravskoslezském kraji. V Orlové (${thousands(orlova.pop)} obyvatel) zatím OpenStreetMap neeviduje jedinou kavárnu. V ${lowRest.slice(0, 3).map((c) => c.n.replace('Most', 'Mostě').replace('Krnov', 'Krnově').replace('Chomutov', 'Chomutově')).join(', ').replace(/, ([^,]*)$/, ' nebo $1')} připadá jedno místo s kávou zhruba na ${Math.min(...lowRange)} až ${Math.max(...lowRange)} tisíc obyvatel.</p>
       <p>Část rozdílu je skutečná, část jsou ale díry v datech. OpenStreetMap tvoří dobrovolníci a ne každé město má někoho, kdo kavárny zapisuje. Znáte kavárnu v Orlové? <a href="https://www.openstreetmap.org/edit" rel="noopener">Přidejte ji</a>.</p>
       ${barTable({ title: 'Nejnižší hustota míst s kávou', sub: 'Na 10 000 obyvatel, města nad 20 000 obyvatel', rows: cityRows(s.perCapitaBottom), max: s.regional[0].r })}
       <p class="small muted">Stupnice je stejná jako u krajských měst, aby šly pruhy porovnat.</p>
@@ -214,7 +214,7 @@ function podzim2026(s) {
       <h2>Metodika</h2>
       <ul>
         <li>Zdrojem jsou data <a href="https://www.openstreetmap.org/" rel="noopener">OpenStreetMap</a> k ${dataDate}: všechny objekty s tagem <code>amenity=cafe</code> (${num(t.cafes)}) a <code>shop=coffee</code> (${num(t.shops)}) v Česku, které mají jméno.</li>
-        <li>Každé místo je přiřazené k nejbližšímu z ${num(t.cities)} měst s dosahem podle velikosti města (od 2,5 km u malých měst po 14 km u Prahy). ${num(t.unassigned)} míst mimo dosah měst se do žebříčků nepočítá. Počty obyvatel jsou z OpenStreetMap.</li>
+        <li>Každé místo je přiřazené k nejbližšímu z ${num(t.cities)} měst s dosahem podle velikosti města (od 2,5 km u malých měst po 14 km u Prahy). ${num(t.unassigned)} míst mimo dosah měst se do žebříčků nepočítá. Počty obyvatel jsou z <a href="https://data.csu.gov.cz/datastat/info/SADA/OBY02A" rel="noopener">Českého statistického úřadu</a> (stav k 1. 1. 2026).</li>
         <li>Hustotu porovnáváme jen u měst nad 10 000 obyvatel (u nejnižší hustoty nad 20 000), menší města mají příliš malá čísla.</li>
         <li>Otevírací doba vychází z tagu <code>opening_hours</code>, který šlo strojově přečíst u ${num(t.parsedHours)} kaváren. Svátky a výjimky nepočítáme. Rozložení otevírání je za středu.</li>
         <li>Řetězec je místo s tagem <code>brand</code>. Údaje o zahrádce nebo Wi‑Fi znamenají „uvedeno v OSM“, ne „neexistuje“.</li>

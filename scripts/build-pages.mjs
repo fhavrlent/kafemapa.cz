@@ -349,7 +349,7 @@ const ABOUT = {
     </section>
     <section>
       <h2>Zdroje a licence</h2>
-      <p>Mapová data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL). Podkladová mapa © <a href="https://mapy.com/" rel="noopener">Seznam.cz a.s. (Mapy.com)</a> a další. Kontakt: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
+      <p>Mapová data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL). Podkladová mapa © <a href="https://mapy.com/" rel="noopener">Seznam.cz a.s. (Mapy.com)</a> a další. Počty obyvatel měst: <a href="https://data.csu.gov.cz/datastat/info/SADA/OBY02A" rel="noopener">Český statistický úřad</a>. Kontakt: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
     </section>`,
   },
   en: {
@@ -375,7 +375,7 @@ const ABOUT = {
     </section>
     <section>
       <h2>Sources and licences</h2>
-      <p>Map data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL). Base map © <a href="https://mapy.com/" rel="noopener">Seznam.cz a.s. (Mapy.com)</a> and others. Contact: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
+      <p>Map data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL). Base map © <a href="https://mapy.com/" rel="noopener">Seznam.cz a.s. (Mapy.com)</a> and others. Town populations: <a href="https://data.csu.gov.cz/datastat/info/SADA/OBY02A" rel="noopener">Czech Statistical Office</a>. Contact: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
     </section>`,
   },
 };

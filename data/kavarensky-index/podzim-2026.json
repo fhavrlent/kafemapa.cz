@@ -6,295 +6,295 @@
     "created": "2026-10-15"
   },
   "totals": {
-    "places": 4070,
-    "cafes": 3952,
+    "places": 4069,
+    "cafes": 3951,
     "shops": 118,
     "chains": 425,
     "chainShare": 0.1044,
-    "withHours": 2613,
-    "hoursShare": 0.642,
-    "parsedHours": 2509,
-    "outdoorShare": 0.2738,
-    "wifiShare": 0.2105,
-    "wheelchairShare": 0.1392,
-    "unassigned": 325,
-    "citiesOver10k": 126,
+    "withHours": 2614,
+    "hoursShare": 0.6424,
+    "parsedHours": 2510,
+    "outdoorShare": 0.2736,
+    "wifiShare": 0.2106,
+    "wheelchairShare": 0.139,
+    "unassigned": 322,
+    "citiesOver10k": 131,
     "cities": 531
   },
   "perCapitaTop": [
     {
       "n": "Český Krumlov",
-      "pop": 13028,
+      "pop": 12658,
       "count": 37,
-      "r": 28.4,
+      "r": 29.23,
       "slug": "cesky-krumlov"
     },
     {
       "n": "Mariánské Lázně",
-      "pop": 14527,
+      "pop": 13921,
       "count": 28,
-      "r": 19.27,
+      "r": 20.11,
       "slug": "marianske-lazne"
     },
     {
       "n": "Jeseník",
-      "pop": 10838,
+      "pop": 10324,
       "count": 14,
-      "r": 12.92,
+      "r": 13.56,
       "slug": "jesenik"
     },
     {
       "n": "Uherské Hradiště",
-      "pop": 21737,
+      "pop": 24852,
       "count": 25,
-      "r": 11.5,
+      "r": 10.06,
       "slug": "uherske-hradiste"
     },
     {
-      "n": "Brno",
-      "pop": 379466,
-      "count": 393,
-      "r": 10.36,
-      "slug": "brno"
-    },
-    {
-      "n": "Jičín",
-      "pop": 15485,
-      "count": 16,
-      "r": 10.33,
-      "slug": "jicin"
-    },
-    {
-      "n": "Kutná Hora",
-      "pop": 20536,
-      "count": 21,
-      "r": 10.23,
-      "slug": "kutna-hora"
-    },
-    {
-      "n": "Olomouc",
-      "pop": 99496,
-      "count": 101,
-      "r": 10.15,
-      "slug": "olomouc"
-    },
-    {
-      "n": "Domažlice",
-      "pop": 10897,
-      "count": 11,
-      "r": 10.09,
-      "slug": "domazlice"
-    },
-    {
-      "n": "České Budějovice",
-      "pop": 93426,
-      "count": 84,
-      "r": 8.99,
-      "slug": "ceske-budejovice"
-    },
-    {
       "n": "Rožnov pod Radhoštěm",
-      "pop": 17845,
+      "pop": 15916,
       "count": 16,
-      "r": 8.97,
+      "r": 10.05,
       "slug": "roznov-pod-radhostem"
     },
     {
-      "n": "Praha",
-      "pop": 1275406,
-      "count": 1128,
-      "r": 8.84,
-      "slug": "praha"
+      "n": "Domažlice",
+      "pop": 10973,
+      "count": 11,
+      "r": 10.02,
+      "slug": "domazlice"
     },
     {
-      "n": "Pardubice",
-      "pop": 88520,
-      "count": 74,
-      "r": 8.36,
-      "slug": "pardubice"
-    },
-    {
-      "n": "Břeclav",
-      "pop": 19502,
+      "n": "Jičín",
+      "pop": 16052,
       "count": 16,
-      "r": 8.2,
-      "slug": "breclav"
+      "r": 9.97,
+      "slug": "jicin"
+    },
+    {
+      "n": "Brno",
+      "pop": 404296,
+      "count": 393,
+      "r": 9.72,
+      "slug": "brno"
+    },
+    {
+      "n": "Olomouc",
+      "pop": 105297,
+      "count": 102,
+      "r": 9.69,
+      "slug": "olomouc"
+    },
+    {
+      "n": "Kutná Hora",
+      "pop": 21787,
+      "count": 21,
+      "r": 9.64,
+      "slug": "kutna-hora"
+    },
+    {
+      "n": "České Budějovice",
+      "pop": 97128,
+      "count": 84,
+      "r": 8.65,
+      "slug": "ceske-budejovice"
     },
     {
       "n": "Jindřichův Hradec",
-      "pop": 21460,
+      "pop": 20369,
       "count": 17,
-      "r": 7.92,
+      "r": 8.35,
       "slug": "jindrichuv-hradec"
+    },
+    {
+      "n": "Pardubice",
+      "pop": 92713,
+      "count": 74,
+      "r": 7.98,
+      "slug": "pardubice"
+    },
+    {
+      "n": "Praha",
+      "pop": 1407084,
+      "count": 1118,
+      "r": 7.95,
+      "slug": "praha"
+    },
+    {
+      "n": "Karlovy Vary",
+      "pop": 48788,
+      "count": 38,
+      "r": 7.79,
+      "slug": "karlovy-vary"
     }
   ],
   "perCapitaBottom": [
     {
       "n": "Orlová",
-      "pop": 28206,
+      "pop": 27383,
       "count": 0,
       "r": 0,
       "slug": null
     },
     {
-      "n": "Jirkov",
-      "pop": 20239,
-      "count": 2,
-      "r": 0.99,
-      "slug": null
-    },
-    {
-      "n": "Krnov",
-      "pop": 25211,
-      "count": 3,
-      "r": 1.19,
-      "slug": null
-    },
-    {
       "n": "Chomutov",
-      "pop": 46263,
+      "pop": 46560,
       "count": 6,
-      "r": 1.3,
+      "r": 1.29,
       "slug": "chomutov"
     },
     {
-      "n": "Šumperk",
-      "pop": 29490,
-      "count": 4,
-      "r": 1.36,
+      "n": "Krnov",
+      "pop": 22303,
+      "count": 3,
+      "r": 1.35,
       "slug": null
     },
     {
       "n": "Most",
-      "pop": 62866,
+      "pop": 63160,
       "count": 9,
-      "r": 1.43,
+      "r": 1.42,
       "slug": "most"
     },
     {
+      "n": "Bohumín",
+      "pop": 20234,
+      "count": 3,
+      "r": 1.48,
+      "slug": null
+    },
+    {
       "n": "Jablonec nad Nisou",
-      "pop": 44588,
+      "pop": 46206,
       "count": 7,
-      "r": 1.57,
+      "r": 1.51,
       "slug": "jablonec-nad-nisou"
     },
     {
       "n": "Havířov",
-      "pop": 69084,
+      "pop": 67998,
       "count": 11,
-      "r": 1.59,
+      "r": 1.62,
       "slug": "havirov"
     },
     {
+      "n": "Šumperk",
+      "pop": 24444,
+      "count": 4,
+      "r": 1.64,
+      "slug": null
+    },
+    {
       "n": "Přerov",
-      "pop": 41404,
+      "pop": 40492,
       "count": 7,
-      "r": 1.69,
+      "r": 1.73,
       "slug": "prerov"
     },
     {
-      "n": "Vsetín",
-      "pop": 28785,
-      "count": 5,
-      "r": 1.74,
-      "slug": "vsetin"
+      "n": "Litvínov",
+      "pop": 22258,
+      "count": 4,
+      "r": 1.8,
+      "slug": null
     }
   ],
   "regional": [
     {
       "n": "Brno",
-      "pop": 379466,
+      "pop": 404296,
       "count": 393,
-      "r": 10.36,
+      "r": 9.72,
       "slug": "brno"
     },
     {
       "n": "Olomouc",
-      "pop": 99496,
-      "count": 101,
-      "r": 10.15,
+      "pop": 105297,
+      "count": 102,
+      "r": 9.69,
       "slug": "olomouc"
     },
     {
       "n": "České Budějovice",
-      "pop": 93426,
+      "pop": 97128,
       "count": 84,
-      "r": 8.99,
+      "r": 8.65,
       "slug": "ceske-budejovice"
     },
     {
-      "n": "Praha",
-      "pop": 1275406,
-      "count": 1128,
-      "r": 8.84,
-      "slug": "praha"
-    },
-    {
       "n": "Pardubice",
-      "pop": 88520,
+      "pop": 92713,
       "count": 74,
-      "r": 8.36,
+      "r": 7.98,
       "slug": "pardubice"
     },
     {
+      "n": "Praha",
+      "pop": 1407084,
+      "count": 1118,
+      "r": 7.95,
+      "slug": "praha"
+    },
+    {
       "n": "Karlovy Vary",
-      "pop": 49353,
+      "pop": 48788,
       "count": 38,
-      "r": 7.7,
+      "r": 7.79,
       "slug": "karlovy-vary"
     },
     {
       "n": "Hradec Králové",
-      "pop": 90596,
+      "pop": 93534,
       "count": 54,
-      "r": 5.96,
+      "r": 5.77,
       "slug": "hradec-kralove"
     },
     {
       "n": "Plzeň",
-      "pop": 185599,
+      "pop": 187863,
       "count": 106,
-      "r": 5.71,
+      "r": 5.64,
       "slug": "plzen"
     },
     {
       "n": "Zlín",
-      "pop": 72973,
+      "pop": 74917,
       "count": 38,
-      "r": 5.21,
+      "r": 5.07,
       "slug": "zlin"
     },
     {
       "n": "Jihlava",
-      "pop": 50108,
+      "pop": 53686,
       "count": 24,
-      "r": 4.79,
+      "r": 4.47,
       "slug": "jihlava"
     },
     {
       "n": "Ostrava",
-      "pop": 279791,
+      "pop": 280853,
       "count": 111,
-      "r": 3.97,
+      "r": 3.95,
       "slug": "ostrava"
     },
     {
       "n": "Liberec",
-      "pop": 102951,
+      "pop": 108214,
       "count": 33,
-      "r": 3.21,
+      "r": 3.05,
       "slug": "liberec"
     },
     {
       "n": "Ústí nad Labem",
-      "pop": 90378,
+      "pop": 90035,
       "count": 17,
-      "r": 1.88,
+      "r": 1.89,
       "slug": "usti-nad-labem"
     }
   ],
   "hours": {
-    "sample": 2402,
+    "sample": 2403,
     "hist": [
       {
         "h": 5,
@@ -310,11 +310,11 @@
       },
       {
         "h": 8,
-        "n": 613
+        "n": 614
       },
       {
         "h": 9,
-        "n": 481
+        "n": 480
       },
       {
         "h": 10,
@@ -342,7 +342,7 @@
       },
       {
         "h": 16,
-        "n": 27
+        "n": 28
       },
       {
         "h": 17,
@@ -360,12 +360,12 @@
     "medianOpen": 510,
     "medianClose": 1140,
     "indieMedianOpen": 540,
-    "openBy7": 0.1724,
-    "fridayAfter21": 0.259,
+    "openBy7": 0.1723,
+    "fridayAfter21": 0.2593,
     "weekdays": [
       {
         "d": "Pondělí",
-        "share": 0.8926
+        "share": 0.8922
       },
       {
         "d": "Úterý",
@@ -377,7 +377,7 @@
       },
       {
         "d": "Čtvrtek",
-        "share": 0.9833
+        "share": 0.9834
       },
       {
         "d": "Pátek",
@@ -385,11 +385,11 @@
       },
       {
         "d": "Sobota",
-        "share": 0.8622
+        "share": 0.8623
       },
       {
         "d": "Neděle",
-        "share": 0.7623
+        "share": 0.762
       }
     ],
     "closedMondayOnly": 123
@@ -454,83 +454,83 @@
     "best": [
       {
         "n": "Hradec Králové",
-        "pop": 90596,
+        "pop": 93534,
         "count": 54,
-        "r": 5.96,
+        "r": 5.77,
         "slug": "hradec-kralove",
         "hours": 0.8889
       },
       {
         "n": "Plzeň",
-        "pop": 185599,
+        "pop": 187863,
         "count": 106,
-        "r": 5.71,
+        "r": 5.64,
         "slug": "plzen",
         "hours": 0.8396
       },
       {
         "n": "Brno",
-        "pop": 379466,
+        "pop": 404296,
         "count": 393,
-        "r": 10.36,
+        "r": 9.72,
         "slug": "brno",
         "hours": 0.8117
       },
       {
         "n": "Uherské Hradiště",
-        "pop": 21737,
+        "pop": 24852,
         "count": 25,
-        "r": 11.5,
+        "r": 10.06,
         "slug": "uherske-hradiste",
         "hours": 0.76
       },
       {
         "n": "Olomouc",
-        "pop": 99496,
-        "count": 101,
-        "r": 10.15,
+        "pop": 105297,
+        "count": 102,
+        "r": 9.69,
         "slug": "olomouc",
-        "hours": 0.7327
+        "hours": 0.7353
       }
     ],
     "worst": [
       {
         "n": "Jihlava",
-        "pop": 50108,
+        "pop": 53686,
         "count": 24,
-        "r": 4.79,
+        "r": 4.47,
         "slug": "jihlava",
         "hours": 0.125
       },
       {
         "n": "Mariánské Lázně",
-        "pop": 14527,
+        "pop": 13921,
         "count": 28,
-        "r": 19.27,
+        "r": 20.11,
         "slug": "marianske-lazne",
         "hours": 0.3929
       },
       {
         "n": "Cheb",
-        "pop": 30420,
+        "pop": 32892,
         "count": 22,
-        "r": 7.23,
+        "r": 6.69,
         "slug": "cheb",
         "hours": 0.4091
       },
       {
         "n": "Karlovy Vary",
-        "pop": 49353,
+        "pop": 48788,
         "count": 38,
-        "r": 7.7,
+        "r": 7.79,
         "slug": "karlovy-vary",
         "hours": 0.4474
       },
       {
         "n": "Liberec",
-        "pop": 102951,
+        "pop": 108214,
         "count": 33,
-        "r": 3.21,
+        "r": 3.05,
         "slug": "liberec",
         "hours": 0.4848
       }

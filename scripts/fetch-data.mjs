@@ -74,6 +74,23 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
+// Počty obyvatel: oficiální stav ČSÚ (data/obyvatele.json, obnovuje scripts/fetch-population.mjs).
+// Tag population v OSM bývá roky starý (Praha 1 275 406 z roku 2021 × 1 407 084 k 1. 1. 2026).
+// Obce se páruje podle jména; u jmenovců (Nové Město, Kostelec…) vyhraje ta, jejíž počet je
+// nejblíž číslu z OSM, a bez čísla v OSM ta největší. Obec, kterou ČSÚ nezná, si nechá číslo z OSM.
+const CSU = JSON.parse(await readFile(join(ROOT, 'data', 'obyvatele.json'), 'utf8'));
+const csuByName = new Map();
+for (const [n, , pop] of CSU.obce) {
+  if (!csuByName.has(n)) csuByName.set(n, []);
+  csuByName.get(n).push(pop);
+}
+export function officialPopulation(name, osmPop) {
+  const cand = csuByName.get(name);
+  if (!cand) return null;
+  if (!osmPop) return Math.max(...cand);
+  return cand.reduce((best, p) => (Math.abs(Math.log(p / osmPop)) < Math.abs(Math.log(best / osmPop)) ? p : best));
+}
+
 // Dosah města roste s počtem obyvatel: malé město ~3 km, Praha 14 km.
 const cityRadiusKm = (pop) => Math.min(14, Math.max(2.5, 2 + Math.sqrt(pop) / 60));
 
@@ -120,6 +137,7 @@ function build(raw) {
   const places = [];
   const cafes = [];
   let skippedUnnamed = 0;
+  const unmatchedPlaces = [];
 
   for (const e of raw.elements) {
     const t = e.tags || {};
@@ -128,7 +146,10 @@ function build(raw) {
     if (lat == null || lon == null) continue;
 
     if (t.place) {
-      const pop = parseInt(String(t.population || '').replace(/\D/g, ''), 10) || 0;
+      const osmPop = parseInt(String(t.population || '').replace(/\D/g, ''), 10) || 0;
+      const csuPop = officialPopulation(t.name, osmPop);
+      if (csuPop == null) unmatchedPlaces.push(t.name);
+      const pop = csuPop ?? osmPop;
       places.push({ n: t.name, pop, y: lat, x: lon, r: cityRadiusKm(pop), count: 0 });
       continue;
     }
@@ -209,6 +230,7 @@ function build(raw) {
     generated: new Date().toISOString(),
     osmBase: raw.osm3s?.timestamp_osm_base,
     license: 'Data © přispěvatelé OpenStreetMap, ODbL 1.0',
+    population: { source: 'ČSÚ', asOf: CSU.asOf, url: CSU.url, unmatched: unmatchedPlaces.sort() },
     skippedUnnamed,
     cities,
     cafes,
