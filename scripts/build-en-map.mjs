@@ -80,7 +80,7 @@ const BLOCKS = [
         <li>Cafés are assigned to the nearest town, so the town ranking is approximate.</li>
       </ul>
       <p class="muted small">Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL). <span id="aboutTiles">Map tiles: OpenStreetMap Foundation.</span></p>
-      <p class="muted small">Visits are measured anonymously and without cookies (Cloudflare Web Analytics); no personal data is stored.</p>
+      <p class="muted small">Visits are measured anonymously and without cookies (Cloudflare Web Analytics); no personal data is stored. Kafemapa itself uses no cookies; the map tile provider Mapy.com sets a technical cookie to balance load across its servers.</p>
     </div>
   </dialog>`,
   ],

@@ -1,35 +1,24 @@
 // Anglická verze statických stránek pro turisty:
-//   /en/cities/, /en/cities/<town>/, /en/cafe/<slug>/, /en/help/
+//   /en/cities/, /en/cities/<town>/, /en/help/ (stránky kaváren v obou jazycích dělá build-cafes.mjs)
 // Texty jsou psané pro angličtinu (ne strojově z češtiny); data i odkazy sdílí s českou verzí.
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseHours, formatWeek } from '../assets/hours.js';
 import { cafePath, cityNameIn } from '../assets/slug.js';
-import { head, foot, esc, breadcrumbLd, SITE, MIN_CAFES, cityEnSlug } from './build-pages.mjs';
+import { head, foot, esc, breadcrumbLd, MIN_CAFES, cityEnSlug } from './build-pages.mjs';
 
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const num = (n) => n.toLocaleString('en-GB');
 const dec = (n) => n.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const pl = (n, one, many) => (n === 1 ? one : many);
 const ordinal = (n) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
 const collator = new Intl.Collator('cs');
-const fmtMin = (m) => {
-  m = ((m % 1440) + 1440) % 1440;
-  return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
-};
-const fmtDist = (d) => (d < 1 ? `${Math.round(d * 100) * 10} m` : `${dec(d)} km`);
 const km = (a, b) => {
   const R = 6371, rad = Math.PI / 180;
   const h = Math.sin(((b.y - a.y) * rad) / 2) ** 2 + Math.cos(a.y * rad) * Math.cos(b.y * rad) * Math.sin(((b.x - a.x) * rad) / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 };
-const osmUrl = (c, edit) => {
-  const type = { n: 'node', w: 'way', r: 'relation' }[c.i[0]];
-  return edit ? `https://www.openstreetmap.org/edit?${type}=${c.i.slice(1)}` : `https://www.openstreetmap.org/${type}/${c.i.slice(1)}`;
-};
-const kindOf = (c) => (c.k ? (c.r ? 'Coffee roaster' : 'Coffee shop') : c.r ? 'Café & roaster' : 'Café');
 const nameOf = (city) => cityNameIn(city?.n, 'en');
 
 function tags(c) {
@@ -42,18 +31,6 @@ function tags(c) {
   if (c.f & F.VEGAN) t.push('Vegan');
   else if (c.f & F.VEGETARIAN) t.push('Vegetarian');
   return t;
-}
-
-function features(c) {
-  const out = [];
-  if (c.f & F.OUTDOOR) out.push('Outdoor seating');
-  if (c.f & F.WIFI) out.push('Wi‑Fi');
-  if (c.f & F.WHEELCHAIR) out.push('Wheelchair accessible');
-  if (c.f & F.WHEELCHAIR_LIMITED) out.push('Partly wheelchair accessible');
-  if (c.f & F.VEGAN) out.push('Vegan options');
-  else if (c.f & F.VEGETARIAN) out.push('Vegetarian options');
-  if (c.f & F.CARD) out.push('Cards accepted');
-  return out;
 }
 
 /* ---------------- town page ---------------- */
@@ -200,106 +177,6 @@ function townsIndex(pages, data) {
   );
 }
 
-/* ---------------- café page ---------------- */
-
-const helpBox = (c, label, open = false) => `<details class="help-box"${open ? ' data-primary' : ''}>
-          <summary>${label}</summary>
-          <div data-hours-editor data-osm-edit="${osmUrl(c, true)}"${c.o ? ` data-current="${esc(c.o)}"` : ''}></div>
-        </details>`;
-
-function cafePageEn(c, ctx) {
-  const { city, path, week, nearby, data } = ctx;
-  const town = nameOf(city);
-  const kind = kindOf(c);
-  const addr = [c.a, c.a && city && c.a.includes(city.n) ? null : town].filter(Boolean).join(', ');
-  const feats = features(c);
-  const hoursText = week ? formatWeek(week, 'en') : null;
-  const cityPath = city?.slug ? `/en/cities/${cityEnSlug(city)}/` : null;
-
-  const crumbs = [['Kafemapa', '/en/']];
-  if (cityPath) crumbs.push(['Cafés by town', '/en/cities/'], [town, cityPath]);
-  crumbs.push([c.n, path]);
-  const sameAs = [c.w, c.ig, c.fb].filter(Boolean);
-  const business = {
-    '@context': 'https://schema.org',
-    '@type': c.k ? 'Store' : 'CafeOrCoffeeShop',
-    name: c.n,
-    url: SITE + path,
-    geo: { '@type': 'GeoCoordinates', latitude: c.y, longitude: c.x },
-    ...(c.a || city ? { address: { '@type': 'PostalAddress', ...(c.a ? { streetAddress: c.a.split(',')[0] } : {}), ...(city ? { addressLocality: city.n } : {}), addressCountry: 'CZ' } } : {}),
-    ...(c.p ? { telephone: c.p } : {}),
-    ...(sameAs.length ? { sameAs } : {}),
-  };
-
-  const actions = [`<a class="btn primary" href="https://mapy.com/fnc/v1/route?end=${c.x},${c.y}" rel="noopener">Directions</a>`, `<a class="btn" href="/en/#${c.i}">On the map</a>`];
-  if (c.w) actions.push(`<a class="btn" href="${esc(c.w)}" rel="noopener nofollow">Website</a>`);
-  if (c.p) actions.push(`<a class="btn" href="tel:${esc(c.p.replace(/[^\d+]/g, ''))}">${esc(c.p)}</a>`);
-  if (c.ig) actions.push(`<a class="btn" href="${esc(c.ig)}" rel="noopener nofollow">Instagram</a>`);
-  if (c.fb) actions.push(`<a class="btn" href="${esc(c.fb)}" rel="noopener nofollow">Facebook</a>`);
-
-  let hours;
-  if (week) {
-    hours = `<table class="week" data-week>
-          <tbody>${DAYS.map((d, i) => {
-            const iv = week[i];
-            const txt = !iv.length ? 'closed' : iv.map(([a, b]) => (a === 0 && b >= 1440 ? 'open 24/7' : `${fmtMin(a)}–${fmtMin(b)}`)).join(', ');
-            return `<tr data-day="${i}"><th scope="row">${d}</th><td>${txt}</td></tr>`;
-          }).join('')}</tbody>
-        </table>
-        <p class="small muted">Public holidays and exceptions are not included. Please check before you go.</p>
-        ${helpBox(c, 'Hours wrong? Fix them')}`;
-  } else if (c.o) {
-    hours = `<p class="cafe-hours raw">${esc(c.o)}</p>${helpBox(c, 'Hours wrong? Fix them')}`;
-  } else {
-    hours = `<p class="muted">Opening hours are not in OpenStreetMap yet.</p>${helpBox(c, 'Know the opening hours? Add them', true)}`;
-  }
-
-  const description = [`${kind} ${c.n}${addr ? `, ${addr}` : ''}, Czechia.`, hoursText ? `Opening hours: ${hoursText}.` : null, feats.length ? `${feats.slice(0, 3).join(', ')}.` : null]
-    .filter(Boolean)
-    .join(' ')
-    .slice(0, 300);
-
-  return (
-    head({
-      lang: 'en',
-      title: `${c.n}${city ? `, ${town}` : ''}: opening hours & address | Kafemapa`,
-      description,
-      path,
-      alternates: { cs: cafePath(c, city?.n, 'cs'), en: path },
-      jsonLd: [breadcrumbLd(crumbs), business],
-    }) +
-    `
-  <main class="page-main cafe-page">
-    <nav class="crumbs" aria-label="Breadcrumb">${crumbs.map(([n, p], i) => (i === crumbs.length - 1 ? `<span>${esc(n)}</span>` : `<a href="${p}">${esc(n)}</a>`)).join(' › ')}</nav>
-    <p class="eyebrow">${kind}</p>
-    <h1>${esc(c.n)}</h1>
-    ${addr ? `<p class="lead">${esc(addr)}</p>` : ''}
-    <div class="cafe-live" data-live${c.o ? ` data-o="${esc(c.o)}"` : ''}><span class="status" data-status></span></div>
-    <div class="actions">${actions.join('\n      ')}</div>
-    ${c.d ? `<section><h2>Description <span class="muted small">(in Czech)</span></h2><p lang="cs">${esc(c.d)}</p></section>` : ''}
-    <section>
-      <h2>Opening hours</h2>
-        ${hours}
-    </section>
-    ${feats.length ? `<section><h2>Amenities</h2><div class="tags">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></section>` : ''}
-    ${nearby.length ? `<section>
-      <h2>Other cafés nearby</h2>
-      <ul class="near">
-        ${nearby.map(({ c: n, d }) => `<li><a href="${cafePath(n, n.c != null ? data.cities[n.c].n : null, 'en')}">${esc(n.n)}</a> <span class="muted">${fmtDist(d)}${n.a ? ` · ${esc(n.a.split(',')[0])}` : ''}</span></li>`).join('\n        ')}
-      </ul>
-      ${cityPath ? `<p><a href="${cityPath}">All cafés in ${esc(town)}</a></p>` : ''}
-    </section>` : ''}
-    <details class="help-box report-box">
-      <summary>Closed or something wrong? Report it</summary>
-      <div data-report data-i="${c.i}" data-n="${esc(c.n)}" data-y="${c.y}" data-x="${c.x}"></div>
-    </details>
-    <p class="small muted osm-note">Data from <a href="${osmUrl(c)}" rel="noopener">OpenStreetMap</a>. Something wrong or missing? <a href="${osmUrl(c, true)}" rel="noopener">Edit it on OSM</a> — the fix shows up here within a week.</p>
-  </main>
-  <script type="module" src="/assets/pages.js"></script>` +
-    foot(data, 'en')
-  );
-}
-
 /* ---------------- help page ---------------- */
 
 function helpPage(pages, data) {
@@ -351,7 +228,7 @@ function helpPage(pages, data) {
 
 /* ---------------- build ---------------- */
 
-export async function buildEn(outDir, data, { nearbyById }) {
+export async function buildEn(outDir, data) {
   // stejná města jako česká verze (assignCitySlugs už nastavil city.slug)
   const byCity = new Map();
   for (const c of data.cafes) if (c.c != null) byCity.set(c.c, [...(byCity.get(c.c) || []), c]);
@@ -373,12 +250,5 @@ export async function buildEn(outDir, data, { nearbyById }) {
   urls.splice(urls.indexOf('/en/help/'), 1);
   await write('/en/help/', helpPage(pages, data));
 
-  const asOf = new Date(data.osmBase || data.generated);
-  for (const c of data.cafes) {
-    const city = c.c != null ? data.cities[c.c] : null;
-    const path = cafePath(c, city?.n, 'en');
-    if (!path) continue;
-    await write(path, cafePageEn(c, { city, path, week: parseHours(c.o, asOf), nearby: nearbyById.get(c.i) || [], data }));
-  }
   return urls;
 }

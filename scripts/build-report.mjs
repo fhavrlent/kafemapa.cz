@@ -142,9 +142,9 @@ function podzim2026(s) {
     <div class="hero-stats">
       <div class="hero"><span class="hero-v">${num(t.places)}</span><span class="hero-l">kaváren, pražíren a obchodů s kávou v OpenStreetMap</span></div>
       <dl class="stats">
-        <div><dt>Brno, míst na 10 000 obyvatel</dt><dd>${dec(brno.r)}</dd><p class="small muted">Praha ${dec(praha.r)}</p></div>
-        <div><dt>Medián otevření ve všední den</dt><dd>${time(h.medianOpen)}</dd><p class="small muted">zavírá se v ${time(h.medianClose)}</p></div>
-        <div><dt>Podíl řetězců</dt><dd>${pct(t.chainShare)}</dd><p class="small muted">${num(t.chains)} míst</p></div>
+        <div><dt>Brno, míst na 10 000 obyvatel</dt><dd>${dec(brno.r)}</dd><dd class="sub">Praha ${dec(praha.r)}</dd></div>
+        <div><dt>Medián otevření ve všední den</dt><dd>${time(h.medianOpen)}</dd><dd class="sub">zavírá se v ${time(h.medianClose)}</dd></div>
+        <div><dt>Podíl řetězců</dt><dd>${pct(t.chainShare)}</dd><dd class="sub">${num(t.chains)} míst</dd></div>
       </dl>
     </div>
 

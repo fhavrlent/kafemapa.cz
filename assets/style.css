@@ -3,7 +3,7 @@
   --panel: #fffaf4;
   --ink: #2a1c15;
   --ink-2: #6b5a4e;
-  --ink-3: #9c8b7e;
+  --ink-3: #736356;  /* ≥ 4,5:1 i na --bg a --accent-soft */
   --line: #eadfd2;
   --line-2: #dccdbc;
   --accent: #b5652b;      /* karamel */
@@ -31,7 +31,7 @@
     --panel: #231a16;
     --ink: #f4e9df;
     --ink-2: #c3b2a5;
-    --ink-3: #8e7e72;
+    --ink-3: #998879;  /* ≥ 5:1 na tmavém panelu */
     --line: #362a24;
     --line-2: #4a3a31;
     --accent: #e09a5c;

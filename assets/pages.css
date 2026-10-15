@@ -95,7 +95,7 @@ body.page { height: auto; }
 .hero-v { font: 600 56px/1 var(--font); letter-spacing: -.02em; color: var(--crema); }
 .hero-l { font-size: 15px; color: #e9d9c8; max-width: 30ch; }
 .hero-stats .stats { margin: 0; }
-.stats p { margin: 4px 0 0; }
+.stats dd.sub { margin: 4px 0 0; font: 400 13px/1.4 var(--font); color: var(--ink-2); }
 
 .dotmap { margin: 28px 0 8px; }
 .dotmap img { width: 100%; height: auto; display: block; }
