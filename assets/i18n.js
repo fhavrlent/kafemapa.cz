@@ -41,7 +41,7 @@ const STR = {
     description: 'Popis', hours: 'Otevírací doba', amenities: 'Vybavení',
     fixHours: 'Nesedí otevírací doba? Opravte ji', addHours: 'Znáte otevírací dobu? Pomozte ji doplnit',
     report: 'Zavřeno nebo je tu chyba? Nahlaste to',
-    cafePage: 'Stránka kavárny', editOsm: 'Upravit v OSM',
+    cafePage: 'Stránka kavárny', editOsm: 'Upravit v OSM', mapySearch: 'Najít na Mapy.com (fotky, recenze)',
     shareText: (n) => `${n} na Kafemapě`,
     title: 'Kafemapa — všechny kavárny v Česku na jedné mapě',
     // žebříček
@@ -85,7 +85,7 @@ const STR = {
     description: 'Description', hours: 'Opening hours', amenities: 'Amenities',
     fixHours: 'Hours wrong? Fix them', addHours: 'Know the opening hours? Add them',
     report: 'Closed or something wrong? Report it',
-    cafePage: 'Café page', editOsm: 'Edit in OSM',
+    cafePage: 'Café page', editOsm: 'Edit in OSM', mapySearch: 'Find on Mapy.com (photos, reviews)',
     shareText: (n) => `${n} on Kafemapa`,
     title: 'Kafemapa — every café in Czechia on one map',
     rankNotePer: 'Towns over 10,000 people. Places with coffee per 10,000 inhabitants. Cafés are assigned to the nearest town, so the numbers are approximate.',

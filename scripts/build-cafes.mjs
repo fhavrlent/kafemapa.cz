@@ -5,7 +5,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseHours, formatWeek } from '../assets/hours.js';
-import { cafePath, cityNameIn } from '../assets/slug.js';
+import { cafePath, cityNameIn, mapySearchUrl } from '../assets/slug.js';
 import { head, foot, esc, breadcrumbLd, SITE, cityEnSlug } from './build-pages.mjs';
 
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
@@ -31,7 +31,7 @@ const T = {
     home: '/', towns: ['Kavárny podle měst', '/kavarny/'], townPath: (city) => `/kavarny/${city.slug}/`, town: (city) => city?.n,
     title: (n, town) => `${n}${town ? `, ${town}` : ''}: otevírací doba a adresa | Kafemapa`,
     desc: (kind, n, addr) => `${kind} ${n}${addr ? `, ${addr}` : ''}.`, descHours: (h) => `Otevírací doba: ${h}.`,
-    crumbs: 'Drobečková navigace', navigate: 'Navigovat', onMap: 'Na mapě', web: 'Web', mapHome: '/',
+    crumbs: 'Drobečková navigace', navigate: 'Navigovat', onMap: 'Na mapě', web: 'Web', mapHome: '/', mapy: 'Fotky a recenze na Mapy.com',
     closed: 'zavřeno', nonstop: 'nonstop', holidays: 'Svátky a výjimky nezohledňujeme. Před cestou je raději ověřte.',
     fix: 'Nesedí otevírací doba? Opravte ji', add: 'Znáte otevírací dobu? Pomozte ji doplnit', missing: 'Otevírací doba zatím v OpenStreetMap chybí.',
     description: '<h2>Popis</h2><p>', hours: 'Otevírací doba', amenities: 'Vybavení', nearby: 'Další kavárny v okolí', all: (town) => `Všechny kavárny: ${town}`,
@@ -45,7 +45,7 @@ const T = {
     home: '/en/', towns: ['Cafés by town', '/en/cities/'], townPath: (city) => `/en/cities/${cityEnSlug(city)}/`, town: (city) => cityNameIn(city?.n, 'en'),
     title: (n, town) => `${n}${town ? `, ${town}` : ''}: opening hours & address | Kafemapa`,
     desc: (kind, n, addr) => `${kind} ${n}${addr ? `, ${addr}` : ''}, Czechia.`, descHours: (h) => `Opening hours: ${h}.`,
-    crumbs: 'Breadcrumb', navigate: 'Directions', onMap: 'On the map', web: 'Website', mapHome: '/en/',
+    crumbs: 'Breadcrumb', navigate: 'Directions', onMap: 'On the map', web: 'Website', mapHome: '/en/', mapy: 'Photos & reviews on Mapy.com',
     closed: 'closed', nonstop: 'open 24/7', holidays: 'Public holidays and exceptions are not included. Please check before you go.',
     fix: 'Hours wrong? Fix them', add: 'Know the opening hours? Add them', missing: 'Opening hours are not in OpenStreetMap yet.',
     description: '<h2>Description <span class="muted small">(in Czech)</span></h2><p lang="cs">', hours: 'Opening hours', amenities: 'Amenities', nearby: 'Other cafés nearby', all: (town) => `All cafés in ${town}`,
@@ -132,6 +132,7 @@ function cafePage(c, ctx, lang = 'cs') {
   if (c.p) actions.push(`<a class="btn" href="tel:${esc(c.p.replace(/[^\d+]/g, ''))}">${esc(c.p)}</a>`);
   if (c.ig) actions.push(`<a class="btn" href="${esc(c.ig)}" rel="noopener nofollow">Instagram</a>`);
   if (c.fb) actions.push(`<a class="btn" href="${esc(c.fb)}" rel="noopener nofollow">Facebook</a>`);
+  actions.push(`<a class="btn" href="${esc(mapySearchUrl(c, city?.n))}" rel="noopener">${L.mapy}</a>`);
 
   let hours;
   if (week) {

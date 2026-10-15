@@ -1,5 +1,5 @@
 import { parseHours, statusLabel, fmtMin } from './hours.js';
-import { cafePath, cityNameIn } from './slug.js';
+import { cafePath, cityNameIn, mapySearchUrl } from './slug.js';
 import { LANG, t, pluralIn, numIn } from './i18n.js';
 
 // Bitové příznaky — musí odpovídat scripts/fetch-data.mjs
@@ -437,7 +437,7 @@ function renderDetail(c) {
       ${cafePath(c, c.city?.n, LANG) ? `<a href="${cafePath(c, c.city?.n, LANG)}">${icon('globe')}${t.cafePage}</a>` : ''}
       <a href="${osmUrl(c, true)}" target="_blank" rel="noopener">${icon('edit')}${t.editOsm}</a>
       <a href="https://www.google.com/maps/search/?api=1&query=${c.y},${c.x}" target="_blank" rel="noopener">${icon('globe')}Google Maps</a>
-      <a href="https://mapy.com/fnc/v1/showmap?center=${c.x},${c.y}&zoom=18&marker=true" target="_blank" rel="noopener">${icon('pin')}Mapy.com</a>
+      <a href="${mapySearchUrl(c, c.city?.n)}" target="_blank" rel="noopener">${icon('pin')}${t.mapySearch}</a>
     </div>`;
 
   $('#btnBack').onclick = leaveDetail;

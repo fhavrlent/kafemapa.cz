@@ -24,3 +24,12 @@ export function cafePath(c, cityName, lang = 'cs') {
   const slug = [slugify(c.n), slugify(cityNameIn(cityName, lang)), c.i].filter(Boolean).join('-');
   return lang === 'en' ? `/en/cafe/${slug}/` : `/kavarna/${slug}/`;
 }
+
+// Odkaz na podnik na Mapy.com (fotky, recenze): vyhledá jméno + adresu kolem polohy.
+// Mapy.com při jasné shodě otevře přímo detail podniku; ID podniků si ukládat nesmíme
+// (podmínky API), proto jde o vyhledávání. Adresa rozliší pobočky (Kafec Orlí × Úvoz).
+export function mapySearchUrl(c, cityName) {
+  const where = c.a || cityName;
+  const q = where ? `${c.n}, ${where}` : c.n;
+  return `https://mapy.com/fnc/v1/search?query=${encodeURIComponent(q)}&center=${c.x},${c.y}&zoom=18`;
+}
