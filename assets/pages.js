@@ -83,3 +83,6 @@ for (const box of document.querySelectorAll('.report-box')) {
     mountReportForm(host, { i: d.i, n: d.n, y: +d.y, x: +d.x });
   });
 }
+
+// Minimapa na stránce kavárny (Leaflet se načte až podle potřeby).
+if (document.querySelector('[data-minimap]')) import('./minimap.js');

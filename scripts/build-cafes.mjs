@@ -31,7 +31,7 @@ const T = {
     home: '/', towns: ['Kavárny podle měst', '/kavarny/'], townPath: (city) => `/kavarny/${city.slug}/`, town: (city) => city?.n,
     title: (n, town) => `${n}${town ? `, ${town}` : ''}: otevírací doba a adresa | Kafemapa`,
     desc: (kind, n, addr) => `${kind} ${n}${addr ? `, ${addr}` : ''}.`, descHours: (h) => `Otevírací doba: ${h}.`,
-    crumbs: 'Drobečková navigace', navigate: 'Navigovat', onMap: 'Na mapě', web: 'Web', mapHome: '/', mapy: 'Fotky a recenze na Mapy.com',
+    crumbs: 'Drobečková navigace', navigate: 'Navigovat', onMap: 'Na mapě', web: 'Web', mapHome: '/', mapy: 'Fotky a recenze na Mapy.com', minimap: (n) => `Mapa: ${n} a kavárny v okolí`,
     closed: 'zavřeno', nonstop: 'nonstop', holidays: 'Svátky a výjimky nezohledňujeme. Před cestou je raději ověřte.',
     fix: 'Nesedí otevírací doba? Opravte ji', add: 'Znáte otevírací dobu? Pomozte ji doplnit', missing: 'Otevírací doba zatím v OpenStreetMap chybí.',
     description: '<h2>Popis</h2><p>', hours: 'Otevírací doba', amenities: 'Vybavení', nearby: 'Další kavárny v okolí', all: (town) => `Všechny kavárny: ${town}`,
@@ -45,7 +45,7 @@ const T = {
     home: '/en/', towns: ['Cafés by town', '/en/cities/'], townPath: (city) => `/en/cities/${cityEnSlug(city)}/`, town: (city) => cityNameIn(city?.n, 'en'),
     title: (n, town) => `${n}${town ? `, ${town}` : ''}: opening hours & address | Kafemapa`,
     desc: (kind, n, addr) => `${kind} ${n}${addr ? `, ${addr}` : ''}, Czechia.`, descHours: (h) => `Opening hours: ${h}.`,
-    crumbs: 'Breadcrumb', navigate: 'Directions', onMap: 'On the map', web: 'Website', mapHome: '/en/', mapy: 'Photos & reviews on Mapy.com',
+    crumbs: 'Breadcrumb', navigate: 'Directions', onMap: 'On the map', web: 'Website', mapHome: '/en/', mapy: 'Photos & reviews on Mapy.com', minimap: (n) => `Map: ${n} and cafés nearby`,
     closed: 'closed', nonstop: 'open 24/7', holidays: 'Public holidays and exceptions are not included. Please check before you go.',
     fix: 'Hours wrong? Fix them', add: 'Know the opening hours? Add them', missing: 'Opening hours are not in OpenStreetMap yet.',
     description: '<h2>Description <span class="muted small">(in Czech)</span></h2><p lang="cs">', hours: 'Opening hours', amenities: 'Amenities', nearby: 'Other cafés nearby', all: (town) => `All cafés in ${town}`,
@@ -164,6 +164,8 @@ function cafePage(c, ctx, lang = 'cs') {
     <div class="cafe-live" data-live${c.o ? ` data-o="${esc(c.o)}"` : ''}><span class="status" data-status></span></div>
 
     <div class="actions">${actions.join('\n      ')}</div>
+
+    <div class="minimap" data-minimap hidden role="region" aria-label="${esc(L.minimap(c.n))}" data-y="${c.y}" data-x="${c.x}" data-n="${esc(c.n)}" data-near="${esc(JSON.stringify(nearby.map(({ c: n }) => [n.y, n.x, n.n, cafePath(n, n.c != null ? meta.cities[n.c].n : null, lang)])))}"></div>
 
     ${c.d ? `<section>${L.description}${esc(c.d)}</p></section>` : ''}
 
