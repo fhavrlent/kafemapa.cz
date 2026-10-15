@@ -52,6 +52,8 @@ Web běží na **Cloudflare Workers** (statické soubory, bez kódu Workeru), zd
 - Google Search Console: ověřeno přes Cloudflare (TXT záznam `google-site-verification`).
 - Seznam Webmaster: ověřeno meta tagem `seznam-wmt` v `index.html`. Seznam ověření čas od času opakuje, tag nemazat.
 - Návštěvnost: Cloudflare Web Analytics (bez cookies), beacon je ve všech stránkách (`index.html`, `404.html`, `head()` v `build-pages.mjs`); CSP povoluje `static.cloudflareinsights.com` a `cloudflareinsights.com`.
+- Písma (Fraunces, Inter) jsou hostovaná u nás v `assets/fonts/` (licence OFL přiložená), ne z Google Fonts: IP návštěvníků tak nejde Googlu a CSP povoluje písma jen z vlastní domény.
+- Ochrana soukromí: `/ochrana-soukromi/` a `/en/privacy/` (správce Filip Havrlent, info@kafemapa.cz). Popisují skutečný stav; při přidání nové služby třetí strany (analytika, reklama, affiliate) je potřeba text upravit. Cookie lišta není potřeba, dokud web nepoužívá jiné než nezbytné cookies a úložiště.
 - Ochrana (Cloudflare WAF, vlastní pravidla): blokace RU/CN/IR/BY; mimo CZ/SK Managed Challenge kromě ověřených botů a strojových souborů (`robots.txt`, `sitemap.xml`, IndexNow klíč a manifest). Bot Fight Mode je vypnutý záměrně: na Free plánu nejde vyjmout pro build a IndexNow.
 - E-mail `info@kafemapa.cz` je na Seznam Email Profi (MX v Cloudflare, „DNS only“: e-mail nejde přes proxy). SPF povoluje odesílání jen přes Seznam, DMARC je zatím v režimu `p=none` (sledování).
 

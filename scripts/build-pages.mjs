@@ -68,9 +68,8 @@ ${hreflang}  <meta name="theme-color" content="#f6efe6" media="(prefers-color-sc
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="/assets/style.css">
   <link rel="stylesheet" href="/assets/pages.css">
 ${extraCss}  <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
@@ -97,7 +96,7 @@ export function foot(meta, lang = 'cs') {
   <footer class="site-foot">
     <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL), updated ${esc(when)}.
     Missing café or wrong data? Anyone can fix it directly on OpenStreetMap.</p>
-    <p><a href="/en/">Kafemapa</a> · <a href="/en/cities/">Cafés by town</a> · <a href="/en/help/">Help improve the data</a> · <a href="/en/about/">About</a> · <a href="/" lang="cs">Česky</a></p>
+    <p><a href="/en/">Kafemapa</a> · <a href="/en/cities/">Cafés by town</a> · <a href="/en/help/">Help improve the data</a> · <a href="/en/about/">About</a> · <a href="/en/privacy/">Privacy</a> · <a href="/" lang="cs">Česky</a></p>
   </footer>
 </body>
 </html>
@@ -107,7 +106,7 @@ export function foot(meta, lang = 'cs') {
   <footer class="site-foot">
     <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL), aktualizace ${esc(when)}.
     Chybí kavárna nebo je údaj špatně? Opravit ho může kdokoli přímo v OpenStreetMap.</p>
-    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a> · <a href="/o-projektu/">O projektu</a> · <a href="/en/" lang="en">English</a></p>
+    <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a> · <a href="/o-projektu/">O projektu</a> · <a href="/ochrana-soukromi/">Ochrana soukromí</a> · <a href="/en/" lang="en">English</a></p>
   </footer>
 </body>
 </html>
@@ -346,7 +345,7 @@ const ABOUT = {
     </section>
     <section>
       <h2>Soukromí</h2>
-      <p>Návštěvnost měříme anonymně a bez cookies (Cloudflare Web Analytics), žádné osobní údaje neukládáme. Kafemapa sama cookies nepoužívá; poskytovatel mapových dlaždic Mapy.com nastavuje technickou cookie pro rozložení zátěže svých serverů.</p>
+      <p>Návštěvnost měříme anonymně a bez cookies (Cloudflare Web Analytics), žádné osobní údaje neukládáme. Kafemapa sama cookies nepoužívá; poskytovatel mapových dlaždic Mapy.com nastavuje technickou cookie pro rozložení zátěže svých serverů. Podrobnosti najdete v <a href="/ochrana-soukromi/">informacích o ochraně soukromí</a>.</p>
     </section>
     <section>
       <h2>Zdroje a licence</h2>
@@ -372,7 +371,7 @@ const ABOUT = {
     </section>
     <section>
       <h2>Privacy</h2>
-      <p>Visits are measured anonymously and without cookies (Cloudflare Web Analytics); no personal data is stored. Kafemapa itself uses no cookies; the map tile provider Mapy.com sets a technical cookie to balance load across its servers.</p>
+      <p>Visits are measured anonymously and without cookies (Cloudflare Web Analytics); no personal data is stored. Kafemapa itself uses no cookies; the map tile provider Mapy.com sets a technical cookie to balance load across its servers. See the <a href="/en/privacy/">privacy notice</a> for details.</p>
     </section>
     <section>
       <h2>Sources and licences</h2>
@@ -380,6 +379,113 @@ const ABOUT = {
     </section>`,
   },
 };
+
+// Informace o zpracování osobních údajů (čl. 13 GDPR): /ochrana-soukromi/, /en/privacy/.
+// Popisuje skutečný stav webu: žádné vlastní cookies, písma hostovaná u nás, Cloudflare,
+// Mapy.com, OSM poznámky a e-mail. Při změně služeb je potřeba text upravit.
+const PRIVACY = {
+  cs: {
+    path: '/ochrana-soukromi/', title: 'Ochrana soukromí | Kafemapa', h1: 'Ochrana soukromí', crumb: 'Ochrana soukromí',
+    description: 'Jak Kafemapa zachází s osobními údaji: bez vlastních cookies, anonymní měření návštěvnosti, kdo údaje zpracovává a jaká máte práva.',
+    body: `
+    <p class="lead">Kafemapa sbírá co nejméně údajů. Nemáme uživatelské účty, nepoužíváme vlastní cookies ani reklamní sledování. Tady je přehled toho, co se při návštěvě webu přesto děje.</p>
+    <section>
+      <h2>Kdo za web odpovídá</h2>
+      <p>Správcem osobních údajů je Filip Havrlent, provozovatel webu kafemapa.cz. Kontakt: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
+    </section>
+    <section>
+      <h2>Jaké údaje zpracováváme a proč</h2>
+      <ul>
+        <li><strong>Technické údaje při návštěvě</strong> (IP adresa, typ prohlížeče, navštívená stránka): web běží na infrastruktuře Cloudflare, která je zpracovává kvůli doručení stránek a ochraně před útoky a roboty. Právním základem je náš oprávněný zájem na provozu a zabezpečení webu.</li>
+        <li><strong>Měření návštěvnosti</strong>: Cloudflare Web Analytics počítá návštěvy souhrnně a bez cookies, neukládá nic do vašeho prohlížeče a nevytváří profily. Oprávněný zájem: vědět, které části webu lidé používají.</li>
+        <li><strong>E-maily</strong>, které nám pošlete na info@kafemapa.cz: použijeme je jen k odpovědi. Oprávněný zájem: vyřídit vaši zprávu.</li>
+        <li><strong>Hlášení chyby nebo zavřeného podniku</strong>: text, který napíšete do formuláře, se odešle jako veřejná poznámka do OpenStreetMap, anonymně a bez vašeho jména. Odesíláte ho sami a víte, že bude veřejný.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Komu se údaje dostanou</h2>
+      <ul>
+        <li><strong>Cloudflare, Inc.</strong> (hosting, zabezpečení, měření návštěvnosti). Firma sídlí v USA a je certifikovaná v rámci EU–US Data Privacy Framework.</li>
+        <li><strong>Seznam.cz, a.s.</strong> (podkladová mapa Mapy.com a e-mailová schránka). Při načítání mapy získá Seznam vaši IP adresu a nastaví technickou cookie pro rozložení zátěže svých serverů.</li>
+        <li><strong>OpenStreetMap Foundation</strong>, jen pokud odešlete hlášení (poznámka je pak veřejná na openstreetmap.org).</li>
+      </ul>
+      <p>Písma i data kaváren načítáme z vlastního webu, ne od třetích stran. Údaje nikomu neprodáváme a nepoužíváme je k reklamě.</p>
+    </section>
+    <section>
+      <h2>Cookies a úložiště v prohlížeči</h2>
+      <p>Kafemapa sama cookies nepoužívá, proto nemá cookie lištu. V úložišti prohlížeče (localStorage) si pamatujeme jen to, co jste sami udělali: že jste zavřeli upoutávku a které podniky jste už nahlásili, aby se nehlásily dvakrát. Mapy.com nastavuje technickou cookie nutnou pro načtení mapy. Návštěvníkům mimo Česko a Slovensko může Cloudflare po ověření, že nejsou robot, nastavit bezpečnostní cookie.</p>
+    </section>
+    <section>
+      <h2>Jak dlouho údaje uchováváme</h2>
+      <p>Technické záznamy uchovává Cloudflare jen po dobu nutnou k provozu a zabezpečení podle svých pravidel. Statistiky návštěvnosti jsou souhrnné a nejde z nich poznat konkrétní osobu. E-maily uchováváme po dobu nezbytnou k vyřízení, nejdéle 2 roky. Poznámky v OpenStreetMap jsou veřejné a spravuje je OpenStreetMap Foundation.</p>
+    </section>
+    <section>
+      <h2>Vaše práva</h2>
+      <p>Máte právo na přístup ke svým údajům, jejich opravu nebo výmaz, omezení zpracování a právo vznést námitku proti zpracování založenému na oprávněném zájmu. Stačí napsat na <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>. Stížnost můžete podat u Úřadu pro ochranu osobních údajů (<a href="https://uoou.gov.cz/" rel="noopener">uoou.gov.cz</a>). Nedochází k automatizovanému rozhodování ani profilování.</p>
+      <p class="small muted">Platné od 15. října 2026.</p>
+    </section>`,
+  },
+  en: {
+    path: '/en/privacy/', title: 'Privacy | Kafemapa', h1: 'Privacy', crumb: 'Privacy',
+    description: 'How Kafemapa handles personal data: no own cookies, anonymous visit statistics, who processes data and what your rights are.',
+    body: `
+    <p class="lead">Kafemapa collects as little data as possible. There are no user accounts, no own cookies and no ad tracking. Here is what still happens when you visit the site.</p>
+    <section>
+      <h2>Who is responsible</h2>
+      <p>The data controller is Filip Havrlent, operator of kafemapa.cz. Contact: <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>.</p>
+    </section>
+    <section>
+      <h2>What data we process and why</h2>
+      <ul>
+        <li><strong>Technical data when you visit</strong> (IP address, browser type, page visited): the site runs on Cloudflare infrastructure, which processes it to deliver pages and protect against attacks and bots. Legal basis: our legitimate interest in running and securing the site.</li>
+        <li><strong>Visit statistics</strong>: Cloudflare Web Analytics counts visits in aggregate and without cookies; it stores nothing in your browser and builds no profiles. Legitimate interest: knowing which parts of the site people use.</li>
+        <li><strong>Emails</strong> you send to info@kafemapa.cz: used only to reply. Legitimate interest: answering your message.</li>
+        <li><strong>Reports of errors or closed places</strong>: what you type into the form is sent as a public note to OpenStreetMap, anonymously and without your name. You submit it yourself, knowing it will be public.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Who receives data</h2>
+      <ul>
+        <li><strong>Cloudflare, Inc.</strong> (hosting, security, visit statistics). Based in the USA and certified under the EU–US Data Privacy Framework.</li>
+        <li><strong>Seznam.cz, a.s.</strong> (Mapy.com base map and our email inbox). When the map loads, Seznam receives your IP address and sets a technical cookie to balance load across its servers.</li>
+        <li><strong>OpenStreetMap Foundation</strong>, only if you submit a report (the note is then public on openstreetmap.org).</li>
+      </ul>
+      <p>Fonts and café data are served from our own site, not from third parties. We do not sell data or use it for advertising.</p>
+    </section>
+    <section>
+      <h2>Cookies and browser storage</h2>
+      <p>Kafemapa itself uses no cookies, which is why there is no cookie banner. In your browser's storage (localStorage) we only remember what you did yourself: that you closed a banner and which places you already reported, so they are not reported twice. Mapy.com sets a technical cookie needed to load the map. For visitors outside Czechia and Slovakia, Cloudflare may set a security cookie after checking they are not a bot.</p>
+    </section>
+    <section>
+      <h2>How long we keep data</h2>
+      <p>Cloudflare keeps technical records only as long as needed for operation and security under its own policies. Visit statistics are aggregated and cannot identify individuals. Emails are kept as long as needed to deal with them, at most 2 years. Notes on OpenStreetMap are public and managed by the OpenStreetMap Foundation.</p>
+    </section>
+    <section>
+      <h2>Your rights</h2>
+      <p>You have the right to access, correct or erase your data, to restrict processing and to object to processing based on legitimate interest. Just write to <a href="mailto:info@kafemapa.cz">info@kafemapa.cz</a>. You can complain to the Czech data protection authority, Úřad pro ochranu osobních údajů (<a href="https://uoou.gov.cz/" rel="noopener">uoou.gov.cz</a>). There is no automated decision-making or profiling.</p>
+      <p class="small muted">Effective from 15 October 2026.</p>
+    </section>`,
+  },
+};
+
+function privacyPage(lang, meta) {
+  const P = PRIVACY[lang];
+  const home = lang === 'en' ? '/en/' : '/';
+  return (
+    head({
+      lang, title: P.title, description: P.description, path: P.path,
+      alternates: { cs: PRIVACY.cs.path, en: PRIVACY.en.path },
+      jsonLd: breadcrumbLd([['Kafemapa', home], [P.crumb, P.path]]),
+    }) +
+    `
+  <main class="page-main report">
+    <nav class="crumbs" aria-label="${lang === 'en' ? 'Breadcrumb' : 'Drobečková navigace'}"><a href="${home}">Kafemapa</a> › <span>${P.crumb}</span></nav>
+    <h1>${P.h1}</h1>
+    ${P.body}
+  </main>` +
+    foot(meta, lang)
+  );
+}
 
 function aboutPage(lang, meta) {
   const A = ABOUT[lang];
@@ -488,6 +594,8 @@ export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new
   for (const lang of ['cs', 'en']) {
     await mkdir(join(outDir, ABOUT[lang].path), { recursive: true });
     await writeFile(join(outDir, ABOUT[lang].path, 'index.html'), aboutPage(lang, data));
+    await mkdir(join(outDir, PRIVACY[lang].path), { recursive: true });
+    await writeFile(join(outDir, PRIVACY[lang].path, 'index.html'), privacyPage(lang, data));
   }
   await mkdir(join(outDir, 'doplnit'), { recursive: true });
   await writeFile(join(outDir, 'doplnit', 'index.html'), contributePage(pages, data));
@@ -499,7 +607,7 @@ export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new
   );
 
   const lastmod = (data.osmBase || data.generated).slice(0, 10);
-  const urls = ['/', '/kavarny/', '/doplnit/', '/o-projektu/', '/en/about/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
+  const urls = ['/', '/kavarny/', '/doplnit/', '/o-projektu/', '/en/about/', '/ochrana-soukromi/', '/en/privacy/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
   await writeFile(
     join(outDir, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +

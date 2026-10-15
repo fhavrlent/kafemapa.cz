@@ -69,7 +69,7 @@ const BLOCKS = [
       <a href="/en/help/"><span><strong>Help improve the data</strong><small>A third of cafés have no opening hours yet</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
       <a href="/kavarensky-index/podzim-2026/" hreflang="cs"><span><strong>Café Index <span class="muted">(in Czech)</span></strong><small>Brno has more cafés per person than Prague</small></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
     </nav>
-    <p class="menu-foot"><a href="/en/about/">About</a><a href="/" lang="cs" hreflang="cs">Česky</a></p>
+    <p class="menu-foot"><a href="/en/about/">About</a><a href="/en/privacy/">Privacy</a><a href="/" lang="cs" hreflang="cs">Česky</a></p>
   </dialog>`,
   ],
 ];
