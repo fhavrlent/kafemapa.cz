@@ -16,6 +16,21 @@ const TXT = {
     complex: 'Složitější otevírací dobu (přestávky, sezónní provoz) zapište přímo v editoru. Změna se na Kafemapě objeví do druhého dne.',
     missingTime: 'Doplňte u otevřených dnů čas otevření i zavření.', invalid: 'Tuhle kombinaci se nepodařilo ověřit, zkontrolujte časy.',
     preview: (w) => `Bude vypadat takto: ${w}`, copied: 'Zkopírováno ✓', selected: 'Označeno, zkopírujte Ctrl/Cmd+C',
+    source: 'Odkud časy znáte?', srcSurvey: 'Z návštěvy nebo z cedule na dveřích', srcWebsite: 'Z webu nebo sociálních sítí kavárny',
+    save: 'Uložit do OpenStreetMap', loginNote: 'Přihlásíte se účtem OpenStreetMap (je zdarma). Heslo zadáváte jen na openstreetmap.org, Kafemapa ho nevidí.',
+    as: (n) => `Přihlášeno jako ${n}`, logout: 'odhlásit',
+    saving: 'Ukládám do OpenStreetMap…', loggingIn: 'Čekám na přihlášení v okně OpenStreetMap…',
+    saved: (u) => `<strong>Uloženo, díky!</strong> Na Kafemapě se změna objeví do druhého dne. <a href="${u}" target="_blank" rel="noopener">Vaše úprava v OpenStreetMap</a>`,
+    same: 'Přesně tuhle otevírací dobu už OpenStreetMap má. Na Kafemapě se objeví do druhého dne.',
+    newer: (w) => `OpenStreetMap už má novější otevírací dobu: ${w}. Na Kafemapě se objeví do druhého dne. Formulář jsme podle ní předvyplnili, ukládejte jen když je špatně.`,
+    conflict: 'Kavárnu mezitím upravil někdo jiný. Načtěte stránku znovu a časy zkontrolujte.',
+    gone: 'Tahle kavárna už v OpenStreetMap není. Pokud pořád funguje, nahlaste to formulářem níže.',
+    failed: 'Uložení se nepovedlo. Zkuste to znovu, nebo použijte ruční postup níže.',
+    popup: 'Prohlížeč zablokoval okno přihlášení. Povolte vyskakovací okna pro kafemapa.cz a zkuste to znovu.',
+    cancelled: 'Přihlášení se nedokončilo, nic se neuložilo.',
+    resumed: 'Přihlášeno. Zkontrolujte časy a klikněte na „Uložit do OpenStreetMap“.',
+    once: 'Tuhle kavárnu jste už upravili. Další změnu prosím udělejte v editoru OpenStreetMap.',
+    manual: 'Raději ručně v editoru OpenStreetMap',
   },
   en: {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -26,6 +41,21 @@ const TXT = {
     complex: 'More complex hours (lunch breaks, seasonal opening) can be entered directly in the editor. The change shows up on Kafemapa by the next day.',
     missingTime: 'Please fill in both opening and closing time for open days.', invalid: 'This combination could not be verified, please check the times.',
     preview: (w) => `It will read: ${w}`, copied: 'Copied ✓', selected: 'Selected — copy with Ctrl/Cmd+C',
+    source: 'Where do you know the times from?', srcSurvey: 'From a visit or the sign on the door', srcWebsite: 'From the café\'s website or social media',
+    save: 'Save to OpenStreetMap', loginNote: 'You sign in with an OpenStreetMap account (free). You enter your password only on openstreetmap.org; Kafemapa never sees it.',
+    as: (n) => `Signed in as ${n}`, logout: 'sign out',
+    saving: 'Saving to OpenStreetMap…', loggingIn: 'Waiting for you to sign in in the OpenStreetMap window…',
+    saved: (u) => `<strong>Saved, thank you!</strong> The change shows up on Kafemapa by the next day. <a href="${u}" target="_blank" rel="noopener">Your edit on OpenStreetMap</a>`,
+    same: 'OpenStreetMap already has exactly these opening hours. They will show up on Kafemapa by the next day.',
+    newer: (w) => `OpenStreetMap already has newer opening hours: ${w}. They will show up on Kafemapa by the next day. We pre-filled the form with them; only save if they are wrong.`,
+    conflict: 'Someone else edited this café in the meantime. Please reload the page and check the times.',
+    gone: 'This café is no longer in OpenStreetMap. If it is still open, please report it with the form below.',
+    failed: 'Saving failed. Please try again, or use the manual steps below.',
+    popup: 'Your browser blocked the sign-in window. Allow pop-ups for kafemapa.cz and try again.',
+    cancelled: 'Sign-in was not completed; nothing was saved.',
+    resumed: 'Signed in. Check the times and click “Save to OpenStreetMap”.',
+    once: 'You have already edited this café. Please make further changes in the OpenStreetMap editor.',
+    manual: 'Prefer to do it manually in the OpenStreetMap editor',
   },
 };
 const T = TXT[LANG];
@@ -63,10 +93,19 @@ function initialDays(week) {
 
 /**
  * Vloží editor do `container`.
- * @param {{ osmEditUrl: string, current?: string }} opts current = stávající opening_hours
+ * @param {{ osmEditUrl: string, current?: string, cafe?: { i: string, n: string } }} opts
+ *   current = stávající opening_hours; cafe = kavárna pro přímé uložení do OSM (bez ní jen ruční postup)
  */
-export function mountHoursEditor(container, { osmEditUrl, current }) {
-  const days = initialDays(current ? parseHours(current) : null);
+export async function mountHoursEditor(container, { osmEditUrl, current, cafe }) {
+  const osm = cafe ? await import('./osm.js') : null;
+  const direct = osm?.OSM_SAVE;
+  let days = initialDays(current ? parseHours(current) : null);
+  const manualSteps = `<ol class="he-steps">
+      <li><button type="button" class="btn" data-copy>${T.copy}</button></li>
+      <li><a class="btn${direct ? '' : ' primary'}" href="${osmEditUrl}" target="_blank" rel="noopener">${T.openEditor}</a>
+        <span class="small muted">${T.account}</span></li>
+      <li>${T.step3}</li>
+    </ol>`;
   container.classList.add('he');
   container.innerHTML = `
     <p class="he-intro">${T.intro}</p>
@@ -87,12 +126,21 @@ export function mountHoursEditor(container, { osmEditUrl, current }) {
       <code class="he-value"></code>
       <p class="he-err" hidden></p>
     </div>
-    <ol class="he-steps">
-      <li><button type="button" class="btn" data-copy>${T.copy}</button></li>
-      <li><a class="btn primary" href="${osmEditUrl}" target="_blank" rel="noopener">${T.openEditor}</a>
-        <span class="small muted">${T.account}</span></li>
-      <li>${T.step3}</li>
-    </ol>
+    <p class="he-newer" hidden></p>
+    ${
+      direct
+        ? `<div class="he-save">
+      <fieldset class="he-source"><legend>${T.source}</legend>
+        <label><input type="radio" name="he-src" value="survey" checked> ${T.srcSurvey}</label>
+        <label><input type="radio" name="he-src" value="website"> ${T.srcWebsite}</label>
+      </fieldset>
+      <button type="button" class="btn primary" data-save>${T.save}</button>
+      <p class="small muted he-who">${T.loginNote}</p>
+      <p class="he-msg" role="status" aria-live="polite"></p>
+    </div>
+    <details class="he-manual"><summary>${T.manual}</summary>${manualSteps}</details>`
+        : manualSteps
+    }
     <p class="small muted">${T.complex}</p>`;
 
   const rows = [...container.querySelectorAll('.he-day')];
@@ -145,4 +193,99 @@ export function mountHoursEditor(container, { osmEditUrl, current }) {
     }
   });
   sync();
+  if (direct) wireSave(container, { osm, cafe, current, value, err, days: () => days, setDays: (d) => ((days = d), sync()) });
+}
+
+const SAVED = (id) => `kafemapa:saved:${id}`;
+const sameHours = (a, b) => {
+  if (!a || !b) return a === b;
+  const [x, y] = [parseHours(a), parseHours(b)];
+  return a === b || (!!x && !!y && JSON.stringify(x) === JSON.stringify(y));
+};
+
+function wireSave(container, { osm, cafe, current, value, err, days, setDays }) {
+  const btn = container.querySelector('[data-save]');
+  const msg = container.querySelector('.he-msg');
+  const who = container.querySelector('.he-who');
+  const newer = container.querySelector('.he-newer');
+  const showUser = async () => {
+    if (!osm.isLoggedIn()) return;
+    try {
+      const name = await osm.userName();
+      if (!name) return;
+      who.innerHTML = `${T.as(name)} · <button type="button" class="link-btn" data-logout>${T.logout}</button>`;
+      who.querySelector('[data-logout]').onclick = () => (osm.logout(), (who.textContent = T.loginNote));
+    } catch {}
+  };
+  showUser();
+
+  // Návrat z přihlášení přesměrováním: obnovit vyplněný formulář a vyzvat k uložení.
+  const resume = osm.takeResume(cafe.i);
+  if (resume) {
+    const w = parseHours(resume.value);
+    if (w) setDays(initialDays(w));
+    const src = container.querySelector(`[name=he-src][value=${resume.source === 'website' ? 'website' : 'survey'}]`);
+    if (src) src.checked = true;
+    msg.textContent = osm.isLoggedIn() ? T.resumed : T.cancelled;
+    setTimeout(() => btn.scrollIntoView({ block: 'center' }), 50);
+  }
+
+  // Jednou za návštěvu na kavárnu; další úpravy ať jdou přes editor OSM.
+  try {
+    if (sessionStorage.getItem(SAVED(cafe.i))) {
+      btn.disabled = true;
+      msg.textContent = T.once;
+    }
+  } catch {}
+
+  // Co je v OSM právě teď: když už tam je novější hodnota než v našich (denních) datech,
+  // řekneme to a formulář podle ní předvyplníme. Tím se nikdo nesnaží ukládat znovu a znovu.
+  let live = current;
+  osm.fetchElement(cafe.i).then(
+    (el) => {
+      live = el.tags?.opening_hours;
+      if (!live || sameHours(live, current)) return;
+      const week = parseHours(live);
+      newer.textContent = T.newer(week ? formatWeek(week, LANG) : live);
+      newer.hidden = false;
+      setDays(initialDays(week));
+    },
+    () => {}
+  );
+
+  btn.addEventListener('click', async () => {
+    if (!err.hidden) return err.scrollIntoView({ block: 'nearest' });
+    btn.disabled = true;
+    try {
+      if (!osm.isLoggedIn()) {
+        msg.textContent = T.loggingIn;
+        await osm.login({ i: cafe.i, value: value.textContent, source: container.querySelector('[name=he-src]:checked')?.value });
+        showUser();
+      }
+      // Stejné časy jinak zapsané (jiné pořadí dnů) nejsou změna: neposílat zbytečnou úpravu.
+      if (live && sameHours(live, value.textContent)) {
+        msg.textContent = T.same;
+        btn.disabled = false;
+        return;
+      }
+      msg.textContent = T.saving;
+      const source = container.querySelector('[name=he-src]:checked')?.value;
+      const res = await osm.saveTags(cafe, { opening_hours: value.textContent }, { what: LANG === 'en' ? 'Opening hours' : 'Otevírací doba', source });
+      if (res.same) {
+        msg.textContent = T.same;
+        return;
+      }
+      osm.rememberPending(cafe.i, value.textContent, res.url);
+      try {
+        sessionStorage.setItem(SAVED(cafe.i), res.url);
+      } catch {}
+      msg.innerHTML = T.saved(res.url);
+      container.querySelector('.he-source').hidden = true;
+      btn.hidden = true;
+    } catch (e) {
+      btn.disabled = false;
+      msg.textContent = { popup: T.popup, closed: T.cancelled, denied: T.cancelled }[e.code] || (e.status === 409 || e.status === 412 ? T.conflict : e.status === 410 || e.status === 404 ? T.gone : T.failed);
+      if (!e.code) console.warn('Kafemapa → OSM:', e);
+    }
+  });
 }

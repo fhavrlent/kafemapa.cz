@@ -1,5 +1,5 @@
 // Statické stránky měst: živý stav „otevřeno / zavřeno“ a filtry nad vygenerovaným seznamem.
-import { parseHours, statusLabel } from './hours.js';
+import { parseHours, statusLabel, formatWeek } from './hours.js';
 import { LANG, t, pluralIn } from './i18n.js';
 
 const F = { WIFI: 1, OUTDOOR: 2, CHAIN: 16 };
@@ -68,9 +68,16 @@ for (const box of document.querySelectorAll('.help-box:not(.report-box)')) {
     if (!box.open || host.dataset.mounted) return;
     host.dataset.mounted = '1';
     const { mountHoursEditor } = await import('./hours-editor.js');
-    mountHoursEditor(host, { osmEditUrl: host.dataset.osmEdit, current: host.dataset.current });
+    mountHoursEditor(host, { osmEditUrl: host.dataset.osmEdit, current: host.dataset.current, cafe: host.dataset.i ? { i: host.dataset.i, n: host.dataset.n } : null });
   });
 }
+
+// Návrat z přihlášení do OSM přesměrováním: rozbalit formulář, ten si obnoví vyplněné časy.
+try {
+  const r = JSON.parse(sessionStorage.getItem('kafemapa:osm-resume') || 'null');
+  const host = r && document.querySelector(`[data-hours-editor][data-i="${r.i}"]`);
+  if (host) host.closest('details').open = true;
+} catch {}
 
 // Hlášení zavřeného podniku nebo chyby (OSM poznámka), načte se až po rozbalení.
 for (const box of document.querySelectorAll('.report-box')) {
@@ -86,3 +93,26 @@ for (const box of document.querySelectorAll('.report-box')) {
 
 // Minimapa na stránce kavárny (Leaflet se načte až podle potřeby).
 if (document.querySelector('[data-minimap]')) import('./minimap.js');
+
+// Úprava otevírací doby, kterou tenhle návštěvník uložil do OSM a kterou denní data ještě nepřinesla.
+// osm.js načítáme jen tehdy, když nějaká taková úprava v prohlížeči je.
+const editorHost = document.querySelector('[data-hours-editor][data-i]');
+let hasPending = false;
+try {
+  hasPending = Object.keys(localStorage).some((k) => k.startsWith('kafemapa:pending:'));
+} catch {}
+if (editorHost && hasPending) {
+  import('./osm.js').then(({ pendingEdit }) => {
+    const p = pendingEdit(editorHost.dataset.i, editorHost.dataset.current || '');
+    if (!p) return;
+    const note = document.createElement('p');
+    note.className = 'pending-note';
+    note.innerHTML = t.pendingHours(esc(formatPending(p.o)), p.url);
+    editorHost.closest('section').querySelector('h2').after(note);
+  });
+}
+const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+function formatPending(o) {
+  const w = parseHours(o);
+  return w ? formatWeek(w, LANG) : o;
+}

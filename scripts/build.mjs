@@ -46,6 +46,27 @@ const reportUrls = await buildReport(ROOT, OUT, data);
 const changeUrls = await buildChanges(ROOT, OUT, data);
 const enUrls = [...(await buildEnMap(ROOT, OUT)), ...(await buildEn(OUT, data)), ...cafes.enUrls];
 await buildHome(OUT, data);
+
+// Návratová adresa přihlášení do OSM (assets/osm.js); jen technická stránka, mimo vyhledávače.
+await mkdir(join(OUT, 'osm'), { recursive: true });
+await writeFile(
+  join(OUT, 'osm', 'index.html'),
+  `<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Přihlášení do OpenStreetMap | Kafemapa</title>
+  <style>body{font:16px/1.5 system-ui,sans-serif;margin:40px 20px;color:#2a1c15;background:#f6efe6}</style>
+</head>
+<body>
+  <p id="msg" hidden>Přihlášení proběhlo, tohle okno můžete zavřít a vrátit se na <a href="/">Kafemapu</a>. · Signed in, you can close this window.</p>
+  <script type="module" src="/assets/osm-callback.js"></script>
+</body>
+</html>
+`
+);
 const nPages = await buildPages(OUT, data, { extraUrls: [...changeUrls, ...reportUrls, ...cafes.urls, ...enUrls], cafePaths: cafes.pathById });
 
 // IndexNow: klíč do kořene webu a manifest hashů stránek, podle kterého

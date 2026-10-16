@@ -1,4 +1,4 @@
-import { parseHours, statusLabel, fmtMin } from './hours.js';
+import { parseHours, statusLabel, fmtMin, formatWeek } from './hours.js';
 import { cafePath, cityNameIn, mapySearchUrl } from './slug.js';
 import { LANG, t, pluralIn, numIn } from './i18n.js';
 import { addBasemap } from './basemap.js';
@@ -412,8 +412,28 @@ function renderDetail(c) {
     if (!helpBox.open || host.dataset.mounted) return;
     host.dataset.mounted = '1';
     const { mountHoursEditor } = await import('./hours-editor.js');
-    mountHoursEditor(host, { osmEditUrl: osmUrl(c, true), current: c.o });
+    mountHoursEditor(host, { osmEditUrl: osmUrl(c, true), current: c.o, cafe: c });
   });
+  // Návrat z přihlášení do OSM přesměrováním: rozbalit formulář (obnoví si vyplněné časy).
+  try {
+    if (JSON.parse(sessionStorage.getItem('kafemapa:osm-resume') || 'null')?.i === c.i) helpBox.open = true;
+  } catch {}
+  // Úprava otevírací doby od tohoto návštěvníka, kterou denní data ještě nepřinesla.
+  let hasPending = false;
+  try {
+    hasPending = Object.keys(localStorage).some((k) => k.startsWith('kafemapa:pending:'));
+  } catch {}
+  if (hasPending) {
+    import('./osm.js').then(({ pendingEdit }) => {
+      const p = pendingEdit(c.i, c.o || '');
+      if (!p || state.selected !== c) return;
+      const w = parseHours(p.o);
+      const note = document.createElement('p');
+      note.className = 'pending-note';
+      note.innerHTML = t.pendingHours(esc(w ? formatWeek(w, LANG) : p.o), p.url);
+      helpBox.before(note);
+    });
+  }
   $('#btnShare').onclick = async (e) => {
     // Odkaz na tlačítko si podržet hned: po await už e.currentTarget je null.
     const btn = e.currentTarget;

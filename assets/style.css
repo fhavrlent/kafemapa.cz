@@ -360,7 +360,7 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .help-box summary { cursor: pointer; padding: 11px 14px; font-weight: 600; font-size: 14px; color: var(--accent); list-style: none; }
 .help-box summary::-webkit-details-marker { display: none; }
 .help-box summary::before { content: '+ '; }
-.help-box[open] summary::before { content: '– '; }
+.help-box[open] > summary::before, .he-manual[open] > summary::before { content: '– '; }
 .he { padding: 0 14px 14px; font-size: 14px; }
 .he-intro { margin: 0 0 10px; color: var(--ink-2); }
 .he-days { display: grid; gap: 6px; }
@@ -377,6 +377,18 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .he-steps { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 8px; }
 .he-steps .btn { display: inline-flex; width: auto; height: 38px; }
 @media (max-width: 420px) { .he-day { grid-template-columns: 64px auto 1fr auto 1fr; gap: 4px; } }
+.he-newer, .pending-note { margin: 10px 0; padding: 9px 12px; border-radius: 10px; background: var(--accent-soft); color: var(--ink); font-size: 14px; }
+.pending-note a, .he-newer a { color: var(--accent); }
+.he-save { display: grid; gap: 10px; margin: 0 0 10px; }
+.he-source { border: 0; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.he-source legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
+.he-source label { display: flex; gap: 6px; align-items: center; }
+.he-save .btn { width: auto; justify-self: start; }
+.he-who, .he-msg { margin: 0; }
+.he-msg:empty { display: none; }
+.he-manual { margin: 0 0 8px; font-size: 14px; }
+.he-manual summary { cursor: pointer; color: var(--ink-2); padding: 4px 0; }
+.he-manual .he-steps { margin-top: 8px; }
 
 /* ---------- hlášení chyby / zavřeného podniku ---------- */
 .report-box summary { color: var(--ink-2); }

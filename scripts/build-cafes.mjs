@@ -36,7 +36,7 @@ const T = {
     fix: 'Nesedí otevírací doba? Opravte ji', add: 'Znáte otevírací dobu? Pomozte ji doplnit', missing: 'Otevírací doba zatím v OpenStreetMap chybí.',
     description: '<h2>Popis</h2><p>', hours: 'Otevírací doba', amenities: 'Vybavení', nearby: 'Další kavárny v okolí', all: (town) => `Všechny kavárny: ${town}`,
     report: 'Zavřeno nebo je tu chyba? Nahlaste to',
-    osm: (view, edit) => `Údaje pocházejí z <a href="${view}" rel="noopener">OpenStreetMap</a>. Je tu chyba nebo něco chybí? <a href="${edit}" rel="noopener">Upravte to v OSM</a>, oprava se tu objeví do týdne.`,
+    osm: (view, edit) => `Údaje pocházejí z <a href="${view}" rel="noopener">OpenStreetMap</a>. Je tu chyba nebo něco chybí? <a href="${edit}" rel="noopener">Upravte to v OSM</a>, oprava se tu objeví do druhého dne.`,
   },
   en: {
     days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -50,7 +50,7 @@ const T = {
     fix: 'Hours wrong? Fix them', add: 'Know the opening hours? Add them', missing: 'Opening hours are not in OpenStreetMap yet.',
     description: '<h2>Description <span class="muted small">(in Czech)</span></h2><p lang="cs">', hours: 'Opening hours', amenities: 'Amenities', nearby: 'Other cafés nearby', all: (town) => `All cafés in ${town}`,
     report: 'Closed or something wrong? Report it',
-    osm: (view, edit) => `Data from <a href="${view}" rel="noopener">OpenStreetMap</a>. Something wrong or missing? <a href="${edit}" rel="noopener">Edit it on OSM</a> — the fix shows up here within a week.`,
+    osm: (view, edit) => `Data from <a href="${view}" rel="noopener">OpenStreetMap</a>. Something wrong or missing? <a href="${edit}" rel="noopener">Edit it on OSM</a> — the fix shows up here by the next day.`,
   },
 };
 const osmUrl = (c, edit) => {
@@ -84,7 +84,7 @@ function schemaHours(o) {
 // Rozbalovací pomocník pro zápis otevírací doby (assets/hours-editor.js, načte se až po otevření).
 const helpBox = (c, label, open = false) => `<details class="help-box"${open ? ' data-primary' : ''}>
           <summary>${label}</summary>
-          <div data-hours-editor data-osm-edit="${osmUrl(c, true)}"${c.o ? ` data-current="${esc(c.o)}"` : ''}></div>
+          <div data-hours-editor data-osm-edit="${osmUrl(c, true)}" data-i="${c.i}" data-n="${esc(c.n)}"${c.o ? ` data-current="${esc(c.o)}"` : ''}></div>
         </details>`;
 
 function cafePage(c, ctx, lang = 'cs') {
