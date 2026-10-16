@@ -34,7 +34,7 @@ const T = {
     crumbs: 'Drobečková navigace', navigate: 'Navigovat', onMap: 'Na mapě', web: 'Web', mapHome: '/', mapy: 'Fotky a recenze na Mapy.com', minimap: (n) => `Mapa: ${n} a kavárny v okolí`,
     closed: 'zavřeno', nonstop: 'nonstop', holidays: 'Svátky a výjimky nezohledňujeme. Před cestou je raději ověřte.',
     fix: 'Nesedí otevírací doba? Opravte ji', add: 'Znáte otevírací dobu? Pomozte ji doplnit', missing: 'Otevírací doba zatím v OpenStreetMap chybí.',
-    description: '<h2>Popis</h2><p>', hours: 'Otevírací doba', amenities: 'Vybavení', nearby: 'Další kavárny v okolí', all: (town) => `Všechny kavárny: ${town}`,
+    description: '<h2>Popis</h2><p>', hours: 'Otevírací doba', amenities: 'Vybavení', noFeats: 'Zatím o vybavení nic nevíme.', fixFeats: 'Nesedí vybavení? Opravte ho', addFeats: 'Víte, jestli tu mají Wi‑Fi nebo zahrádku? Doplňte to', nearby: 'Další kavárny v okolí', all: (town) => `Všechny kavárny: ${town}`,
     report: 'Zavřeno nebo je tu chyba? Nahlaste to',
     osm: (view, edit) => `Údaje pocházejí z <a href="${view}" rel="noopener">OpenStreetMap</a>. Je tu chyba nebo něco chybí? <a href="${edit}" rel="noopener">Upravte to v OSM</a>, oprava se tu objeví do druhého dne.`,
   },
@@ -48,7 +48,7 @@ const T = {
     crumbs: 'Breadcrumb', navigate: 'Directions', onMap: 'On the map', web: 'Website', mapHome: '/en/', mapy: 'Photos & reviews on Mapy.com', minimap: (n) => `Map: ${n} and cafés nearby`,
     closed: 'closed', nonstop: 'open 24/7', holidays: 'Public holidays and exceptions are not included. Please check before you go.',
     fix: 'Hours wrong? Fix them', add: 'Know the opening hours? Add them', missing: 'Opening hours are not in OpenStreetMap yet.',
-    description: '<h2>Description <span class="muted small">(in Czech)</span></h2><p lang="cs">', hours: 'Opening hours', amenities: 'Amenities', nearby: 'Other cafés nearby', all: (town) => `All cafés in ${town}`,
+    description: '<h2>Description <span class="muted small">(in Czech)</span></h2><p lang="cs">', hours: 'Opening hours', amenities: 'Amenities', noFeats: 'We don\'t know anything about the amenities yet.', fixFeats: 'Amenities wrong? Fix them', addFeats: 'Know if they have Wi‑Fi or outdoor seating? Add it', nearby: 'Other cafés nearby', all: (town) => `All cafés in ${town}`,
     report: 'Closed or something wrong? Report it',
     osm: (view, edit) => `Data from <a href="${view}" rel="noopener">OpenStreetMap</a>. Something wrong or missing? <a href="${edit}" rel="noopener">Edit it on OSM</a> — the fix shows up here by the next day.`,
   },
@@ -174,7 +174,14 @@ function cafePage(c, ctx, lang = 'cs') {
         ${hours}
     </section>
 
-    ${feats.length ? `<section><h2>${L.amenities}</h2><div class="tags">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></section>` : ''}
+    <section>
+      <h2>${L.amenities}</h2>
+      ${feats.length ? `<div class="tags">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : `<p class="muted">${L.noFeats}</p>`}
+      <details class="help-box amen-box">
+        <summary>${feats.length ? L.fixFeats : L.addFeats}</summary>
+        <div data-amenities-editor data-osm-edit="${osmUrl(c, true)}" data-i="${c.i}" data-n="${esc(c.n)}"></div>
+      </details>
+    </section>
 
     ${nearby.length ? `<section>
       <h2>${L.nearby}</h2>

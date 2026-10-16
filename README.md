@@ -2,11 +2,11 @@
 
 Všechny kavárny, pražírny a obchody s kávou v Česku na jedné mapě. Zobrazuje, co má právě otevřeno, umí filtrovat zahrádky, Wi‑Fi, bezbariérový vstup nebo nezávislé podniky a ukazuje žebříček měst podle počtu kaváren na obyvatele.
 
-Data pocházejí z [OpenStreetMap](https://www.openstreetmap.org/) (ODbL). Kdo najde chybu, opraví ji přímo v OSM (každý detail má odkaz *Upravit v OSM*) a oprava se na webu objeví po další aktualizaci dat.
+Data pocházejí z [OpenStreetMap](https://www.openstreetmap.org/) (ODbL). Kdo najde chybu, opraví ji v OSM: otevírací dobu a vybavení přímo na Kafemapě (přihlášením účtem OSM), cokoli jiného přes odkaz *Upravit v OSM*. Data se stahují každý den, oprava se na webu objeví do druhého dne.
 
 ## Jak to funguje
 
-Statický web: žádný backend ani npm závislosti, „build“ jen zkopíruje soubory do `_site/` a doplní klíč.
+Statický web: žádný backend ani npm závislosti. Build zkopíruje soubory do `_site/`, doplní klíč, vygeneruje statické stránky (města, kavárny, index, anglická verze) a zkontroluje všechny interní odkazy.
 
 ```
 index.html               stránka
@@ -21,10 +21,21 @@ scripts/build-pages.mjs  statické stránky měst /kavarny/<mesto>/ a sitemap.xm
 scripts/build-cafes.mjs  stránky kaváren /kavarna/<slug>/
 scripts/build-changes.mjs  „Nově na mapě“ /nove/ a RSS
 scripts/changes.mjs      porovnání dat mezi aktualizacemi (s testy)
-assets/slug.js           sdílený výpočet URL kaváren (mapa i build)
-assets/pages.{css,js}    vzhled a živý stav „otevřeno“ na stránkách měst
-scripts/hours.test.mjs   testy parseru otevírací doby
-.github/workflows/       nasazení na GitHub Pages + týdenní aktualizace dat
+scripts/build-home.mjs   statický obsah úvodní stránky pro vyhledávače a AI asistenty
+scripts/check-links.mjs  kontrola interních odkazů v _site/ (rozbitý odkaz shodí build)
+scripts/fetch-population.mjs  počty obyvatel obcí z ČSÚ → data/obyvatele.json (jednou ročně)
+scripts/uptime.mjs       denní kontrola živého webu (GitHub Actions)
+assets/slug.js           sdílený výpočet URL kaváren (mapa i build) a odkaz na Mapy.com
+assets/basemap.js        podkladová mapa Mapy.com (hlavní mapa i minimapa)
+assets/minimap.js        minimapa na stránkách kaváren
+assets/osm.js            přihlášení do OSM a zápis vybraných tagů (otevírací doba, vybavení)
+assets/hours-editor.js   formulář otevírací doby
+assets/amenities-editor.js  formulář vybavení (Wi‑Fi, zahrádka, vegan…)
+assets/osm-note.js       hlášení „Zavřeno nebo je tu chyba?“ jako poznámka OSM
+assets/pages.{css,js}    vzhled a živý stav „otevřeno“ na statických stránkách
+scripts/*.test.mjs       testy parseru otevírací doby a přehledu změn
+.github/workflows/       denní aktualizace dat a denní kontrola webu
+docs/osm-wiki/           texty stránek Kafemapa na wiki OSM
 ```
 
 ## Lokální vývoj
@@ -34,7 +45,7 @@ Potřebujete Node 20+.
 ```bash
 npm run dev     # http://localhost:8080
 npm run build   # sestaví _site/ pro nasazení
-npm test        # testy parseru otevírací doby
+npm test        # testy parseru otevírací doby a přehledu změn
 npm run data    # stáhne čerstvá data z OSM (1–3 minuty, Overpass občas zlobí, skript zkouší víc serverů)
 ```
 
@@ -43,9 +54,10 @@ npm run data    # stáhne čerstvá data z OSM (1–3 minuty, Overpass občas zl
 Web běží na **Cloudflare Workers** (statické soubory, bez kódu Workeru), zdrojem je tento repozitář.
 
 - Každý push do `main` spustí Cloudflare Workers Builds: `npm test && npm run build` (sestaví `_site/`) a `npx wrangler deploy`. Nastavení je ve [`wrangler.jsonc`](wrangler.jsonc), bezpečnostní a cache hlavičky v [`_headers`](_headers).
-- Každé pondělí ráno workflow [`refresh-data.yml`](.github/workflows/refresh-data.yml) stáhne čerstvá data z OSM a commitne je, čímž spustí nové nasazení. Ručně jde spustit v záložce Actions.
+- Každé ráno (3:17 UTC) workflow [`refresh-data.yml`](.github/workflows/refresh-data.yml) stáhne čerstvá data z OSM, spustí testy a celý build (včetně kontroly odkazů) a když se data změnila, commitne je jako `kafemapa-bot`, čímž spustí nové nasazení. Když místa nebo města proti předchozímu dni ubudou o víc než 5 %, data nezapíše a skončí chybou (Overpass občas vrátí neúplný výsledek); skutečnou velkou změnu propustí ruční spuštění s volbou *force* (`FORCE=1`). Ručně jde spustit v záložce Actions. Kvůli dennímu commitu bota je před vlastním pushem potřeba `git pull --rebase`.
+- Každé ráno (6:41 UTC) workflow [`uptime.yml`](.github/workflows/uptime.yml) zkontroluje živý web (`scripts/uptime.mjs`): že odpovídá, že `robots.txt` a sitemap jsou v pořádku a podle `/status.json` (zapisuje ho build: datum dat, počty stránek) že data nejsou starší než 3 dny a build je kompletní. Při selhání pošle GitHub e-mail.
 - Domény `kafemapa.cz` a `www.kafemapa.cz` jsou na Worker napojené jako custom domains, DNS záznamy spravuje Cloudflare sám.
-- Deploy příkaz je `node scripts/indexnow.mjs prepare && npx wrangler deploy && node scripts/indexnow.mjs submit`. Build zveřejní `indexnow-manifest.json` s hashem každé stránky; `prepare` ho porovná s manifestem, který je právě na webu, a `submit` po nasazení oznámí změněné URL přes [IndexNow](https://www.indexnow.org/) (Seznam, Bing a další). Klíč je veřejný soubor `<klíč>.txt` v kořeni repozitáře. Selhání IndexNow nasazení neshodí.
+- Deploy příkaz je `node scripts/indexnow.mjs prepare && npx wrangler deploy && node scripts/indexnow.mjs submit`. Build zveřejní `indexnow-manifest.json` s hashem každé stránky (bez data aktualizace `<time data-upd>`, které je skoro na každé stránce a mění se denně); `prepare` ho porovná s manifestem, který je právě na webu, a `submit` po nasazení oznámí změněné URL přes [IndexNow](https://www.indexnow.org/) (Seznam, Bing a další). Klíč je veřejný soubor `<klíč>.txt` v kořeni repozitáře. Selhání IndexNow nasazení neshodí.
 
 ### Vyhledávače a e-mail
 
@@ -54,7 +66,7 @@ Web běží na **Cloudflare Workers** (statické soubory, bez kódu Workeru), zd
 - Návštěvnost: Cloudflare Web Analytics (bez cookies), beacon je ve všech stránkách (`index.html`, `404.html`, `head()` v `build-pages.mjs`); CSP povoluje `static.cloudflareinsights.com` a `cloudflareinsights.com`.
 - Písma (Fraunces, Inter) jsou hostovaná u nás v `assets/fonts/` (licence OFL přiložená), ne z Google Fonts: IP návštěvníků tak nejde Googlu a CSP povoluje písma jen z vlastní domény.
 - Ochrana soukromí: `/ochrana-soukromi/` a `/en/privacy/` (správce Filip Havrlent, info@kafemapa.cz). Popisují skutečný stav; při přidání nové služby třetí strany (analytika, reklama, affiliate) je potřeba text upravit. Cookie lišta není potřeba, dokud web nepoužívá jiné než nezbytné cookies a úložiště.
-- Ochrana (Cloudflare WAF, vlastní pravidla): blokace RU/CN/IR/BY; mimo CZ/SK Managed Challenge kromě ověřených botů a strojových souborů (`robots.txt`, `sitemap.xml`, IndexNow klíč a manifest). Bot Fight Mode je vypnutý záměrně: na Free plánu nejde vyjmout pro build a IndexNow.
+- Ochrana (Cloudflare WAF, vlastní pravidla): blokace RU/CN/IR/BY; mimo CZ/SK Managed Challenge kromě ověřených botů a strojových souborů (`robots.txt`, `sitemap.xml`, `status.json`, IndexNow klíč a manifest). Bot Fight Mode je vypnutý záměrně: na Free plánu nejde vyjmout pro build a IndexNow.
 - E-mail `info@kafemapa.cz` je na Seznam Email Profi (MX v Cloudflare, „DNS only“: e-mail nejde přes proxy). SPF povoluje odesílání jen přes Seznam, DMARC je zatím v režimu `p=none` (sledování).
 
 ### Klíč Mapy.com
@@ -71,41 +83,46 @@ Klíč pro dlaždice je v prohlížeči vždy veřejně vidět, protože se pos�
   - klíč musí být zabezpečený proti zneužití: v konzoli je omezený na referery `kafemapa.cz` a `www.kafemapa.cz` a jen na službu `v1/maptiles`,
   - jsme na výchozím tarifu Basic. Rozšířený tarif (Extended) mimo jiné zakazuje kombinovat mapová data Mapy.com s jinými mapovými daty, a naše kavárny jsou z OpenStreetMap, takže o něj bez dohody se Seznamem nežádat.
 - **„Otevřeno teď“** se počítá z `opening_hours` v čase prohlížeče. Parser zvládá přes 99 % zápisů v ČR včetně sezónních (`May-Sep: …`), svátky (`PH`) ignoruje. Nečitelné zápisy se zobrazí jako text.
-- **Města**: v OSM má `addr:city` jen menšina podniků, proto se každý přiřazuje k nejbližšímu městu (dosah roste s velikostí města). Žebříček je tedy orientační.
+- **Města**: v OSM má `addr:city` jen menšina podniků, proto se každý přiřazuje k nejbližšímu městu (dosah roste s velikostí města). Žebříček je tedy orientační. Počty obyvatel jsou oficiální stav ČSÚ k 1. 1. (`data/obyvatele.json`), ne tag `population` z OSM, který bývá roky starý; obce se párují podle jména, u jmenovců podle nejbližšího počtu z OSM. Nový ročník ČSÚ vydává na jaře: `node scripts/fetch-population.mjs` a commit.
 - Podniky bez jména (~270) se vynechávají.
 
 ## Stránky měst
 
-Kvůli vyhledávačům má každé město s aspoň 5 kavárnami vlastní statickou stránku (`/kavarny/brno/`): počty, žebříček na obyvatele, seznam všech míst s čitelnou otevírací dobou, filtry a okolní města. Rozcestník je na `/kavarny/`. Generují se při každém buildu z `data/cafes.json`, takže je týdenní aktualizace dat obnoví sama. Texty se vyhýbají skloňování názvů měst („v okolí centra města Brno“), protože automatické skloňování by dělalo chyby.
+Kvůli vyhledávačům má každé město s aspoň 5 kavárnami vlastní statickou stránku (`/kavarny/brno/`): počty, žebříček na obyvatele, seznam všech míst s čitelnou otevírací dobou, filtry a okolní města. Rozcestník je na `/kavarny/`. Generují se při každém buildu z `data/cafes.json`, takže je denní aktualizace dat obnoví sama. Texty se vyhýbají skloňování názvů měst („v okolí centra města Brno“), protože automatické skloňování by dělalo chyby.
 
 ## Stránky kaváren
 
-Každá nezávislá kavárna s adresou, otevírací dobou nebo webem má vlastní stránku `/kavarna/<jméno>-<město>-<osm id>/` (`scripts/build-cafes.mjs`), kvůli hledání podle jména. Obsahuje adresu, týdenní otevírací dobu s dneškem a živým stavem, vybavení, odkazy (navigace, web, Instagram…), 6 nejbližších kaváren a strukturovaná data `CafeOrCoffeeShop` (u obchodů s kávou `Store`). Do schema.org `openingHours` jde jen jednoduchý zápis bez svátků a měsíců. Řetězce a podniky jen se jménem stránku nemají. URL počítá sdílený `assets/slug.js`, takže na ni umí odkázat mapa, stránky měst i build. OSM id na konci drží adresu stabilní.
+Každá nezávislá kavárna s adresou, otevírací dobou nebo webem má vlastní stránku `/kavarna/<jméno>-<město>-<osm id>/` (`scripts/build-cafes.mjs`), kvůli hledání podle jména. Obsahuje adresu, týdenní otevírací dobu s dneškem a živým stavem, minimapu s okolními kavárnami (Leaflet a dlaždice se načtou, až když je mapa vidět), vybavení, odkazy (navigace, web, Instagram, vyhledání podniku na Mapy.com s fotkami a recenzemi), 6 nejbližších kaváren a strukturovaná data `CafeOrCoffeeShop` (u obchodů s kávou `Store`). Do schema.org `openingHours` jde jen jednoduchý zápis bez svátků a měsíců. Řetězce a podniky jen se jménem stránku nemají. URL počítá sdílený `assets/slug.js`, takže na ni umí odkázat mapa, stránky měst i build. OSM id na konci drží adresu stabilní.
 
 ## Doplňování dat
 
-Kafemapa sama do OSM nezapisuje, lidé upravují pod vlastním účtem. Pomáhá jim s nejtěžší částí, se zápisem otevírací doby:
+Lidé upravují OSM pod vlastním účtem. Kafemapa jim usnadňuje dvě věci, otevírací dobu a vybavení, a obě umí uložit přímo do OSM:
 
-- `assets/hours-editor.js`: formulář po dnech, ze kterého se složí hodnota `opening_hours` (ověřená vlastním parserem), plus tlačítko na editor OSM přímo pro danou kavárnu. Je na stránkách kaváren i v detailu na mapě, načte se až po rozbalení. Upozorňuje, že se nesmí přebírat data z Google Map.
+- `assets/osm.js`: přihlášení účtem OSM (OAuth 2 + PKCE; v okně, a když ho prohlížeč zablokuje, přesměrováním přes `/osm/` a zpět) a zápis. Mění **jen tagy z pevného seznamu `EDITABLE`** u existujících objektů, nic nepřidává ani nemaže. Každá úprava je samostatná sada změn s `created_by=Kafemapa`, `hashtags=#kafemapa`, `source=survey|website` a komentářem. Zápis jde přes verzi objektu, takže cizí mezitímní úpravu nepřepíše (konflikt 409). Vypínač `OSM_SAVE`: bez něj se formuláře vrátí k ručnímu postupu. Client ID aplikací (openstreetmap.org a testovací server) jsou v souboru, nejsou tajné.
+- `assets/hours-editor.js`: formulář po dnech, ze kterého se složí `opening_hours` (ověřená vlastním parserem). Po otevření načte aktuální hodnotu z OSM: když je novější než naše denní data, řekne to a předvyplní ji. Stejné časy (i v jiném pořadí) neposílá. Ruční postup (zkopírovat a otevřít editor OSM) zůstává jako záloha.
+- `assets/amenities-editor.js`: Wi‑Fi, zahrádka, vegan, vegetarián, bezbariérovost, platba kartou jako *Ano / Ne / Nevím*, předvyplněné z aktuálního stavu v OSM. „Nevím“ tag nemění. Čtení hodnot odpovídá filtrům mapy (`scripts/fetch-data.mjs`).
+- Kdo uložil úpravu, uvidí na stránce kavárny poznámku „vaše úprava se objeví do druhého dne“, dokud ji nepřinese denní aktualizace (`localStorage`). Jedna úprava na kavárnu za návštěvu.
+- Na localhostu jde všechno (přihlášení, zápis i poznámky) na testovací server OSM `master.apis.dev.openstreetmap.org`, ne do skutečné mapy. Aplikace je tam zaregistrovaná zvlášť a skutečné kavárny tam nejsou, testuje se na vlastním testovacím uzlu.
+- Popis pro komunitu OSM: stránky `Cs:Kafemapa` a `Kafemapa` na wiki OSM (texty v `docs/osm-wiki/`). Při změně toho, co Kafemapa zapisuje, je potřeba je upravit.
 - `/doplnit/`: jak pomoct, pravidla a města s nejvíce chybějícími údaji. Stránka města má sekci „Chybí otevírací doba“ (`#chybi`).
-- Hlášení „Zavřeno nebo je tu chyba?“ (`assets/osm-note.js`): vytvoří anonymní poznámku v OpenStreetMap (OSM Notes API) s odkazem na objekt; data sami neměníme, poznámku ověří místní mapeři. Na localhostu jde hlášení na testovací server OSM (`master.apis.dev.openstreetmap.org`), ne do skutečné mapy. V moderovaných oblastech (HTTP 403) nabídne založení poznámky přímo na openstreetmap.org.
-- `data/stats-history.json`: týdenní záznam úplnosti dat (otevírací doba, adresa, web), doplňuje ho `scripts/fetch-data.mjs`. Poslouží dalším edicím indexu.
+- Hlášení „Zavřeno nebo je tu chyba?“ (`assets/osm-note.js`): vytvoří anonymní poznámku v OpenStreetMap (OSM Notes API) s odkazem na objekt; data podle ní sami neměníme, poznámku ověří místní mapeři. V moderovaných oblastech (HTTP 403) nabídne založení poznámky přímo na openstreetmap.org.
+- `data/stats-history.json`: denní záznam úplnosti dat (otevírací doba, adresa, web), doplňuje ho `scripts/fetch-data.mjs`. Poslouží dalším edicím indexu.
 
 ## Nově na mapě
 
-Týdenní přehled změn na `/nove/` a v RSS `/nove/feed.xml` (`scripts/build-changes.mjs`). Při každé aktualizaci dat `scripts/fetch-data.mjs` porovná nová data s předchozími (`scripts/changes.mjs`) a do `data/changes.json` přidá nová místa, zmizelá místa a doplněné nebo změněné otevírací doby (nejvýš 52 týdnů). Překreslení podniku v OSM (nové id, stejné jméno do 100 m) se nepočítá jako nová kavárna. První stažení a opakované stažení téhož dne se nezapisují.
+Týdenní přehled změn na `/nove/` a v RSS `/nove/feed.xml` (`scripts/build-changes.mjs`). Při každé (denní) aktualizaci dat `scripts/fetch-data.mjs` porovná nová data s předchozími (`scripts/changes.mjs`) a změny přidá do záznamu aktuálního týdne (od pondělí, pole `week`) v `data/changes.json`: nová místa, zmizelá místa a doplněné nebo změněné otevírací doby (nejvýš 52 týdnů). Místo, které ve stejném týdnu přibude a zase zmizí, se neukazuje. Překreslení podniku v OSM (nové id, stejné jméno do 100 m) se nepočítá jako nová kavárna. První stažení a opakované stažení téhož dne se nezapisují.
 
 ## Anglická verze
 
 Pod `/en/` pro turisty: mapa (`/en/`), města (`/en/cities/`, Praha a Plzeň jako `prague`, `pilsen`), stránky kaváren (`/en/cafe/…/`) a návod k doplňování (`/en/help/`). Kavárenský index a „Nově na mapě“ jsou zatím jen česky (odkazy na ně jsou označené „in Czech“).
 
-- Texty interaktivních částí jsou v `assets/i18n.js` (mapa, živé stavy) a ve slovnících `hours-editor.js` a `osm-note.js`; jazyk určuje `<html lang>`. Poznámky do OSM jsou vždy česky, čtou je místní mapeři.
+- Texty interaktivních částí jsou v `assets/i18n.js` (mapa, živé stavy) a ve slovnících `hours-editor.js`, `amenities-editor.js` a `osm-note.js`; jazyk určuje `<html lang>`. Poznámky do OSM jsou vždy česky, čtou je místní mapeři.
 - `scripts/build-en-map.mjs` vyrobí `/en/index.html` z `index.html` seznamem náhrad; když se český text změní a náhrada nesedí, build selže.
 - `scripts/build-en.mjs` generuje anglické statické stránky, české stránky na ně odkazují přes `hreflang` a přepínač jazyka.
 
 ## Kavárenský index
 
-Datová zpráva na `/kavarensky-index/<edice>/` (první edice: [podzim 2026](https://kafemapa.cz/kavarensky-index/podzim-2026/)). Čísla edice jsou **zmrazená** v `data/kavarensky-index/<edice>.json` (+ tečková mapa `-mapa.svg` a obrázek pro sdílení `-og.png`), takže citovaná čísla se týdenní aktualizací dat nezmění.
+Datová zpráva na `/kavarensky-index/<edice>/` (první edice: [podzim 2026](https://kafemapa.cz/kavarensky-index/podzim-2026/)). Čísla edice jsou **zmrazená** v `data/kavarensky-index/<edice>.json` (+ tečková mapa `-mapa.svg` a obrázek pro sdílení `-og.png`), takže citovaná čísla se denní aktualizací dat nezmění.
 
 Nová edice:
 

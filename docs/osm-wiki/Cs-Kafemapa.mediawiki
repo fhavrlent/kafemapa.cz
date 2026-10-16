@@ -1,0 +1,85 @@
+{{Languages}}
+{{Software
+| name = Kafemapa
+| author = [https://www.openstreetmap.org/user/LuckyThunder26 LuckyThunder26]
+| web = https://kafemapa.cz/
+| languages = cs,en
+| status = active
+| platform = web
+| map = yes
+| showOpeningHours = yes
+| showWebsite = yes
+| showPhoneNumber = yes
+| addPOI = no
+| addWay = no
+| editTags = yes
+| editGeom = no
+| editRelations = no
+| viewNotes = no
+| createNotes = yes
+| uploadOSMData = yes
+}}
+
+'''[https://kafemapa.cz/ Kafemapa]''' je webová mapa kaváren, pražíren a obchodů s kávou v Česku postavená na datech OpenStreetMap. Ukazuje, co má právě otevřeno (podle {{Tag|opening_hours}}), a umí filtrovat zahrádky, Wi‑Fi, bezbariérový přístup nebo nezávislé podniky. Má stránky jednotlivých měst a kaváren v češtině a angličtině.
+
+Návštěvníci můžou chybějící nebo špatné údaje opravit přímo v OpenStreetMap, vlastním účtem OSM. Tahle stránka popisuje, jaké úpravy Kafemapa dělá a jak je dohledat.
+
+== Data ==
+* Data se stahují jednou denně přes [[Overpass API]]: {{Tag|amenity|cafe}}, {{Tag|shop|coffee}} a {{Tag|craft|coffee_roaster}} v Česku.
+* Počty obyvatel měst (pro žebříčky) jsou z Českého statistického úřadu, ne z {{Key|population}}.
+* Atribuce „© přispěvatelé OpenStreetMap“ je u mapy i na každé stránce.
+
+== Úpravy v OpenStreetMap ==
+=== Co Kafemapa mění ===
+* Jen tyto tagy u kavárny, která už v OSM je:
+** {{Key|opening_hours}}: formulář po dnech,
+** vybavení, vždy s volbou ''Ano / Ne / Nevím'' (u bezbariérovosti i ''Částečně''): {{Key|internet_access}} (<code>wlan</code> / <code>no</code>), {{Key|outdoor_seating}}, {{Key|diet:vegan}}, {{Key|diet:vegetarian}}, {{Key|wheelchair}} (<code>yes</code> / <code>limited</code> / <code>no</code>) a {{Key|payment:cards}}. Odpověď „Ne“ u platby kartou nastaví na <code>no</code> i {{Key|payment:credit_cards}} a {{Key|payment:debit_cards}}, pokud byly <code>yes</code>, aby si tagy neodporovaly.
+* Úpravu dělá návštěvník '''vlastním účtem OSM''' (přihlášení přes [[OAuth]] 2, heslo Kafemapa nevidí). Za úpravu odpovídá on, stejně jako v jiných editorech.
+* Časy se zadávají po dnech ve formuláři, Kafemapa z nich složí hodnotu (např. <code>Mo-Fr 08:00-18:00; Sa 09:00-14:00; Su off</code>) a ověří ji. Složitější otevírací dobu (přestávky, sezónní provoz) formulář nenabízí, na tu odkazuje do editoru OSM.
+* Formulář výslovně upozorňuje, že se časy nesmí přebírat z Google Map ani jiných map.
+* Formulář vybavení se předvyplní aktuálními hodnotami z OSM. Volba „Nevím“ tag nechá, jak je, takže formulář nikdy nic nemaže a hodnoty, kterým nerozumí (např. <code>diet:vegan=only</code>), nepřepíše, dokud je návštěvník vědomě nezmění.
+
+=== Co Kafemapa nikdy nedělá ===
+* Nepřidává ani nemaže objekty, nemění jejich polohu ani geometrii.
+* Nemění jiné tagy než ty vyjmenované výše (seznam je pevně v kódu, ostatní tagy objektu zůstávají beze změny).
+* Nepřepisuje cizí úpravy: zápis jde přes verzi objektu, a když ho mezitím někdo upravil, OSM uložení odmítne (konflikt verzí) a návštěvník dostane výzvu stránku načíst znovu.
+
+=== Jak úpravy poznat ===
+Každá úprava je samostatná sada změn s jedním objektem a s těmito tagy:
+
+{| class="wikitable"
+! Tag !! Hodnota
+|-
+| {{Key|created_by}} || <code>Kafemapa</code>
+|-
+| {{Key|comment}} || <code>Otevírací doba: ''název kavárny''</code> nebo <code>Vybavení: ''název''</code> (na anglické verzi webu <code>Opening hours: …</code> / <code>Amenities: …</code>)
+|-
+| {{Key|hashtags}} || <code>#kafemapa</code>
+|-
+| {{Key|source}} || <code>survey</code> (z návštěvy nebo cedule) nebo <code>website</code> (z webu nebo sociálních sítí kavárny), podle volby návštěvníka
+|-
+| {{Key|host}} || <code><nowiki>https://kafemapa.cz/</nowiki></code>
+|-
+| {{Key|locale}} || <code>cs</code> nebo <code>en</code>
+|}
+
+Všechny úpravy najdete v [https://osmcha.org/ OSMCha] podle hashtagu <code>#kafemapa</code>. Pokud u některé narazíte na problém, napište prosím autorovi (kontakt níže).
+
+=== Další pojistky ===
+* Beze změny se nic neposílá: stejná otevírací doba (ani jinak zapsaná, např. s jiným pořadím dnů), ani vybavení, u kterého návštěvník nic nezměnil.
+* Před úpravou si Kafemapa načte aktuální stav objektu z OSM. Když už je tam novější otevírací doba než v denních datech Kafemapy, formulář to oznámí, aby lidé neukládali tutéž změnu opakovaně. Vybavení se vždy předvyplňuje z aktuálního stavu v OSM.
+* Jedna úprava na kavárnu za návštěvu, další změny už jen přes editor OSM.
+* Přímé ukládání jde na webu kdykoli vypnout; formulář se pak vrátí k ručnímu postupu („zkopírovat hodnotu a otevřít editor OSM“).
+
+== Poznámky ==
+Formulář „Zavřeno nebo je tu chyba?“ u každé kavárny vytváří anonymní [[Notes|poznámky OSM]] (bez účtu). Text poznámky je česky, z pevné šablony: druh problému (trvale zavřeno, přestěhovalo se, jiná chyba), upřesnění od návštěvníka, odkaz na objekt a hashtag <code>#kafemapa</code>. Kafemapa podle poznámek data sama nemění, ověří je a opraví místní mapeři.
+
+== Kontakt ==
+* E-mail: info@kafemapa.cz
+* OSM: [https://www.openstreetmap.org/user/LuckyThunder26 LuckyThunder26] (zprávy přes openstreetmap.org)
+
+Připomínky ke způsobu úprav jsou vítané, nejlépe na diskusní stránce téhle stránky nebo e-mailem.
+
+== Viz také ==
+* [[Key:opening_hours]]
+* [[List of OSM-based services]]

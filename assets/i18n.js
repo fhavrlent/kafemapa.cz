@@ -43,6 +43,8 @@ const STR = {
     report: 'Zavřeno nebo je tu chyba? Nahlaste to',
     cafePage: 'Stránka kavárny', editOsm: 'Upravit v OSM', mapySearch: 'Najít na Mapy.com (fotky, recenze)',
     shareText: (n) => `${n} na Kafemapě`,
+    pendingAmenities: (u) => `Vaše úprava vybavení je uložená v <a href="${u}" target="_blank" rel="noopener">OpenStreetMap</a> a na Kafemapě se objeví do druhého dne.`,
+    noFeats: 'Zatím o vybavení nic nevíme.', fixFeats: 'Nesedí vybavení? Opravte ho', addFeats: 'Víte, jestli tu mají Wi‑Fi nebo zahrádku? Doplňte to',
     pendingHours: (w, u) => `Vaše úprava otevírací doby (${w}) je uložená v <a href="${u}" target="_blank" rel="noopener">OpenStreetMap</a> a na Kafemapě se objeví do druhého dne.`,
     title: 'Kafemapa — všechny kavárny v Česku na jedné mapě',
     // žebříček
@@ -88,6 +90,8 @@ const STR = {
     report: 'Closed or something wrong? Report it',
     cafePage: 'Café page', editOsm: 'Edit in OSM', mapySearch: 'Find on Mapy.com (photos, reviews)',
     shareText: (n) => `${n} on Kafemapa`,
+    pendingAmenities: (u) => `Your amenities edit is saved on <a href="${u}" target="_blank" rel="noopener">OpenStreetMap</a> and will show up on Kafemapa by the next day.`,
+    noFeats: 'We don\'t know anything about the amenities yet.', fixFeats: 'Amenities wrong? Fix them', addFeats: 'Know if they have Wi‑Fi or outdoor seating? Add it',
     pendingHours: (w, u) => `Your opening hours edit (${w}) is saved on <a href="${u}" target="_blank" rel="noopener">OpenStreetMap</a> and will show up on Kafemapa by the next day.`,
     title: 'Kafemapa — every café in Czechia on one map',
     rankNotePer: 'Towns over 10,000 people. Places with coffee per 10,000 inhabitants. Cafés are assigned to the nearest town, so the numbers are approximate.',

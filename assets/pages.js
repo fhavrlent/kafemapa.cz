@@ -62,7 +62,7 @@ refresh();
 setInterval(refresh, 60_000);
 
 // Pomocník pro otevírací dobu: modul se načte, až ho někdo rozbalí.
-for (const box of document.querySelectorAll('.help-box:not(.report-box)')) {
+for (const box of document.querySelectorAll('.help-box:not(.report-box):not(.amen-box)')) {
   box.addEventListener('toggle', async () => {
     const host = box.querySelector('[data-hours-editor]');
     if (!box.open || host.dataset.mounted) return;
@@ -72,10 +72,21 @@ for (const box of document.querySelectorAll('.help-box:not(.report-box)')) {
   });
 }
 
-// Návrat z přihlášení do OSM přesměrováním: rozbalit formulář, ten si obnoví vyplněné časy.
+// Vybavení (Wi‑Fi, zahrádka…): formulář se načte až po rozbalení.
+for (const box of document.querySelectorAll('.amen-box')) {
+  box.addEventListener('toggle', async () => {
+    const host = box.querySelector('[data-amenities-editor]');
+    if (!box.open || host.dataset.mounted) return;
+    host.dataset.mounted = '1';
+    const { mountAmenitiesEditor } = await import('./amenities-editor.js');
+    mountAmenitiesEditor(host, { cafe: { i: host.dataset.i, n: host.dataset.n }, osmEditUrl: host.dataset.osmEdit });
+  });
+}
+
+// Návrat z přihlášení do OSM přesměrováním: rozbalit formulář, ten si obnoví vyplněné údaje.
 try {
   const r = JSON.parse(sessionStorage.getItem('kafemapa:osm-resume') || 'null');
-  const host = r && document.querySelector(`[data-hours-editor][data-i="${r.i}"]`);
+  const host = r && document.querySelector(`[data-${r.kind === 'amenities' ? 'amenities' : 'hours'}-editor][data-i="${r.i}"]`);
   if (host) host.closest('details').open = true;
 } catch {}
 
@@ -99,10 +110,18 @@ if (document.querySelector('[data-minimap]')) import('./minimap.js');
 const editorHost = document.querySelector('[data-hours-editor][data-i]');
 let hasPending = false;
 try {
-  hasPending = Object.keys(localStorage).some((k) => k.startsWith('kafemapa:pending:'));
+  hasPending = Object.keys(localStorage).some((k) => k.startsWith('kafemapa:pending'));
 } catch {}
 if (editorHost && hasPending) {
-  import('./osm.js').then(({ pendingEdit }) => {
+  import('./osm.js').then(({ pendingEdit, pendingAmenities }) => {
+    const pa = pendingAmenities(editorHost.dataset.i);
+    const amen = document.querySelector('[data-amenities-editor]');
+    if (pa && amen) {
+      const n = document.createElement('p');
+      n.className = 'pending-note';
+      n.innerHTML = t.pendingAmenities(pa.url);
+      amen.closest('section').querySelector('h2').after(n);
+    }
     const p = pendingEdit(editorHost.dataset.i, editorHost.dataset.current || '');
     if (!p) return;
     const note = document.createElement('p');

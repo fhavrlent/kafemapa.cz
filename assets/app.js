@@ -385,7 +385,12 @@ function renderDetail(c) {
         <div data-hours-editor></div>
       </details>
     </div>
-    ${feats.length ? `<div class="section"><h3>${t.amenities}</h3><div class="feats">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div></div>` : ''}
+    <div class="section"><h3>${t.amenities}</h3>${feats.length ? `<div class="feats">${feats.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : `<p class="muted small">${t.noFeats}</p>`}
+      <details class="help-box amen-box">
+        <summary>${feats.length ? t.fixFeats : t.addFeats}</summary>
+        <div data-amenities-editor></div>
+      </details>
+    </div>
     <details class="help-box report-box">
       <summary>${t.report}</summary>
       <div data-report></div>
@@ -406,7 +411,15 @@ function renderDetail(c) {
     const { mountReportForm } = await import('./osm-note.js');
     mountReportForm(host, c);
   });
-  const helpBox = $('#detail .help-box:not(.report-box)');
+  const amenBox = $('#detail .amen-box');
+  amenBox.addEventListener('toggle', async () => {
+    const host = amenBox.querySelector('[data-amenities-editor]');
+    if (!amenBox.open || host.dataset.mounted) return;
+    host.dataset.mounted = '1';
+    const { mountAmenitiesEditor } = await import('./amenities-editor.js');
+    mountAmenitiesEditor(host, { cafe: c, osmEditUrl: osmUrl(c, true) });
+  });
+  const helpBox = $('#detail .help-box:not(.report-box):not(.amen-box)');
   helpBox.addEventListener('toggle', async () => {
     const host = helpBox.querySelector('[data-hours-editor]');
     if (!helpBox.open || host.dataset.mounted) return;
@@ -416,15 +429,23 @@ function renderDetail(c) {
   });
   // Návrat z přihlášení do OSM přesměrováním: rozbalit formulář (obnoví si vyplněné časy).
   try {
-    if (JSON.parse(sessionStorage.getItem('kafemapa:osm-resume') || 'null')?.i === c.i) helpBox.open = true;
+    const r = JSON.parse(sessionStorage.getItem('kafemapa:osm-resume') || 'null');
+    if (r?.i === c.i) (r.kind === 'amenities' ? amenBox : helpBox).open = true;
   } catch {}
   // Úprava otevírací doby od tohoto návštěvníka, kterou denní data ještě nepřinesla.
   let hasPending = false;
   try {
-    hasPending = Object.keys(localStorage).some((k) => k.startsWith('kafemapa:pending:'));
+    hasPending = Object.keys(localStorage).some((k) => k.startsWith('kafemapa:pending'));
   } catch {}
   if (hasPending) {
-    import('./osm.js').then(({ pendingEdit }) => {
+    import('./osm.js').then(({ pendingEdit, pendingAmenities }) => {
+      const pa = pendingAmenities(c.i);
+      if (pa && state.selected === c) {
+        const n = document.createElement('p');
+        n.className = 'pending-note';
+        n.innerHTML = t.pendingAmenities(pa.url);
+        amenBox.before(n);
+      }
       const p = pendingEdit(c.i, c.o || '');
       if (!p || state.selected !== c) return;
       const w = parseHours(p.o);

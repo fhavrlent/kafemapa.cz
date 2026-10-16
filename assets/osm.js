@@ -124,11 +124,11 @@ export async function completeRedirect(params) {
   return saved.back;
 }
 
-/** Rozpracovaný formulář z doby před přesměrováním na přihlášení (jednorázově). */
-export function takeResume(id) {
+/** Rozpracovaný formulář z doby před přesměrováním na přihlášení (jednorázově). kind: 'hours' | 'amenities' */
+export function takeResume(id, kind = 'hours') {
   try {
     const r = JSON.parse(sessionStorage.getItem(RESUME) || 'null');
-    if (!r || r.i !== id) return null;
+    if (!r || r.i !== id || (r.kind || 'hours') !== kind) return null;
     sessionStorage.removeItem(RESUME);
     return r;
   } catch {
@@ -219,6 +219,22 @@ const PENDING = (id) => `kafemapa:pending:${id}`;
 export function rememberPending(osmId, value, url) {
   store.set(PENDING(osmId), JSON.stringify({ o: value, url, at: Date.now() }));
 }
+// Vybavení: data máme jen jako příznaky, takže poznámku necháme do příští denní aktualizace (~36 h).
+const PENDING_AMEN = (id) => `kafemapa:pending-amenities:${id}`;
+export function rememberPendingAmenities(osmId, url) {
+  store.set(PENDING_AMEN(osmId), JSON.stringify({ url, at: Date.now() }));
+}
+export function pendingAmenities(osmId) {
+  try {
+    const p = JSON.parse(store.get(PENDING_AMEN(osmId)));
+    if (!p) return null;
+    if (Date.now() - p.at > 36 * 3_600_000) return void store.set(PENDING_AMEN(osmId), null), null;
+    return p;
+  } catch {
+    return null;
+  }
+}
+
 /** @returns {{ o: string, url: string, at: number } | null} čekající úprava, která ještě není v našich datech */
 export function pendingEdit(osmId, currentValue) {
   try {
