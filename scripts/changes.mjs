@@ -1,4 +1,4 @@
-// Týdenní změny v datech: co přibylo, co zmizelo, kde se doplnila nebo změnila otevírací doba.
+// Změny v datech mezi dvěma staženími: co přibylo, co zmizelo, kde se doplnila nebo změnila otevírací doba.
 // Volá ho scripts/fetch-data.mjs před přepsáním data/cafes.json.
 
 const norm = (s) => String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -59,9 +59,37 @@ export function computeChanges(prev, next) {
   };
 }
 
-// Historie změn: nejnovější první, nejvýš rok zpátky, jeden záznam na den dat.
+// Týden začíná pondělím; data se stahují denně, ale přehled změn je po týdnech.
+export function weekOf(iso) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+const key = (c) => c.i ?? c.n;
+const byName = (a, b) => a.n.localeCompare(b.n, 'cs');
+// Sjednocení podle id, novější záznam vyhrává; bez těch, která patří jinam.
+const union = (a, b, without = new Set()) => [...new Map([...a, ...b].map((c) => [key(c), c])).values()].filter((c) => !without.has(key(c))).sort(byName);
+
+// Den k dosavadnímu týdnu: místo přidané a ve stejném týdnu zase odebrané se neukazuje vůbec,
+// nové místo nepočítáme zároveň jako „doplněnou otevírací dobu“.
+function mergeDay(week, day) {
+  const ids = (l) => new Set(l.map(key));
+  const removedNow = ids(day.removed), addedNow = ids(day.added);
+  const added = union(week.added.filter((c) => !removedNow.has(key(c))), day.added.filter((c) => !ids(week.removed).has(key(c))));
+  const removed = union(week.removed.filter((c) => !addedNow.has(key(c))), day.removed.filter((c) => !ids(week.added).has(key(c))));
+  const skip = new Set([...ids(added), ...ids(removed)]);
+  const hoursAdded = union(week.hoursAdded, day.hoursAdded, skip);
+  const hoursChanged = union(week.hoursChanged, day.hoursChanged, new Set([...skip, ...ids(hoursAdded)]));
+  return { ...week, date: day.date, added, removed, hoursAdded, hoursChanged };
+}
+
+// Historie změn: nejnovější týden první, nejvýš rok zpátky.
 export function appendChanges(history, entry, keep = 52) {
-  // první stažení nemá s čím srovnávat a opakované stažení téhož dne by byl prázdný „týden“
+  // první stažení nemá s čím srovnávat a opakované stažení téhož dne nic nového nepřinese
   if (!entry.from || entry.from === entry.date) return history;
-  return [entry, ...history.filter((h) => h.date !== entry.date)].slice(0, keep);
+  const week = weekOf(entry.date);
+  const [last, ...rest] = history;
+  if (last && (last.week ?? weekOf(last.date)) === week) return [mergeDay({ ...last, week }, entry), ...rest];
+  return [{ ...entry, week }, ...history].slice(0, keep);
 }

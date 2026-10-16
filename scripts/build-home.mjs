@@ -13,7 +13,7 @@ const TOWNS = 24;
 
 const T = {
   cs: {
-    intro: (n, d) => `Kafemapa ukazuje ${n} kaváren, pražíren a obchodů s kávou v Česku: co má právě otevřeno, kde je zahrádka, Wi‑Fi nebo bezbariérový vstup. Data pocházejí z OpenStreetMap a aktualizují se každý týden (naposledy ${d}).`,
+    intro: (n, d) => `Kafemapa ukazuje ${n} kaváren, pražíren a obchodů s kávou v Česku: co má právě otevřeno, kde je zahrádka, Wi‑Fi nebo bezbariérový vstup. Data pocházejí z OpenStreetMap a aktualizují se každý den (naposledy <time data-upd>${d}</time>).`,
     towns: 'Kavárny podle měst',
     townPath: (c) => `/kavarny/${c.slug}/`,
     all: (n) => `Všech ${n} měst`,
@@ -27,7 +27,7 @@ const T = {
     ],
   },
   en: {
-    intro: (n, d) => `Kafemapa shows ${n} cafés, coffee roasters and coffee shops in Czechia: what is open right now, with outdoor seating, Wi‑Fi or wheelchair access. The data comes from OpenStreetMap and is updated every week (last on ${d}).`,
+    intro: (n, d) => `Kafemapa shows ${n} cafés, coffee roasters and coffee shops in Czechia: what is open right now, with outdoor seating, Wi‑Fi or wheelchair access. The data comes from OpenStreetMap and is updated every day (last on <time data-upd>${d}</time>).`,
     towns: 'Cafés by town',
     townPath: (c) => `/en/cities/${cityEnSlug(c)}/`,
     all: (n) => `All ${n} towns`,
@@ -47,7 +47,7 @@ function homeStatic(data, lang) {
   const withPage = data.cities.filter((c) => c.slug);
   const towns = [...withPage].sort((a, b) => b.count - a.count).slice(0, TOWNS);
   return `<li class="home-static">
-          <p>${esc(L.intro(numIn(lang, data.cafes.length), date))}</p>
+          <p>${L.intro(numIn(lang, data.cafes.length), esc(date))}</p>
           <h2>${L.towns}</h2>
           <ul class="home-towns">${towns.map((c) => `<li><a href="${L.townPath(c)}">${esc(cityNameIn(c.n, lang))}</a> <span>${numIn(lang, c.count)}</span></li>`).join('')}</ul>
           <p><a href="${L.allPath}">${L.all(withPage.length)}&nbsp;→</a></p>

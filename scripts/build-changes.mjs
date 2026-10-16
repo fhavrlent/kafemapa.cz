@@ -44,7 +44,7 @@ export async function buildChanges(root, outDir, data) {
   const body = weeks.length
     ? weeks
         .map(
-          (e) => `<section class="week-changes" id="${e.date}">
+          (e) => `<section class="week-changes" id="${e.week ?? e.date}">
       <h2>${range(e)}</h2>
       <p class="lead">${esc(summary(e))}</p>
       ${block('Nová místa', e.added)}
@@ -54,7 +54,7 @@ export async function buildChanges(root, outDir, data) {
     </section>`
         )
         .join('\n    ')
-    : `<p class="cta">První přehled změn vyjde po příští pravidelné aktualizaci dat (každé pondělí ráno). Mezitím můžete <a href="/doplnit/">pomoct doplnit chybějící údaje</a>, objeví se tu.</p>`;
+    : `<p class="cta">První přehled změn se objeví po příští aktualizaci dat (každé ráno). Mezitím můžete <a href="/doplnit/">pomoct doplnit chybějící údaje</a>, objeví se tu.</p>`;
 
   const html =
     head({
@@ -68,7 +68,7 @@ export async function buildChanges(root, outDir, data) {
   <main class="page-main report">
     <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Kafemapa</a> › <span>Nově na mapě</span></nav>
     <h1>Nově na mapě</h1>
-    <p class="lead">Co se změnilo v kavárnách za poslední týden: nová místa, doplněné otevírací doby a místa, která z mapy zmizela. Data se aktualizují z OpenStreetMap každé pondělí. Odebírat můžete i přes <a href="/nove/feed.xml">RSS</a>.</p>
+    <p class="lead">Co se změnilo v kavárnách za poslední týden: nová místa, doplněné otevírací doby a místa, která z mapy zmizela. Data se z OpenStreetMap aktualizují každý den, přehled změn je po týdnech. Odebírat můžete i přes <a href="/nove/feed.xml">RSS</a>.</p>
     ${body}
   </main>` +
     foot(data);
@@ -86,8 +86,8 @@ export async function buildChanges(root, outDir, data) {
     ].join('');
     return `    <item>
       <title>${xml(`${range(e)}: ${summary(e)}`)}</title>
-      <link>${SITE}/nove/#${e.date}</link>
-      <guid isPermaLink="false">kafemapa-zmeny-${e.date}</guid>
+      <link>${SITE}/nove/#${e.week ?? e.date}</link>
+      <guid isPermaLink="false">kafemapa-zmeny-${e.week ?? e.date}</guid>
       <pubDate>${new Date(`${e.date}T06:00:00Z`).toUTCString()}</pubDate>
       <description>${xml(desc || summary(e))}</description>
     </item>`;

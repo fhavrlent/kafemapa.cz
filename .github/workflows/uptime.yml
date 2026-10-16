@@ -1,0 +1,22 @@
+name: Kontrola webu
+
+# Denně ověří, že kafemapa.cz běží, že poslední build je kompletní a že data
+# nejsou starší než 3 dny (viz scripts/uptime.mjs). Při selhání pošle GitHub e-mail.
+on:
+  schedule:
+    - cron: '41 6 * * *' # každý den v 6:41 UTC, po ranní aktualizaci dat a nasazení
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/uptime.mjs

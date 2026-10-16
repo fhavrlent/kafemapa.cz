@@ -14,5 +14,8 @@
 /indexnow-manifest.json
   Cache-Control: no-store
 
+/status.json
+  Cache-Control: no-store
+
 /assets/fonts/*
   Cache-Control: public, max-age=2592000

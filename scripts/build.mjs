@@ -12,6 +12,7 @@ import { buildChanges } from './build-changes.mjs';
 import { buildEn } from './build-en.mjs';
 import { buildEnMap } from './build-en-map.mjs';
 import { buildHome } from './build-home.mjs';
+import { checkLinks } from './check-links.mjs';
 import { buildReport } from './build-report.mjs';
 import { findKey } from './indexnow.mjs';
 import { createHash } from 'node:crypto';
@@ -56,11 +57,28 @@ const manifest = {};
 for (const entry of await readdir(OUT, { recursive: true })) {
   if (!entry.endsWith('index.html')) continue;
   const path = '/' + entry.replace(/index\.html$/, '');
-  let content = await readFile(join(OUT, entry));
+  // Datum aktualizace dat (<time data-upd>) je skoro na každé stránce a mění se denně;
+  // za změnu stránky ho nepočítáme, jinak by IndexNow každý den hlásil všech ~5 800 stránek.
+  let content = Buffer.from((await readFile(join(OUT, entry), 'utf8')).replace(/<time data-upd>[^<]*<\/time>/g, ''));
   // Úvodní stránka se mění s daty, ne s HTML.
   if (path === '/') content = Buffer.concat([content, await readFile(join(OUT, 'data', 'cafes.json'))]);
   manifest[path] = sha(content);
 }
 await writeFile(join(OUT, 'indexnow-manifest.json'), JSON.stringify(manifest));
 
-console.log(`Sestaveno do _site/, ${nPages} stránek měst, ${cafes.urls.length} stránek kaváren, ${enUrls.length} anglických stránek (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);
+const nLinks = await checkLinks(OUT);
+
+// Stav nasazení pro denní kontrolu (scripts/uptime.mjs). Je ve WAF výjimce z anti-bot
+// výzvy jako robots.txt, takže ho přečte i běžec GitHubu mimo ČR.
+await writeFile(
+  join(OUT, 'status.json'),
+  JSON.stringify({
+    built: new Date().toISOString(),
+    data: data.osmBase || data.generated,
+    places: data.cafes.length,
+    pages: { cities: nPages, cafes: cafes.urls.length, en: enUrls.length, total: Object.keys(manifest).length },
+    links: nLinks,
+  }) + '\n'
+);
+
+console.log(`Sestaveno do _site/, odkazy v pořádku (${nLinks.toLocaleString('cs-CZ')}), ${nPages} stránek měst, ${cafes.urls.length} stránek kaváren, ${enUrls.length} anglických stránek (${key ? 's klíčem Mapy.com' : 'BEZ klíče Mapy.com, použijí se dlaždice OSM'})`);

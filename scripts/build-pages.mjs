@@ -94,7 +94,7 @@ export function foot(meta, lang = 'cs') {
   if (lang === 'en') {
     return `
   <footer class="site-foot">
-    <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL), updated ${esc(when)}.
+    <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL), updated <time data-upd>${esc(when)}</time>.
     Missing café or wrong data? Anyone can fix it directly on OpenStreetMap.</p>
     <p><a href="/en/">Kafemapa</a> · <a href="/en/cities/">Cafés by town</a> · <a href="/en/help/">Help improve the data</a> · <a href="/en/about/">About</a> · <a href="/en/privacy/">Privacy</a> · <a href="/" lang="cs">Česky</a></p>
   </footer>
@@ -104,7 +104,7 @@ export function foot(meta, lang = 'cs') {
   }
   return `
   <footer class="site-foot">
-    <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL), aktualizace ${esc(when)}.
+    <p>Data © <a href="https://www.openstreetmap.org/copyright" rel="noopener">přispěvatelé OpenStreetMap</a> (ODbL), aktualizace <time data-upd>${esc(when)}</time>.
     Chybí kavárna nebo je údaj špatně? Opravit ho může kdokoli přímo v OpenStreetMap.</p>
     <p><a href="/">Kafemapa</a> · <a href="/kavarny/">Kavárny podle měst</a> · <a href="/kavarensky-index/">Kavárenský index</a> · <a href="/doplnit/">Pomozte doplnit data</a> · <a href="/o-projektu/">O projektu</a> · <a href="/ochrana-soukromi/">Ochrana soukromí</a> · <a href="/en/" lang="en">English</a></p>
   </footer>
@@ -288,7 +288,7 @@ function contributePage(pages, data) {
       <ol class="steps">
         <li><strong>Najděte kavárnu</strong> na <a href="/">mapě</a> nebo v seznamu města níže.</li>
         <li><strong>Otevřete „Znáte otevírací dobu?“</strong> a vyplňte časy po dnech. Kafemapa z nich složí správný zápis pro OpenStreetMap.</li>
-        <li><strong>Vložte ho v editoru OSM a uložte.</strong> Stačí bezplatný účet na openstreetmap.org. Změna se na Kafemapě objeví při další týdenní aktualizaci.</li>
+        <li><strong>Vložte ho v editoru OSM a uložte.</strong> Stačí bezplatný účet na openstreetmap.org. Změna se na Kafemapě objeví do druhého dne.</li>
       </ol>
       <aside class="cta">
         <h3>Jediné pravidlo</h3>
@@ -337,7 +337,7 @@ const ABOUT = {
     <section>
       <h2>Jak to funguje</h2>
       <ul>
-        <li>Údaje se každý týden stahují z OpenStreetMap. Poslední aktualizace: ${when}. Co se změnilo, ukazuje <a href="/nove/">Nově na mapě</a>.</li>
+        <li>Údaje se každý den stahují z OpenStreetMap. Poslední aktualizace: ${when}. Co se změnilo, ukazuje <a href="/nove/">Nově na mapě</a>.</li>
         <li>„Otevřeno teď“ se počítá z tagu <code>opening_hours</code> podle času ve vašem zařízení. Svátky ani výjimky nezohledňujeme, takže před cestou raději ověřte.</li>
         <li>Města se přiřazují podle vzdálenosti od centra, žebříčky jsou proto orientační.</li>
         <li>Dvakrát do roka z dat vychází <a href="/kavarensky-index/">Kavárenský index</a>.</li>
@@ -364,7 +364,7 @@ const ABOUT = {
     <section>
       <h2>How it works</h2>
       <ul>
-        <li>Data is downloaded from OpenStreetMap every week. Last update: ${when}.</li>
+        <li>Data is downloaded from OpenStreetMap every day. Last update: ${when}.</li>
         <li>“Open now” is calculated from the <code>opening_hours</code> tag using your device's clock. Public holidays and exceptions are not included, so check before you go.</li>
         <li>Cafés are assigned to the nearest town, so the town rankings are approximate.</li>
       </ul>
@@ -501,7 +501,7 @@ function aboutPage(lang, meta) {
   <main class="page-main report">
     <nav class="crumbs" aria-label="${lang === 'en' ? 'Breadcrumb' : 'Drobečková navigace'}"><a href="${home}">Kafemapa</a> › <span>${A.crumb}</span></nav>
     <h1>${A.h1}</h1>
-    ${A.body(esc(when))}
+    ${A.body(`<time data-upd>${esc(when)}</time>`)}
   </main>` +
     foot(meta, lang)
   );
@@ -607,11 +607,14 @@ export async function buildPages(outDir, data, { extraUrls = [], cafePaths = new
   );
 
   const lastmod = (data.osmBase || data.generated).slice(0, 10);
+  const FRESH = new Set(['/', '/en/', '/nove/']);
   const urls = ['/', '/kavarny/', '/doplnit/', '/o-projektu/', '/en/about/', '/ochrana-soukromi/', '/en/privacy/', ...extraUrls, ...pages.map((p) => `/kavarny/${p.city.slug}/`)];
   await writeFile(
     join(outDir, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-      urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${lastmod}</lastmod></url>`).join('\n') +
+      // lastmod jen tam, kde se stránka s daty opravdu mění; datum aktualizace u všech by
+      // vyhledávače naučilo sitemapě nevěřit (data se stahují denně, většina stránek se nemění).
+      urls.map((u) => `  <url><loc>${SITE}${u}</loc>${FRESH.has(u) ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`).join('\n') +
       `\n</urlset>\n`
   );
   return pages.length;

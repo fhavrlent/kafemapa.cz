@@ -47,3 +47,20 @@ test('historie: první stažení se nezapisuje, stejný den se přepíše, nejno
   assert.deepEqual(h.map((x) => x.date), ['2026-10-26', '2026-10-19']);
   assert.equal(h[0].added.length, 1);
 });
+
+test('denní stažení se slučují do týdne (od pondělí)', () => {
+  const day = (date, from, extra = {}) => ({ date, from, added: [], removed: [], hoursAdded: [], hoursChanged: [], ...extra });
+  const b = (i, n) => ({ i, n, y: 49.19, x: 16.6 });
+  let h = [];
+  h = appendChanges(h, day('2026-10-20', '2026-10-19', { added: [b('n1', 'Alfa'), b('n2', 'Beta')] }));
+  h = appendChanges(h, day('2026-10-21', '2026-10-20', { hoursAdded: [b('n1', 'Alfa'), b('n3', 'Gama')] }));
+  h = appendChanges(h, day('2026-10-22', '2026-10-21', { removed: [b('n2', 'Beta')], hoursChanged: [b('n3', 'Gama')] }));
+  assert.equal(h.length, 1);
+  assert.deepEqual([h[0].from, h[0].date, h[0].week], ['2026-10-19', '2026-10-22', '2026-10-19']);
+  assert.deepEqual(h[0].added.map((c) => c.n), ['Alfa']); // Beta přibyla a zase zmizela
+  assert.deepEqual(h[0].removed, []);
+  assert.deepEqual(h[0].hoursAdded.map((c) => c.n), ['Gama']); // Alfa je nové místo
+  assert.deepEqual(h[0].hoursChanged, []); // Gama už je v doplněných
+  h = appendChanges(h, day('2026-10-26', '2026-10-25', { added: [b('n4', 'Delta')] }));
+  assert.deepEqual(h.map((e) => e.week), ['2026-10-26', '2026-10-19']);
+});

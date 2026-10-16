@@ -207,7 +207,7 @@ function helpPage(pages, data) {
       <ol class="steps">
         <li><strong>Find the café</strong> on the <a href="/en/">map</a> or in a town list below.</li>
         <li><strong>Open “Know the opening hours?”</strong> and fill in the times per day. Kafemapa turns them into the correct OpenStreetMap format.</li>
-        <li><strong>Paste the value in the OSM editor and save.</strong> A free account on openstreetmap.org is all you need. The change shows up on Kafemapa after the next weekly update.</li>
+        <li><strong>Paste the value in the OSM editor and save.</strong> A free account on openstreetmap.org is all you need. The change shows up on Kafemapa by the next day.</li>
       </ol>
       <aside class="cta">
         <h3>The one rule</h3>

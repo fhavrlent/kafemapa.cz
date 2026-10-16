@@ -1,11 +1,17 @@
 name: Aktualizace dat z OSM
 
 # Nasazení dělá Cloudflare Workers Builds při každém pushi do main,
-# takže tady stačí data stáhnout a commitnout.
+# takže tady stačí data stáhnout a commitnout. Když se data nezmění, nic se nenasazuje.
+# Selhání (Overpass nedostupný, podezřelý úbytek dat) pošle GitHub e-mailem.
 on:
   schedule:
-    - cron: '17 3 * * 1' # každé pondělí ve 3:17 UTC
+    - cron: '17 3 * * *' # každý den ve 3:17 UTC (5:17 letního času)
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Propustit i velký úbytek dat (FORCE=1)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -13,6 +19,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,6 +27,10 @@ jobs:
           node-version: 22
       - run: npm test
       - run: npm run data
+        env:
+          FORCE: ${{ inputs.force && '1' || '' }}
+      # Stejný build jako na Cloudflare (včetně kontroly odkazů): rozbitá data se nedostanou do main.
+      - run: npm run build
       - name: Commit, pokud se data změnila
         run: |
           if git diff --quiet data/; then

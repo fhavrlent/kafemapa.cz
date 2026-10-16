@@ -258,12 +258,25 @@ if (out.cafes.length < 1000) {
 }
 await mkdir(dirname(OUT), { recursive: true });
 
-// Týdenní změny: porovnat s dosavadními daty, než je přepíšeme.
+// Změny: porovnat s dosavadními daty, než je přepíšeme.
 const CHANGES = join(ROOT, 'data', 'changes.json');
 let prev = null;
 try {
   prev = JSON.parse(await readFile(OUT, 'utf8'));
 } catch {}
+
+// Pojistka pro denní běh: Overpass občas vrátí neúplný výsledek (timeout jednoho zrcadla).
+// Úbytek přes 5 % míst nebo měst za den je skoro jistě chyba stahování, ne realita;
+// data nepřepisujeme a běh skončí chybou, takže GitHub pošle upozornění.
+// Opravdu velkou změnu (např. hromadný úklid v OSM) lze propustit FORCE=1.
+if (prev && !process.env.FORCE) {
+  for (const [what, a, b] of [['míst', prev.cafes.length, out.cafes.length], ['měst', prev.cities.length, out.cities.length]]) {
+    if (b < a * 0.95) {
+      console.error(`Podezřelý úbytek ${what}: ${a} → ${b} (−${(100 - (b / a) * 100).toFixed(1)} %). Data nezapisuji; když je změna skutečná, spusťte s FORCE=1.`);
+      process.exit(1);
+    }
+  }
+}
 let changes = [];
 try {
   changes = JSON.parse(await readFile(CHANGES, 'utf8'));
