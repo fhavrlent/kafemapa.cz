@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+# Yandex: web je pro české a slovenské návštěvníky, z Ruska je přístup blokovaný.
+User-agent: Yandex
+Disallow: /
+
 Sitemap: https://kafemapa.cz/sitemap.xml
