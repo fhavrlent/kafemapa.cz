@@ -29,6 +29,8 @@ await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT);
 for (const f of FILES) await cp(join(ROOT, f), join(OUT, f), { recursive: true });
 await rm(join(OUT, 'assets', 'config.example.js'), { force: true });
+// Typy pro kontrolu (npm run typecheck) do webu nepatří.
+for (const f of await readdir(join(OUT, 'assets'))) if (f.endsWith('.d.ts')) await rm(join(OUT, 'assets', f));
 
 let key = process.env.MAPY_API_KEY || '';
 if (!key) {

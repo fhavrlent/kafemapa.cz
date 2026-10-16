@@ -145,7 +145,12 @@ export const hasResume = () => {
 
 /* ---------------- API ---------------- */
 
-async function api(path, { method = 'GET', body, auth = false } = {}) {
+/**
+ * @param {string} path
+ * @param {{ method?: string, body?: string, auth?: boolean }} [opts]
+ */
+async function api(path, { method = 'GET', body = undefined, auth = false } = {}) {
+  /** @type {Record<string, string>} */
   const headers = {};
   if (auth) headers.Authorization = `Bearer ${store.get(TOKEN_KEY)}`;
   if (body) headers['Content-Type'] = 'text/xml';

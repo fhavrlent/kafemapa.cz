@@ -6,6 +6,7 @@ import { addBasemap } from './basemap.js';
 // Bitové příznaky — musí odpovídat scripts/fetch-data.mjs
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
 const DAY_LONG = t.days;
+/** @type {import('leaflet').LatLngBoundsLiteral} */
 const CZ_BOUNDS = [[48.55, 12.09], [51.06, 18.86]];
 const LIST_LIMIT = 80;
 
@@ -630,12 +631,13 @@ $('#list').addEventListener('mouseover', (e) => {
 $('#list').addEventListener('mouseleave', () => setHoverMarker(null));
 
 document.addEventListener('click', (e) => {
-  const city = e.target.closest('[data-city]');
+  const target = /** @type {Element} */ (e.target);
+  const city = /** @type {HTMLElement | null} */ (target.closest('[data-city]'));
   if (city) {
     city.closest('dialog')?.close();
     goToCity(+city.dataset.city);
   }
-  if (e.target.closest('[data-close]')) e.target.closest('dialog').close();
+  if (target.closest('[data-close]')) target.closest('dialog').close();
 });
 for (const d of document.querySelectorAll('dialog')) {
   d.addEventListener('click', (e) => e.target === d && d.close()); // klik mimo
@@ -687,11 +689,11 @@ $('#btnLocate').addEventListener('click', () => {
 
 $('#btnRank').addEventListener('click', () => {
   renderRank('perCapita');
-  for (const t of document.querySelectorAll('.tabs [role=tab]')) t.setAttribute('aria-selected', String(t.dataset.tab === 'perCapita'));
+  for (const t of /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.tabs [role=tab]'))) t.setAttribute('aria-selected', String(t.dataset.tab === 'perCapita'));
   $('#dlgRank').showModal();
 });
 document.querySelector('.tabs').addEventListener('click', (e) => {
-  const t = e.target.closest('[role=tab]');
+  const t = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('[role=tab]'));
   if (!t) return;
   for (const x of document.querySelectorAll('.tabs [role=tab]')) x.setAttribute('aria-selected', String(x === t));
   renderRank(t.dataset.tab);

@@ -55,6 +55,7 @@ const PAIRS = [
 ];
 
 // Celé bloky: upoutávka na index (ten je jen česky → na /en/ ji schováme) a obsah menu.
+/** @type {[RegExp, string][]} */
 const BLOCKS = [
   [/<div class="promo" id="promo"[\s\S]*?<\/div>\n/, ''],
   [

@@ -60,7 +60,7 @@ const nameWords = [
   ['Cukrárna', /cukrár/],
   ['Kafe', /\bkaf[eé]/],
   ['Bistro', /bistro/],
-].map(([w, re]) => ({ w, n: names.filter((n) => re.test(n)).length }));
+].map((/** @type {[string, RegExp]} */ [w, re]) => ({ w, n: names.filter((n) => re.test(n)).length }));
 
 const byCity = new Map();
 for (const c of all) if (c.c != null) byCity.set(c.c, [...(byCity.get(c.c) || []), c]);

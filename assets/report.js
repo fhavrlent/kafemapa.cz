@@ -1,6 +1,6 @@
 // Kavárenský index: tooltip pro sloupce histogramu (myš i klávesnice).
 // Hodnoty jsou zároveň v tabulce pod grafem, tooltip je jen pohodlnější cesta.
-const tip = document.querySelector('.tip');
+const tip = /** @type {HTMLElement} */ (document.querySelector('.tip'));
 
 function show(col, x, y) {
   tip.textContent = col.dataset.tip;
@@ -17,7 +17,7 @@ function hide(col) {
   col?.classList.remove('on');
 }
 
-for (const col of document.querySelectorAll('.hist .col')) {
+for (const col of /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.hist .col'))) {
   col.addEventListener('pointermove', (e) => show(col, e.clientX, e.clientY));
   col.addEventListener('pointerleave', () => hide(col));
   col.addEventListener('focus', () => {

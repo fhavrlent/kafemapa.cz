@@ -25,7 +25,9 @@ if (!res.ok) throw new Error(`ČSÚ: HTTP ${res.status}`);
 // Obce mají šestimístný kód začínající 5 (kraje CZ0…, okresy CZ0…, ORP čtyřmístné).
 const byYear = new Map();
 let header;
-for await (const line of createInterface({ input: Readable.fromWeb(res.body) })) {
+// Typy fetch (DOM) a node:stream/web se v TypeScriptu rozcházejí, za běhu jde o tentýž stream.
+const body = /** @type {import('node:stream/web').ReadableStream} */ (/** @type {unknown} */ (res.body));
+for await (const line of createInterface({ input: Readable.fromWeb(body) })) {
   const f = line.slice(1, -1).split('","');
   if (!header) {
     header = f;

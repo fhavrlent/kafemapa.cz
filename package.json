@@ -8,9 +8,16 @@
     "data": "node scripts/fetch-data.mjs",
     "test": "node --test scripts/*.test.mjs",
     "build": "node scripts/build.mjs",
-    "dev": "node scripts/serve.mjs"
+    "dev": "node scripts/serve.mjs",
+    "typecheck": "tsc -p tsconfig.json"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.20",
+    "@types/leaflet.markercluster": "^1.5.5",
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
   }
 }

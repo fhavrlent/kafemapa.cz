@@ -96,7 +96,8 @@ function initialDays(week) {
  * @param {{ osmEditUrl: string, current?: string, cafe?: { i: string, n: string } }} opts
  *   current = stávající opening_hours; cafe = kavárna pro přímé uložení do OSM (bez ní jen ruční postup)
  */
-export async function mountHoursEditor(container, { osmEditUrl, current, cafe }) {
+export async function mountHoursEditor(container, opts) {
+  const { osmEditUrl, current, cafe } = opts;
   const osm = cafe ? await import('./osm.js') : null;
   const direct = osm?.OSM_SAVE;
   let days = initialDays(current ? parseHours(current) : null);

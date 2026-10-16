@@ -19,6 +19,7 @@ function assert(cond, msg) {
 
 // Žebříček jako tabulka s pruhy: každá hodnota je popsaná na konci pruhu,
 // takže graf je zároveň svou tabulkovou podobou (bez tooltipu i pro čtečky).
+/** @param {{ title: string, sub?: string, rows: any[], max?: number }} table */
 function barTable({ title, sub, rows, max }) {
   const top = max ?? Math.max(...rows.map((r) => r.value));
   return `<figure class="chart">
@@ -87,6 +88,7 @@ function histogram({ title, sub, bins, labelOf }) {
     </figure>`;
 }
 
+/** @param {any[]} cities @param {(c: any) => string | null} [extra] vlastní popisek řádku */
 const cityRows = (cities, extra = () => null) =>
   cities.map((c) => ({
     label: c.n,

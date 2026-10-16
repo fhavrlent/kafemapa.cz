@@ -36,7 +36,7 @@ const res = await fetchOk(`/status.json?t=${Date.now()}`, { cache: 'no-store' })
 if (res && res.status !== 200) problems.push(`/status.json: HTTP ${res.status}`);
 else if (res) {
   const s = await res.json();
-  const days = (iso) => (Date.now() - new Date(iso)) / 86_400_000;
+  const days = (iso) => (Date.now() - new Date(iso).getTime()) / 86_400_000;
   if (!(days(s.data) < MAX_DATA_AGE_DAYS)) problems.push(`data jsou ${days(s.data).toFixed(1)} dne stará (denní aktualizace asi selhává, viz Actions → Aktualizace dat z OSM)`);
   if (!(s.places > 3000)) problems.push(`v datech je jen ${s.places} míst`);
   if (!(s.pages?.cafes > 2000 && s.pages?.cities > 80 && s.pages?.total > 4000)) problems.push(`podezřele málo stránek: ${JSON.stringify(s.pages)}`);

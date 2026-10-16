@@ -20,7 +20,7 @@ Na webu se změna objeví do druhého dne. Co přesně Kafemapa do OSM zapisuje,
 
 ## Jak to funguje
 
-Statický web bez backendu a bez npm závislostí, jen Node pro build.
+Statický web bez backendu. Web ani build nemají žádné npm závislosti; TypeScript slouží jen ke kontrole typů JavaScriptu (typy v JSDoc komentářích, nic se nekompiluje).
 
 - `scripts/fetch-data.mjs` stáhne data z Overpass a zapíše kompaktní `data/cafes.json` (každé místo se přiřadí k nejbližšímu městu, takže žebříčky jsou orientační). GitHub Action to dělá každé ráno a změněná data commitne.
 - `scripts/build.mjs` sestaví `_site/`: mapu, statické stránky měst a kaváren (kvůli vyhledávačům), anglickou verzi, přehled změn, Kavárenský index a sitemap. Na konci zkontroluje všechny interní odkazy.
@@ -51,6 +51,7 @@ npm run data    # stáhne data z OSM (1–3 minuty)
 npm run build   # sestaví _site/
 npm run dev     # http://localhost:8080
 npm test
+npm run typecheck   # kontrola typů (po npm install)
 ```
 
 - **Podkladová mapa:** pro dlaždice Mapy.com zkopírujte `assets/config.example.js` jako `assets/config.js` a doplňte vlastní klíč z [developer.mapy.com](https://developer.mapy.com/). Bez klíče se použijí dlaždice OSM. Podle podmínek Mapy.com musí být nad mapou jejich logo a dlaždice se nesmí ukládat, cachovat ani upravovat.

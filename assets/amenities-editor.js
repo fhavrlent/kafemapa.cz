@@ -146,12 +146,14 @@ export async function mountAmenitiesEditor(container, { cafe, osmEditUrl }) {
       <p class="he-msg" role="status" aria-live="polite"></p>
     </div>`;
 
-  const btn = container.querySelector('[data-save]');
-  const msg = container.querySelector('.he-msg');
-  const who = container.querySelector('.he-who');
-  const pick = (id) => container.querySelector(`[name=ae-${id}]:checked`)?.value;
+  const btn = /** @type {HTMLButtonElement} */ (container.querySelector('[data-save]'));
+  const msg = /** @type {HTMLElement} */ (container.querySelector('.he-msg'));
+  const who = /** @type {HTMLElement} */ (container.querySelector('.he-who'));
+  /** @param {string} sel */
+  const input = (sel) => /** @type {HTMLInputElement | null} */ (container.querySelector(sel));
+  const pick = (id) => input(`[name=ae-${id}]:checked`)?.value;
   const set = (id, v) => {
-    const el = container.querySelector(`[name=ae-${id}][value="${v}"]`);
+    const el = input(`[name=ae-${id}][value="${v}"]`);
     if (el) el.checked = true;
   };
 
@@ -161,7 +163,7 @@ export async function mountAmenitiesEditor(container, { cafe, osmEditUrl }) {
       const name = await osm.userName();
       if (!name) return;
       who.innerHTML = `${S.as(name)} · <button type="button" class="link-btn" data-logout>${S.logout}</button>`;
-      who.querySelector('[data-logout]').onclick = () => (osm.logout(), (who.textContent = S.loginNote));
+      /** @type {HTMLButtonElement} */ (who.querySelector('[data-logout]')).onclick = () => (osm.logout(), (who.textContent = S.loginNote));
     } catch {}
   };
   showUser();
@@ -181,7 +183,9 @@ export async function mountAmenitiesEditor(container, { cafe, osmEditUrl }) {
     }
   } catch {}
 
+  /** @param {Record<string, string>} base @returns {Record<string, string>} */
   const changes = (base) => {
+    /** @type {Record<string, string>} */
     const out = {};
     for (const f of FIELDS) {
       const v = pick(f.id);
@@ -194,7 +198,7 @@ export async function mountAmenitiesEditor(container, { cafe, osmEditUrl }) {
   btn.addEventListener('click', async () => {
     if (!Object.keys(changes(tags)).length) return void (msg.textContent = T.nothing);
     btn.disabled = true;
-    const source = container.querySelector('[name=ae-src]:checked')?.value;
+    const source = /** @type {'survey' | 'website'} */ (input('[name=ae-src]:checked')?.value);
     try {
       if (!osm.isLoggedIn()) {
         msg.textContent = S.loggingIn;
@@ -222,7 +226,7 @@ export async function mountAmenitiesEditor(container, { cafe, osmEditUrl }) {
       } catch {}
       tags = { ...fresh, ...delta };
       msg.innerHTML = T.saved(res.url);
-      container.querySelector('.he-source').hidden = true;
+      /** @type {HTMLElement} */ (container.querySelector('.he-source')).hidden = true;
       btn.hidden = true;
     } catch (e) {
       btn.disabled = false;

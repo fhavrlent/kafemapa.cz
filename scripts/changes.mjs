@@ -15,7 +15,7 @@ const brief = (c, data) => ({ i: c.i, n: c.n, ...(c.c != null && data.cities[c.c
 /**
  * @param prev předchozí data/cafes.json (nebo null)
  * @param next nová data
- * @returns {{date, added, removed, hoursAdded, hoursChanged}}
+ * @returns {{date: string, from: string | null, added: any[], removed: any[], hoursAdded: any[], hoursChanged: any[]}}
  */
 export function computeChanges(prev, next) {
   const date = (next.osmBase || next.generated).slice(0, 10);

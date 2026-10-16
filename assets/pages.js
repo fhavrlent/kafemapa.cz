@@ -3,7 +3,7 @@ import { parseHours, statusLabel, formatWeek } from './hours.js';
 import { LANG, t, pluralIn } from './i18n.js';
 
 const F = { WIFI: 1, OUTDOOR: 2, CHAIN: 16 };
-const items = [...document.querySelectorAll('.cafe, [data-live]')];
+const items = [.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.cafe, [data-live]'))];
 const filters = new Set();
 
 function refresh() {
@@ -11,13 +11,13 @@ function refresh() {
   for (const el of items) {
     const s = el.dataset.o ? statusLabel(parseHours(el.dataset.o, now), now, LANG) : null;
     el.dataset.open = s && s.cls !== 'closed' ? '1' : '';
-    const out = el.querySelector('[data-status]');
+    const out = /** @type {HTMLElement} */ (el.querySelector('[data-status]'));
     out.className = `status ${s ? s.cls : 'unknown'}`;
     out.textContent = s ? s.text.replace(' · otevře ', ', otevře ').replace(' · opens ', ', opens ') : '';
   }
   // Stránka kavárny: zvýraznit dnešní den v tabulce otevírací doby
   const today = (now.getDay() + 6) % 7;
-  for (const tr of document.querySelectorAll('[data-week] tr')) tr.classList.toggle('today', +tr.dataset.day === today);
+  for (const tr of /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-week] tr'))) tr.classList.toggle('today', +tr.dataset.day === today);
   apply();
 }
 
@@ -44,11 +44,11 @@ function apply() {
   }
 }
 
-const bar = document.querySelector('[data-filters]');
+const bar = /** @type {HTMLElement} */ (document.querySelector('[data-filters]'));
 if (bar) {
   bar.hidden = false; // bez JS filtry nefungují, proto je ukazujeme až teď
   bar.addEventListener('click', (e) => {
-    const chip = e.target.closest('.chip');
+    const chip = /** @type {HTMLElement} */ (/** @type {Element} */ (e.target).closest('.chip'));
     if (!chip) return;
     const f = chip.dataset.filter;
     const on = !filters.has(f);
@@ -62,9 +62,9 @@ refresh();
 setInterval(refresh, 60_000);
 
 // Pomocník pro otevírací dobu: modul se načte, až ho někdo rozbalí.
-for (const box of document.querySelectorAll('.help-box:not(.report-box):not(.amen-box)')) {
+for (const box of /** @type {NodeListOf<HTMLDetailsElement>} */ (document.querySelectorAll('.help-box:not(.report-box):not(.amen-box)'))) {
   box.addEventListener('toggle', async () => {
-    const host = box.querySelector('[data-hours-editor]');
+    const host = /** @type {HTMLElement} */ (box.querySelector('[data-hours-editor]'));
     if (!box.open || host.dataset.mounted) return;
     host.dataset.mounted = '1';
     const { mountHoursEditor } = await import('./hours-editor.js');
@@ -73,9 +73,9 @@ for (const box of document.querySelectorAll('.help-box:not(.report-box):not(.ame
 }
 
 // Vybavení (Wi‑Fi, zahrádka…): formulář se načte až po rozbalení.
-for (const box of document.querySelectorAll('.amen-box')) {
+for (const box of /** @type {NodeListOf<HTMLDetailsElement>} */ (document.querySelectorAll('.amen-box'))) {
   box.addEventListener('toggle', async () => {
-    const host = box.querySelector('[data-amenities-editor]');
+    const host = /** @type {HTMLElement} */ (box.querySelector('[data-amenities-editor]'));
     if (!box.open || host.dataset.mounted) return;
     host.dataset.mounted = '1';
     const { mountAmenitiesEditor } = await import('./amenities-editor.js');
@@ -91,9 +91,9 @@ try {
 } catch {}
 
 // Hlášení zavřeného podniku nebo chyby (OSM poznámka), načte se až po rozbalení.
-for (const box of document.querySelectorAll('.report-box')) {
+for (const box of /** @type {NodeListOf<HTMLDetailsElement>} */ (document.querySelectorAll('.report-box'))) {
   box.addEventListener('toggle', async () => {
-    const host = box.querySelector('[data-report]');
+    const host = /** @type {HTMLElement} */ (box.querySelector('[data-report]'));
     if (!box.open || host.dataset.mounted) return;
     host.dataset.mounted = '1';
     const { mountReportForm } = await import('./osm-note.js');
@@ -107,7 +107,7 @@ if (document.querySelector('[data-minimap]')) import('./minimap.js');
 
 // Úprava otevírací doby, kterou tenhle návštěvník uložil do OSM a kterou denní data ještě nepřinesla.
 // osm.js načítáme jen tehdy, když nějaká taková úprava v prohlížeči je.
-const editorHost = document.querySelector('[data-hours-editor][data-i]');
+const editorHost = /** @type {HTMLElement | null} */ (document.querySelector('[data-hours-editor][data-i]'));
 let hasPending = false;
 try {
   hasPending = Object.keys(localStorage).some((k) => k.startsWith('kafemapa:pending'));

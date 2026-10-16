@@ -2,7 +2,7 @@
 // Leaflet a dlaždice se načtou, až když se mapa blíží k výřezu: neplatíme za dlaždice,
 // které nikdo neuvidí, a stránka kavárny zůstane bez mapy stejně rychlá jako dřív.
 
-const box = document.querySelector('[data-minimap]');
+const box = /** @type {HTMLElement | null} */ (document.querySelector('[data-minimap]'));
 
 const loadCss = (href) =>
   new Promise((ok) => {
@@ -18,15 +18,16 @@ const loadScript = (src) =>
 async function show() {
   await Promise.all([loadCss('/assets/vendor/leaflet.css'), window.L ? null : loadScript('/assets/vendor/leaflet.js')]);
   const { addBasemap } = await import('./basemap.js');
-  const here = [+box.dataset.y, +box.dataset.x];
+  const here = /** @type {import('leaflet').LatLngTuple} */ ([+box.dataset.y, +box.dataset.x]);
+  /** @type {[number, number, string, string][]} */
   const near = JSON.parse(box.dataset.near || '[]');
   const touch = matchMedia('(pointer: coarse)').matches;
 
   // Na dotykovém displeji by tažení mapy kradlo posun stránky; mapa jde zvětšit tlačítky.
-  const map = L.map(box, { scrollWheelZoom: false, dragging: !touch, tap: false, minZoom: 8, maxZoom: 19 });
+  const map = L.map(box, { scrollWheelZoom: false, dragging: !touch, minZoom: 8, maxZoom: 19 });
   // Výřez na ulice kolem podniku; sousedy do ~800 m vezme do záběru, vzdálenější ne
   // (jinak by se mapa v menších městech oddálila na celý okres).
-  const close = near.filter(([y, x]) => map.distance(here, [y, x]) <= 800).map(([y, x]) => [y, x]);
+  const close = near.filter(([y, x]) => map.distance(here, [y, x]) <= 800).map(([y, x]) => /** @type {import('leaflet').LatLngTuple} */ ([y, x]));
   if (close.length) map.fitBounds([here, ...close], { padding: [28, 28], maxZoom: 17 });
   else map.setView(here, 16);
   addBasemap(map);

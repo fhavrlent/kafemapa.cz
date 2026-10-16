@@ -7,6 +7,7 @@ import { cafePath } from '../assets/slug.js';
 import { head, foot, esc, num, plural, breadcrumbLd, SITE } from './build-pages.mjs';
 
 const WEEKS_ON_PAGE = 12;
+/** @param {string} iso @param {Intl.DateTimeFormatOptions} [opts] */
 const czDate = (iso, opts = { day: 'numeric', month: 'long', year: 'numeric' }) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('cs-CZ', opts);
 const range = (e) => `${czDate(e.from, { day: 'numeric', month: 'numeric' })}–${czDate(e.date, { day: 'numeric', month: 'numeric', year: 'numeric' })}`;
 

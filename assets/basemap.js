@@ -5,24 +5,23 @@
 // Bez klíče se použijí standardní dlaždice OSM.
 import { LANG, t } from './i18n.js';
 
-const { MAPY_API_KEY = '' } = await import('./config.js').catch(() => ({}));
+const { MAPY_API_KEY = '' } = /** @type {{ MAPY_API_KEY?: string }} */ (await import('./config.js').catch(() => ({})));
 
 export function addBasemap(map) {
   if (MAPY_API_KEY) {
     // Ostré @2x dlaždice (~150 kB) jen při přiblížení na ulice; v přehledu republiky a krajů
     // stačí běžné (~50 kB). Úvodní načtení mapy tak přenese zhruba čtvrtinu dat.
     // lang=en přeloží popisky zemí a moří (Mapy.com to umí jen pro přehledové úrovně z ≤ 6).
-    const MapyTiles = L.TileLayer.extend({
-      getTileUrl(coords) {
-        const size = devicePixelRatio > 1 && coords.z >= 12 ? '256@2x' : '256';
-        return `https://api.mapy.com/v1/maptiles/basic/${size}/${coords.z}/${coords.x}/${coords.y}?apikey=${MAPY_API_KEY}${LANG === 'en' ? '&lang=en' : ''}`;
-      },
-    });
-    new MapyTiles('', {
+    const tiles = L.tileLayer('', {
       minZoom: 0,
       maxZoom: 19,
       attribution: `<a href="https://api.mapy.com/copyright" target="_blank" rel="noopener">${t.mapyAttr}</a> · ${t.cafesAttr}`,
-    }).addTo(map);
+    });
+    tiles.getTileUrl = (coords) => {
+      const size = devicePixelRatio > 1 && coords.z >= 12 ? '256@2x' : '256';
+      return `https://api.mapy.com/v1/maptiles/basic/${size}/${coords.z}/${coords.x}/${coords.y}?apikey=${MAPY_API_KEY}${LANG === 'en' ? '&lang=en' : ''}`;
+    };
+    tiles.addTo(map);
 
     // Logo Mapy.com musí být podle podmínek API viditelné nad mapou.
     const MapyLogo = L.Control.extend({
