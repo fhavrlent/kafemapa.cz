@@ -31,6 +31,8 @@ area(id:3600051684)->.cz;
 );
 out center tags;`;
 
+const MIN_ELEMENTS = 3000;
+
 async function fetchOverpass() {
   let lastErr;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -50,6 +52,9 @@ async function fetchOverpass() {
         if (!res.ok || !text.startsWith('{')) throw new Error(`HTTP ${res.status}`);
         const json = JSON.parse(text);
         if (json.remark && /error|timed out/i.test(json.remark)) throw new Error(json.remark);
+        // Přetížené zrcadlo umí vrátit „OK“ s prázdným nebo useknutým výsledkem (2026-10-18: 0 prvků).
+        // Takový výsledek bereme jako chybu a zkusíme další zrcadlo. Česko má přes 4 000 prvků.
+        if (!(json.elements?.length >= MIN_ELEMENTS)) throw new Error(`neúplný výsledek (${json.elements?.length ?? 0} prvků)`);
         process.stderr.write(`OK (${json.elements.length} prvků)\n`);
         return json;
       } catch (err) {
