@@ -32,6 +32,7 @@ area(id:3600051684)->.cz;
 out center tags;`;
 
 const MIN_ELEMENTS = 3000;
+const MAX_LAG_HOURS = 24; // běžné zpoždění zrcadel je pár minut
 
 async function fetchOverpass() {
   let lastErr;
@@ -55,6 +56,11 @@ async function fetchOverpass() {
         // Přetížené zrcadlo umí vrátit „OK“ s prázdným nebo useknutým výsledkem (2026-10-18: 0 prvků).
         // Takový výsledek bereme jako chybu a zkusíme další zrcadlo. Česko má přes 4 000 prvků.
         if (!(json.elements?.length >= MIN_ELEMENTS)) throw new Error(`neúplný výsledek (${json.elements?.length ?? 0} prvků)`);
+        // Zrcadlo, které přestalo stahovat změny z OSM, vrací staré mapy, ale s plným počtem prvků
+        // (2026-10-22: overpass.private.coffee poslal stav z 31. 5.). Stáří databáze zrcadla hlásí osm3s.
+        const base = json.osm3s?.timestamp_osm_base;
+        const lagH = base ? (Date.now() - new Date(base).getTime()) / 3_600_000 : Infinity;
+        if (!(lagH < MAX_LAG_HOURS)) throw new Error(`zastaralá data zrcadla (${base ?? 'bez data'})`);
         process.stderr.write(`OK (${json.elements.length} prvků)\n`);
         return json;
       } catch (err) {
@@ -269,6 +275,12 @@ let prev = null;
 try {
   prev = JSON.parse(await readFile(OUT, 'utf8'));
 } catch {}
+
+// Pojistka: data nesmí jít zpátky v čase (zastaralé zrcadlo by přepsalo novější stav).
+if (prev?.osmBase && out.osmBase && out.osmBase < prev.osmBase && !process.env.FORCE) {
+  console.error(`Data z Overpass (${out.osmBase}) jsou starší než dosavadní (${prev.osmBase}), nezapisuji.`);
+  process.exit(1);
+}
 
 // Pojistka pro denní běh: Overpass občas vrátí neúplný výsledek (timeout jednoho zrcadla).
 // Úbytek přes 5 % míst nebo měst za den je skoro jistě chyba stahování, ne realita;
