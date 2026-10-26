@@ -4,12 +4,27 @@
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cafePath } from '../assets/slug.js';
+import { weekOf } from './changes.mjs';
 import { head, foot, esc, num, plural, breadcrumbLd, SITE } from './build-pages.mjs';
 
 const WEEKS_ON_PAGE = 12;
 /** @param {string} iso @param {Intl.DateTimeFormatOptions} [opts] */
 const czDate = (iso, opts = { day: 'numeric', month: 'long', year: 'numeric' }) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('cs-CZ', opts);
-const range = (e) => `${czDate(e.from, { day: 'numeric', month: 'numeric' })}–${czDate(e.date, { day: 'numeric', month: 'numeric', year: 'numeric' })}`;
+// Nadpis týdne: kalendářní týden pondělí–neděle (data se stahují denně a sčítají se do týdne,
+// do kterého spadá den stažení). Rozsah stažených dat (from → date) by dával nesmysly jako „17.–23. 10.“.
+const DAY = 86_400_000;
+const weekStart = (e) => e.week ?? weekOf(e.date);
+/** @param {any} e @param {boolean} [latest] jen nejnovější týden může ještě běžet */
+function range(e, latest = false) {
+  const mon = new Date(`${weekStart(e)}T12:00:00Z`);
+  const sun = new Date(mon.getTime() + 6 * DAY);
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const sameMonth = mon.getUTCMonth() === sun.getUTCMonth();
+  const from = sameMonth ? `${mon.getUTCDate()}.` : czDate(iso(mon), { day: 'numeric', month: 'numeric' });
+  const label = `${from}–${czDate(iso(sun), { day: 'numeric', month: 'numeric', year: 'numeric' })}`;
+  // Nejnovější týden, který ještě neskončil (poslední data jsou starší než neděle)
+  return latest && e.date < iso(sun) ? `${label} (probíhá)` : label;
+}
 
 function summary(e) {
   const parts = [];
@@ -45,8 +60,8 @@ export async function buildChanges(root, outDir, data) {
   const body = weeks.length
     ? weeks
         .map(
-          (e) => `<section class="week-changes" id="${e.week ?? e.date}">
-      <h2>${range(e)}</h2>
+          (e, i) => `<section class="week-changes" id="${e.week ?? e.date}">
+      <h2>${range(e, i === 0)}</h2>
       <p class="lead">${esc(summary(e))}</p>
       ${block('Nová místa', e.added)}
       ${block('Doplněná otevírací doba', e.hoursAdded, 'Díky všem, kdo ji zapsali do OpenStreetMap.')}
@@ -86,7 +101,7 @@ export async function buildChanges(root, outDir, data) {
       e.removed.length ? `<p>Zmizela z mapy: ${e.removed.map((b) => b.n).join(', ')}</p>` : '',
     ].join('');
     return `    <item>
-      <title>${xml(`${range(e)}: ${summary(e)}`)}</title>
+      <title>${xml(`${range(e, e === history[0])}: ${summary(e)}`)}</title>
       <link>${SITE}/nove/#${e.week ?? e.date}</link>
       <guid isPermaLink="false">kafemapa-zmeny-${e.week ?? e.date}</guid>
       <pubDate>${new Date(`${e.date}T06:00:00Z`).toUTCString()}</pubDate>
