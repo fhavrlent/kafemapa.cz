@@ -44,7 +44,7 @@ docs/osm-wiki/              text stránek na wiki OSM
 
 ## Lokální vývoj
 
-Potřebujete Node 20+.
+Potřebujete Node 22+ (doporučeně 24, viz `.node-version`).
 
 ```bash
 npm run data    # stáhne data z OSM (1–3 minuty)
