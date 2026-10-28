@@ -49,7 +49,7 @@ function cafeItem(c, data) {
       ${c.a ? `<p class="cafe-addr">${esc(c.a)}</p>` : ''}
       <p class="cafe-hours${!week && c.o ? ' raw' : ''}">${hours ? esc(hours) : '<span class="muted">Opening hours unknown</span>'}</p>
       ${tg.length ? `<div class="tags">${tg.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-      <p class="cafe-links"><a href="/en/#${c.i}">On the map</a>${c.w ? `<a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Website</a>` : ''}</p>
+      <p class="cafe-links"><a href="/en/#${c.i}">On the map</a>${c.w ? ` · <a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Website</a>` : ''}</p>
     </li>`;
 }
 

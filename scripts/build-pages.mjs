@@ -162,7 +162,7 @@ function cafeItem(c) {
       ${c.a ? `<p class="cafe-addr">${esc(c.a)}</p>` : ''}
       <p class="cafe-hours${!week && c.o ? ' raw' : ''}">${hours ? esc(hours) : '<span class="muted">Otevírací doba neuvedena</span>'}</p>
       ${tags.length ? `<div class="tags">${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-      <p class="cafe-links"><a href="/#${c.i}">Na mapě</a>${c.w ? `<a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Web</a>` : ''}</p>
+      <p class="cafe-links"><a href="/#${c.i}">Na mapě</a>${c.w ? ` · <a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Web</a>` : ''}</p>
     </li>`;
 }
 

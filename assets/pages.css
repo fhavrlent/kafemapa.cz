@@ -72,17 +72,9 @@ body.page { height: auto; }
 .town-page .stats div { display: flex; flex-direction: column-reverse; }
 .town-page .stats dd { margin: 0; font: 600 32px/1.05 var(--display); font-variant-numeric: lining-nums tabular-nums; color: var(--ink); }
 
-/* Seznam míst jako jídelní lístek: jméno, vodící tečky, stav vpravo; řádky místo karet */
-.town-page .cafes { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 0 48px; margin: 4px 0 24px; }
-.town-page .cafe { background: none; border: 0; border-radius: 0; padding: 16px 0 14px; border-bottom: 1px solid var(--line); gap: 3px; }
-.town-page .cafe-top { justify-content: flex-start; gap: 8px; }
-.town-page .cafe h3 { font: 600 19px/1.25 var(--display); letter-spacing: -.005em; min-width: 0; }
-.town-page .cafe .status { flex: none; max-width: 55%; text-align: right; font-size: 13px; }
+/* Vodící tečky jen u okolních měst; karty míst zůstávají kartami */
 .leader { display: none; }
-.town-page .leader { display: block; flex: 1 1 24px; min-width: 24px; align-self: baseline; height: .6em; border-bottom: 2px dotted color-mix(in srgb, var(--ink-3) 55%, transparent); }
-.town-page .cafe-top:has(.status:empty) .leader { visibility: hidden; }
-.town-page .cafe-links { display: flex; gap: 14px; padding-top: 4px; font-size: 13px; }
-.town-page .chips { padding: 2px 0 8px; }
+.near-towns .leader { display: block; flex: 1 1 24px; min-width: 24px; align-self: baseline; height: .6em; border-bottom: 2px dotted color-mix(in srgb, var(--ink-3) 55%, transparent); }
 
 /* Okolní města: stejná řeč jako lístek */
 .near-towns { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 40px; }
@@ -96,11 +88,6 @@ body.page { height: auto; }
   .town-bar-search { max-width: none; flex-basis: 100%; }
   .town-page .stats { gap: 6px 24px; }
   .town-page .stats dd { font-size: 27px; }
-  .town-page .cafes { grid-template-columns: 1fr; }
-  /* Na úzkém displeji stav pod jménem, jinak by se jméno lámalo po slovech */
-  .town-page .cafe-top { flex-direction: column; align-items: flex-start; gap: 2px; }
-  .town-page .cafe-top .leader { display: none; }
-  .town-page .cafe .status { max-width: none; text-align: left; }
 }
 .cafes {
   list-style: none; margin: 8px 0 20px; padding: 0;
