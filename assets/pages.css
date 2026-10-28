@@ -31,6 +31,24 @@ body.page { height: auto; }
 .map-cta { display: inline-flex; width: auto; padding: 0 20px; }
 
 .page .chips { padding: 4px 0 10px; }
+.page-nav {
+  position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  margin: 18px -16px 0; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px); border-bottom: 1px solid var(--line);
+}
+.page-nav::-webkit-scrollbar { display: none; }
+.page-nav a {
+  flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--panel);
+  color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap;
+}
+.page-nav a:hover { border-color: var(--accent); color: var(--accent); }
+#mista, #chybi, #okoli, #places, #missing, #nearby { scroll-margin-top: 64px; }
+.list-search {
+  display: block; width: 100%; max-width: 420px; margin: 4px 0 8px; padding: 10px 14px; font: inherit; font-size: 15px;
+  color: var(--ink); background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px;
+}
+.list-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.list-search[hidden] { display: none; }
 .cafes {
   list-style: none; margin: 8px 0 20px; padding: 0;
   display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;

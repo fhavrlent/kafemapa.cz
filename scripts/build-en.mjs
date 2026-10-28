@@ -6,7 +6,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseHours, formatWeek } from '../assets/hours.js';
 import { cafePath, cityNameIn } from '../assets/slug.js';
-import { head, foot, esc, breadcrumbLd, MIN_CAFES, cityEnSlug } from './build-pages.mjs';
+import { head, foot, esc, breadcrumbLd, MIN_CAFES, cityEnSlug, pageNav, listSearch } from './build-pages.mjs';
 
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
 const num = (n) => n.toLocaleString('en-GB');
@@ -108,8 +108,18 @@ function townPage(p, ctx) {
 
     <p><a class="btn primary map-cta" href="/en/?city=${cityEnSlug(city)}">Show ${esc(name)} on the map</a></p>
 
-    <section aria-labelledby="list-h">
+    ${pageNav(
+      [
+        ['places', `All places (${num(n)})`],
+        ...(missing.length ? [['missing', `Opening hours missing (${num(missing.length)})`]] : []),
+        ['nearby', 'Nearby towns'],
+      ],
+      'Page sections'
+    )}
+
+    <section id="places" aria-labelledby="list-h">
       <h2 id="list-h">All places for coffee</h2>
+      ${listSearch('Search by name or address…')}
       <div class="chips" role="group" aria-label="Filters" data-filters hidden>
         <button class="chip" data-filter="open" aria-pressed="false"><i class="dot dot-open"></i>Open now</button>
         <button class="chip" data-filter="indie" aria-pressed="false">Independent</button>
@@ -135,7 +145,7 @@ function townPage(p, ctx) {
       </details>
     </section>` : ''}
 
-    <section aria-labelledby="near-h">
+    <section id="nearby" aria-labelledby="near-h">
       <h2 id="near-h">Cafés in nearby towns</h2>
       <ul class="city-links">
         ${nearby.map((q) => `<li><a href="/en/cities/${cityEnSlug(q.city)}/">${esc(nameOf(q.city))}</a> <span class="muted">${num(q.cafes.length)} · ${Math.round(q.d)} km</span></li>`).join('\n        ')}

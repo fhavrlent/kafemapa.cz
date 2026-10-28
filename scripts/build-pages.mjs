@@ -123,6 +123,18 @@ export const breadcrumbLd = (items) => ({
 
 let cafeLinks = new Map(); // id → /kavarna/…/, nastavuje buildPages
 
+/**
+ * Lepivá navigace po sekcích dlouhé stránky města (seznam míst bývá stovky karet).
+ * @param {string[][]} links dvojice [kotva, popisek]
+ * @param {string} label
+ */
+export const pageNav = (links, label) =>
+  `<nav class="page-nav" aria-label="${label}">${links.map(([id, text]) => `<a href="#${id}">${text}</a>`).join('')}</nav>`;
+
+/** Hledání v seznamu míst; bez JavaScriptu zůstane skryté jako filtry. */
+export const listSearch = (placeholder) =>
+  `<input type="search" class="list-search" data-search hidden placeholder="${placeholder}" aria-label="${placeholder}" autocomplete="off">`;
+
 function cafeItem(c) {
   const href = cafeLinks.get(c.i) || `/#${c.i}`;
   const week = parseHours(c.o);
@@ -210,8 +222,18 @@ function cityPage(city, ctx) {
 
     <p><a class="btn primary map-cta" href="/?mesto=${city.slug}">Zobrazit ${esc(city.n)} na mapě</a></p>
 
-    <section aria-labelledby="list-h">
+    ${pageNav(
+      [
+        ['mista', `Všechna místa (${num(n)})`],
+        ...(sorted.some((c) => !c.o) ? [['chybi', `Chybí otevírací doba (${num(sorted.filter((c) => !c.o).length)})`]] : []),
+        ['okoli', 'Okolní města'],
+      ],
+      'Části stránky'
+    )}
+
+    <section id="mista" aria-labelledby="list-h">
       <h2 id="list-h">Všechna místa s kávou</h2>
+      ${listSearch('Hledat podle názvu nebo adresy…')}
       <div class="chips" role="group" aria-label="Filtry" data-filters hidden>
         <button class="chip" data-filter="open" aria-pressed="false"><i class="dot dot-open"></i>Otevřeno teď</button>
         <button class="chip" data-filter="indie" aria-pressed="false">Nezávislé</button>
@@ -241,7 +263,7 @@ function cityPage(city, ctx) {
     </section>
 
 `;
-    })()}    <section aria-labelledby="near-h">
+    })()}    <section id="okoli" aria-labelledby="near-h">
       <h2 id="near-h">Kavárny v okolních městech</h2>
       <ul class="city-links">
         ${nearby.map((p) => `<li><a href="/kavarny/${p.city.slug}/">${esc(p.city.n)}</a> <span class="muted">${num(p.cafes.length)} · ${Math.round(p.d)} km</span></li>`).join('\n        ')}

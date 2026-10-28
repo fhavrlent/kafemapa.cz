@@ -5,6 +5,12 @@ import { LANG, t, pluralIn } from './i18n.js';
 const F = { WIFI: 1, OUTDOOR: 2, CHAIN: 16 };
 const items = [.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('.cafe, [data-live]'))];
 const filters = new Set();
+let query = '';
+// Hledání bez ohledu na diakritiku a velikost písmen („kavarna“ najde „Kavárna“).
+const norm = (s) => String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const haystack = new Map(
+  items.filter((el) => el.classList.contains('cafe')).map((el) => [el, norm(`${el.querySelector('h3')?.textContent} ${el.querySelector('.cafe-addr')?.textContent ?? ''}`)])
+);
 
 function refresh() {
   const now = new Date();
@@ -32,13 +38,14 @@ function apply() {
       (!filters.has('indie') || !(f & F.CHAIN)) &&
       (!filters.has('outdoor') || f & F.OUTDOOR) &&
       (!filters.has('wifi') || f & F.WIFI) &&
-      (!filters.has('beans') || 'beans' in el.dataset);
+      (!filters.has('beans') || 'beans' in el.dataset) &&
+      (!query || query.split(' ').every((w) => haystack.get(el).includes(w)));
     el.hidden = !ok;
     if (ok) shown++;
   }
   const count = document.querySelector('[data-count]');
   if (count) {
-    count.textContent = filters.size
+    count.textContent = filters.size || query
       ? t.shownOf(shown, cards.length) + (LANG === 'en' ? '' : ` ${pluralIn('cs', cards.length, ['místa', 'míst', 'míst'])}`)
       : '';
   }
@@ -134,4 +141,14 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '
 function formatPending(o) {
   const w = parseHours(o);
   return w ? formatWeek(w, LANG) : o;
+}
+
+// Hledání v seznamu míst na stránce města
+const search = /** @type {HTMLInputElement | null} */ (document.querySelector('[data-search]'));
+if (search) {
+  search.hidden = false;
+  search.addEventListener('input', () => {
+    query = norm(search.value.trim()).replace(/\s+/g, ' ');
+    apply();
+  });
 }
