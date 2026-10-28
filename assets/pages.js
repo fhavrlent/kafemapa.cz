@@ -152,3 +152,30 @@ if (search) {
     apply();
   });
 }
+
+// Pult stránky města: zvýraznit sekci, ve které právě jsme (poslední, jejíž nadpis už prošel horní částí okna).
+const barLinks = /** @type {HTMLAnchorElement[]} */ ([...document.querySelectorAll('.town-bar-nav a')]);
+if (barLinks.length) {
+  const targets = barLinks.map((a) => document.getElementById(a.hash.slice(1)));
+  let ticking = false;
+  // Po kliknutí na odkaz drží zvýraznění kliknutá sekce, dokud člověk sám nezačne posouvat
+  // (poslední dvě krátké sekce se často vejdou na jednu obrazovku a výpočet by je nerozlišil).
+  let pinned = -1;
+  barLinks.forEach((a, i) => a.addEventListener('click', () => ((pinned = i), mark())));
+  for (const ev of ['wheel', 'touchmove', 'keydown']) addEventListener(ev, () => (pinned = -1), { passive: true });
+  const mark = () => {
+    ticking = false;
+    if (pinned >= 0) return barLinks.forEach((a, i) => (i === pinned ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+    // Krátké sekce na konci stránky se nahoru nikdy nedostanou, proto stačí horních ~40 % okna.
+    const line = Math.max(96, innerHeight * 0.4);
+    let current = -1;
+    targets.forEach((el, i) => {
+      if (el && el.getBoundingClientRect().top <= line) current = i;
+    });
+    // Na úplném konci stránky je aktuální poslední sekce, i když se její nadpis nahoru nevejde.
+    if (scrollY > 0 && innerHeight + scrollY >= document.documentElement.scrollHeight - 2) current = targets.length - 1;
+    barLinks.forEach((a, i) => (i === current ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+  };
+  addEventListener('scroll', () => ticking || ((ticking = true), requestAnimationFrame(mark)), { passive: true });
+  mark();
+}

@@ -124,16 +124,21 @@ export const breadcrumbLd = (items) => ({
 let cafeLinks = new Map(); // id → /kavarna/…/, nastavuje buildPages
 
 /**
- * Lepivá navigace po sekcích dlouhé stránky města (seznam míst bývá stovky karet).
- * @param {string[][]} links dvojice [kotva, popisek]
- * @param {string} label
+ * Lepivý „pult“ stránky města: odkazy na sekce (seznam míst bývá stovky položek) a hledání,
+ * které je tak po ruce i uprostřed seznamu. Hledání bez JavaScriptu zůstane skryté.
+ * @param {string[][]} links trojice [kotva, popisek, počet]
+ * @param {{ label: string, search: string }} t
  */
-export const pageNav = (links, label) =>
-  `<nav class="page-nav" aria-label="${label}">${links.map(([id, text]) => `<a href="#${id}">${text}</a>`).join('')}</nav>`;
+export const townBar = (links, t) => `<div class="town-bar">
+      <nav class="town-bar-nav" aria-label="${t.label}">${links
+        .map(([id, text, n]) => `<a href="#${id}">${text}${n ? ` <span class="town-bar-n">${n}</span>` : ''}</a>`)
+        .join('')}</nav>
+      <input type="search" class="town-bar-search" data-search hidden placeholder="${t.search}" aria-label="${t.search}" autocomplete="off">
+    </div>`;
 
-/** Hledání v seznamu míst; bez JavaScriptu zůstane skryté jako filtry. */
-export const listSearch = (placeholder) =>
-  `<input type="search" class="list-search" data-search hidden placeholder="${placeholder}" aria-label="${placeholder}" autocomplete="off">`;
+/** Odkaz na okolní město jako řádek jídelního lístku: název, tečky, počet a vzdálenost. */
+export const nearTown = (href, name, meta) =>
+  `<li><a href="${href}">${name}</a><span class="leader" aria-hidden="true"></span><span class="near-meta">${meta}</span></li>`;
 
 function cafeItem(c) {
   const href = cafeLinks.get(c.i) || `/#${c.i}`;
@@ -151,12 +156,13 @@ function cafeItem(c) {
   return `<li class="cafe" data-f="${c.f || 0}"${c.k || c.r ? ' data-beans' : ''}${c.o ? ` data-o="${esc(c.o)}"` : ''}>
       <div class="cafe-top">
         <h3><a href="${href}">${esc(c.n)}</a></h3>
+        <span class="leader" aria-hidden="true"></span>
         <span class="status" data-status></span>
       </div>
       ${c.a ? `<p class="cafe-addr">${esc(c.a)}</p>` : ''}
       <p class="cafe-hours${!week && c.o ? ' raw' : ''}">${hours ? esc(hours) : '<span class="muted">Otevírací doba neuvedena</span>'}</p>
       ${tags.length ? `<div class="tags">${tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-      <p class="cafe-links"><a href="/#${c.i}">Na mapě</a>${c.w ? ` · <a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Web</a>` : ''}</p>
+      <p class="cafe-links"><a href="/#${c.i}">Na mapě</a>${c.w ? `<a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Web</a>` : ''}</p>
     </li>`;
 }
 
@@ -207,9 +213,8 @@ function cityPage(city, ctx) {
       alternates: { cs: path, en: `/en/cities/${cityEnSlug(city)}/` },
     }) +
     `
-  <main class="page-main">
+  <main class="page-main town-page">
     <nav class="crumbs" aria-label="Drobečková navigace"><a href="/">Kafemapa</a> › <a href="/kavarny/">Města</a> › <span>${esc(city.n)}</span></nav>
-    <p class="eyebrow">Kavárny a pražírny</p>
     <h1>${esc(city.n)}</h1>
     ${intro.map((p) => `<p class="lead">${p}</p>`).join('\n    ')}
 
@@ -222,18 +227,17 @@ function cityPage(city, ctx) {
 
     <p><a class="btn primary map-cta" href="/?mesto=${city.slug}">Zobrazit ${esc(city.n)} na mapě</a></p>
 
-    ${pageNav(
+    ${townBar(
       [
-        ['mista', `Všechna místa (${num(n)})`],
-        ...(sorted.some((c) => !c.o) ? [['chybi', `Chybí otevírací doba (${num(sorted.filter((c) => !c.o).length)})`]] : []),
+        ['mista', 'Všechna místa', num(n)],
+        ...(sorted.some((c) => !c.o) ? [['chybi', 'Bez otevírací doby', num(sorted.filter((c) => !c.o).length)]] : []),
         ['okoli', 'Okolní města'],
       ],
-      'Části stránky'
+      { label: 'Části stránky', search: 'Hledat kavárnu nebo ulici' }
     )}
 
     <section id="mista" aria-labelledby="list-h">
       <h2 id="list-h">Všechna místa s kávou</h2>
-      ${listSearch('Hledat podle názvu nebo adresy…')}
       <div class="chips" role="group" aria-label="Filtry" data-filters hidden>
         <button class="chip" data-filter="open" aria-pressed="false"><i class="dot dot-open"></i>Otevřeno teď</button>
         <button class="chip" data-filter="indie" aria-pressed="false">Nezávislé</button>
@@ -265,8 +269,8 @@ function cityPage(city, ctx) {
 `;
     })()}    <section id="okoli" aria-labelledby="near-h">
       <h2 id="near-h">Kavárny v okolních městech</h2>
-      <ul class="city-links">
-        ${nearby.map((p) => `<li><a href="/kavarny/${p.city.slug}/">${esc(p.city.n)}</a> <span class="muted">${num(p.cafes.length)} · ${Math.round(p.d)} km</span></li>`).join('\n        ')}
+      <ul class="near-towns">
+        ${nearby.map((p) => nearTown(`/kavarny/${p.city.slug}/`, esc(p.city.n), `${num(p.cafes.length)} ${plural(p.cafes.length, ['místo', 'místa', 'míst'])}, ${Math.round(p.d)} km`)).join('\n        ')}
       </ul>
     </section>
   </main>

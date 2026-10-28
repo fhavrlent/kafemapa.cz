@@ -6,7 +6,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseHours, formatWeek } from '../assets/hours.js';
 import { cafePath, cityNameIn } from '../assets/slug.js';
-import { head, foot, esc, breadcrumbLd, MIN_CAFES, cityEnSlug, pageNav, listSearch } from './build-pages.mjs';
+import { head, foot, esc, breadcrumbLd, MIN_CAFES, cityEnSlug, townBar, nearTown } from './build-pages.mjs';
 
 const F = { WIFI: 1, OUTDOOR: 2, WHEELCHAIR: 4, VEGAN: 8, CHAIN: 16, VEGETARIAN: 32, WHEELCHAIR_LIMITED: 64, CARD: 128 };
 const num = (n) => n.toLocaleString('en-GB');
@@ -43,12 +43,13 @@ function cafeItem(c, data) {
   return `<li class="cafe" data-f="${c.f || 0}"${c.k || c.r ? ' data-beans' : ''}${c.o ? ` data-o="${esc(c.o)}"` : ''}>
       <div class="cafe-top">
         <h3><a href="${href}">${esc(c.n)}</a></h3>
+        <span class="leader" aria-hidden="true"></span>
         <span class="status" data-status></span>
       </div>
       ${c.a ? `<p class="cafe-addr">${esc(c.a)}</p>` : ''}
       <p class="cafe-hours${!week && c.o ? ' raw' : ''}">${hours ? esc(hours) : '<span class="muted">Opening hours unknown</span>'}</p>
       ${tg.length ? `<div class="tags">${tg.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
-      <p class="cafe-links"><a href="/en/#${c.i}">On the map</a>${c.w ? ` · <a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Website</a>` : ''}</p>
+      <p class="cafe-links"><a href="/en/#${c.i}">On the map</a>${c.w ? `<a href="${esc(c.w)}" rel="noopener nofollow" target="_blank">Website</a>` : ''}</p>
     </li>`;
 }
 
@@ -93,9 +94,8 @@ function townPage(p, ctx) {
       jsonLd: breadcrumbLd([['Kafemapa', '/en/'], ['Cafés by town', '/en/cities/'], [name, path]]),
     }) +
     `
-  <main class="page-main">
+  <main class="page-main town-page">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/en/">Kafemapa</a> › <a href="/en/cities/">Towns</a> › <span>${esc(name)}</span></nav>
-    <p class="eyebrow">Cafés and coffee roasters</p>
     <h1>${esc(name)}</h1>
     ${intro.map((t) => `<p class="lead">${t}</p>`).join('\n    ')}
 
@@ -108,18 +108,17 @@ function townPage(p, ctx) {
 
     <p><a class="btn primary map-cta" href="/en/?city=${cityEnSlug(city)}">Show ${esc(name)} on the map</a></p>
 
-    ${pageNav(
+    ${townBar(
       [
-        ['places', `All places (${num(n)})`],
-        ...(missing.length ? [['missing', `Opening hours missing (${num(missing.length)})`]] : []),
+        ['places', 'All places', num(n)],
+        ...(missing.length ? [['missing', 'No opening hours', num(missing.length)]] : []),
         ['nearby', 'Nearby towns'],
       ],
-      'Page sections'
+      { label: 'Page sections', search: 'Search cafés or streets' }
     )}
 
     <section id="places" aria-labelledby="list-h">
       <h2 id="list-h">All places for coffee</h2>
-      ${listSearch('Search by name or address…')}
       <div class="chips" role="group" aria-label="Filters" data-filters hidden>
         <button class="chip" data-filter="open" aria-pressed="false"><i class="dot dot-open"></i>Open now</button>
         <button class="chip" data-filter="indie" aria-pressed="false">Independent</button>
@@ -147,8 +146,8 @@ function townPage(p, ctx) {
 
     <section id="nearby" aria-labelledby="near-h">
       <h2 id="near-h">Cafés in nearby towns</h2>
-      <ul class="city-links">
-        ${nearby.map((q) => `<li><a href="/en/cities/${cityEnSlug(q.city)}/">${esc(nameOf(q.city))}</a> <span class="muted">${num(q.cafes.length)} · ${Math.round(q.d)} km</span></li>`).join('\n        ')}
+      <ul class="near-towns">
+        ${nearby.map((q) => nearTown(`/en/cities/${cityEnSlug(q.city)}/`, esc(nameOf(q.city)), `${num(q.cafes.length)} ${q.cafes.length === 1 ? 'place' : 'places'}, ${Math.round(q.d)} km`)).join('\n        ')}
       </ul>
     </section>
   </main>

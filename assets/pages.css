@@ -31,24 +31,77 @@ body.page { height: auto; }
 .map-cta { display: inline-flex; width: auto; padding: 0 20px; }
 
 .page .chips { padding: 4px 0 10px; }
-.page-nav {
-  position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-  margin: 18px -16px 0; padding: 10px 16px; background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(6px); border-bottom: 1px solid var(--line);
+/* ---------- Stránka města: pult, jídelní lístek míst ---------- */
+
+/* Pult: tmavý pruh barvy espressa, drží se nahoře. Navigace po stránce, odlišená od světlých
+   filtrů, s hledáním, které je tak po ruce i uprostřed dlouhého seznamu. */
+.town-page { --band: var(--espresso); --band-ink: #f4e6d6; --band-mute: #cbb39c; --band-line: #5a3a29; }
+@media (prefers-color-scheme: dark) { .town-page { --band: #2c1f18; --band-line: #4a3428; } }
+.town-bar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; align-items: center; gap: 10px 20px; flex-wrap: wrap;
+  margin: 28px -20px 0; padding: 10px 20px;
+  background: var(--band); color: var(--band-ink);
+  box-shadow: 0 1px 0 var(--band-line), 0 10px 24px -18px rgb(30 18 12 / .6);
 }
-.page-nav::-webkit-scrollbar { display: none; }
-.page-nav a {
-  flex: none; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--panel);
-  color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 500; white-space: nowrap;
+.town-bar-nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin-right: auto; }
+.town-bar-nav::-webkit-scrollbar { display: none; }
+.town-page .town-bar-nav a {
+  flex: none; display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 7px 12px; border-radius: 8px; color: var(--band-mute); text-decoration: none;
+  font-size: 14.5px; font-weight: 500; white-space: nowrap;
 }
-.page-nav a:hover { border-color: var(--accent); color: var(--accent); }
-#mista, #chybi, #okoli, #places, #missing, #nearby { scroll-margin-top: 64px; }
-.list-search {
-  display: block; width: 100%; max-width: 420px; margin: 4px 0 8px; padding: 10px 14px; font: inherit; font-size: 15px;
-  color: var(--ink); background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px;
+.town-page .town-bar-nav a:hover { color: var(--band-ink); background: rgb(255 255 255 / .06); }
+.town-page .town-bar-nav a[aria-current] { color: var(--band-ink); box-shadow: inset 0 -2px 0 var(--crema); border-radius: 8px 8px 0 0; }
+.town-bar-n { font-variant-numeric: tabular-nums; color: var(--crema); font-weight: 600; }
+.town-bar-search {
+  flex: 1 1 260px; max-width: 380px; padding: 9px 14px 9px 36px; font: inherit; font-size: 14.5px;
+  color: var(--band-ink); background: rgb(255 255 255 / .08)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbb39c' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") 11px 50% / 17px no-repeat;
+  border: 1px solid var(--band-line); border-radius: 10px;
 }
-.list-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
-.list-search[hidden] { display: none; }
+.town-bar-search::placeholder { color: var(--band-mute); }
+.town-bar-search:focus { outline: 2px solid var(--crema); outline-offset: 1px; background-color: rgb(255 255 255 / .12); }
+.town-bar-search[hidden] { display: none; }
+.town-page section { scroll-margin-top: 76px; }
+
+/* Úvod: čísla v řadě, bez krabic */
+.town-page .stats { display: flex; flex-wrap: wrap; gap: 6px 36px; margin: 22px 0 22px; }
+.town-page .stats div { background: none; border: 0; padding: 0; }
+.town-page .stats dt { order: 2; font-size: 13.5px; color: var(--ink-2); }
+.town-page .stats div { display: flex; flex-direction: column-reverse; }
+.town-page .stats dd { margin: 0; font: 600 32px/1.05 var(--display); font-variant-numeric: lining-nums tabular-nums; color: var(--ink); }
+
+/* Seznam míst jako jídelní lístek: jméno, vodící tečky, stav vpravo; řádky místo karet */
+.town-page .cafes { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 0 48px; margin: 4px 0 24px; }
+.town-page .cafe { background: none; border: 0; border-radius: 0; padding: 16px 0 14px; border-bottom: 1px solid var(--line); gap: 3px; }
+.town-page .cafe-top { justify-content: flex-start; gap: 8px; }
+.town-page .cafe h3 { font: 600 19px/1.25 var(--display); letter-spacing: -.005em; min-width: 0; }
+.town-page .cafe .status { flex: none; max-width: 55%; text-align: right; font-size: 13px; }
+.leader { display: none; }
+.town-page .leader { display: block; flex: 1 1 24px; min-width: 24px; align-self: baseline; height: .6em; border-bottom: 2px dotted color-mix(in srgb, var(--ink-3) 55%, transparent); }
+.town-page .cafe-top:has(.status:empty) .leader { visibility: hidden; }
+.town-page .cafe-links { display: flex; gap: 14px; padding-top: 4px; font-size: 13px; }
+.town-page .chips { padding: 2px 0 8px; }
+
+/* Okolní města: stejná řeč jako lístek */
+.near-towns { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 40px; }
+.near-towns li { display: flex; align-items: baseline; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.near-towns a { font: 600 17px/1.3 var(--display); color: var(--ink); text-decoration: none; }
+.near-towns a:hover { color: var(--accent); text-decoration: underline; }
+.near-meta { flex: none; font-size: 13.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .town-bar { margin: 22px -20px 0; padding: 8px 12px; }
+  .town-bar-search { max-width: none; flex-basis: 100%; }
+  .town-page .stats { gap: 6px 24px; }
+  .town-page .stats dd { font-size: 27px; }
+  .town-page .cafes { grid-template-columns: 1fr; }
+  /* Na úzkém displeji stav pod jménem, jinak by se jméno lámalo po slovech */
+  .town-page .cafe-top { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .town-page .cafe-top .leader { display: none; }
+  .town-page .cafe .status { max-width: none; text-align: left; }
+}
 .cafes {
   list-style: none; margin: 8px 0 20px; padding: 0;
   display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px;
