@@ -29,8 +29,12 @@ const T = {
     kind: (c) => (c.k ? (c.r ? 'Pražírna' : 'Obchod s kávou') : c.r ? 'Kavárna a pražírna' : 'Kavárna'),
     feats: { outdoor: 'Zahrádka', wifi: 'Wi‑Fi', wheel: 'Bezbariérový vstup', wheelLim: 'Částečně bezbariérové', vegan: 'Veganské možnosti', veg: 'Vegetariánské možnosti', card: 'Platba kartou' },
     home: '/', towns: ['Kavárny podle měst', '/kavarny/'], townPath: (city) => `/kavarny/${city.slug}/`, town: (city) => city?.n,
-    title: (n, town) => `${n}${town ? `, ${town}` : ''}: otevírací doba a adresa | Kafemapa`,
+    // Titulek slibuje jen to, co stránka má: bez známé otevírací doby ji nenabízí.
+    title: (n, town, hours) => `${n}${town ? `, ${town}` : ''}: ${hours ? 'otevírací doba a adresa' : 'adresa, mapa a kavárny v okolí'} | Kafemapa`,
     desc: (kind, n, addr) => `${kind} ${n}${addr ? `, ${addr}` : ''}.`, descHours: (h) => `Otevírací doba: ${h}.`,
+    descNoHours: 'Otevírací dobu zatím neznáme, víte ji? Doplníte ji za minutu.',
+    descNear: (k) => (k === 1 ? 'Na mapě s další kavárnou do 500 m.' : k ? `Na mapě s dalšími ${k} kavárnami do 500 m.` : 'Na mapě s kavárnami v okolí.'),
+    descLinks: (l) => `Odkaz na ${l.join(' a ')}.`, linkNames: { w: 'web', ig: 'Instagram', fb: 'Facebook' },
     crumbs: 'Drobečková navigace', navigate: 'Navigovat', onMap: 'Na mapě', web: 'Web', mapHome: '/', mapy: 'Fotky a recenze na Mapy.com', minimap: (n) => `Mapa: ${n} a kavárny v okolí`,
     closed: 'zavřeno', nonstop: 'nonstop', holidays: 'Svátky a výjimky nezohledňujeme. Před cestou je raději ověřte.',
     fix: 'Nesedí otevírací doba? Opravte ji', add: 'Znáte otevírací dobu? Pomozte ji doplnit', missing: 'Otevírací doba zatím v OpenStreetMap chybí.',
@@ -43,8 +47,11 @@ const T = {
     kind: (c) => (c.k ? (c.r ? 'Coffee roaster' : 'Coffee shop') : c.r ? 'Café & roaster' : 'Café'),
     feats: { outdoor: 'Outdoor seating', wifi: 'Wi‑Fi', wheel: 'Wheelchair accessible', wheelLim: 'Partly wheelchair accessible', vegan: 'Vegan options', veg: 'Vegetarian options', card: 'Cards accepted' },
     home: '/en/', towns: ['Cafés by town', '/en/cities/'], townPath: (city) => `/en/cities/${cityEnSlug(city)}/`, town: (city) => cityNameIn(city?.n, 'en'),
-    title: (n, town) => `${n}${town ? `, ${town}` : ''}: opening hours & address | Kafemapa`,
+    title: (n, town, hours) => `${n}${town ? `, ${town}` : ''}: ${hours ? 'opening hours & address' : 'address, map & cafés nearby'} | Kafemapa`,
     desc: (kind, n, addr) => `${kind} ${n}${addr ? `, ${addr}` : ''}, Czechia.`, descHours: (h) => `Opening hours: ${h}.`,
+    descNoHours: 'Opening hours unknown so far. Know them? Add them in a minute.',
+    descNear: (k) => (k === 1 ? 'On the map with another café within 500 m.' : k ? `On the map with ${k} more cafés within 500 m.` : 'On the map with cafés nearby.'),
+    descLinks: (l) => `Links to ${l.join(' and ')}.`, linkNames: { w: 'the website', ig: 'Instagram', fb: 'Facebook' },
     crumbs: 'Breadcrumb', navigate: 'Directions', onMap: 'On the map', web: 'Website', mapHome: '/en/', mapy: 'Photos & reviews on Mapy.com', minimap: (n) => `Map: ${n} and cafés nearby`,
     closed: 'closed', nonstop: 'open 24/7', holidays: 'Public holidays and exceptions are not included. Please check before you go.',
     fix: 'Hours wrong? Fix them', add: 'Know the opening hours? Add them', missing: 'Opening hours are not in OpenStreetMap yet.',
@@ -98,15 +105,21 @@ function cafePage(c, ctx, lang = 'cs') {
   const feats = features(c, L);
   const hoursText = week ? formatWeek(week, lang) : null;
 
-  const title = L.title(c.n, city ? town : null);
-  const description = [
+  const title = L.title(c.n, city ? town : null, !!c.o);
+  // Popis ve výsledcích hledání: kavárna je často i na Mapách a Instagramu, Kafemapa musí
+  // ve ~160 znacích říct, co nabízí navíc. Věty podle důležitosti, dokud se vejdou.
+  // (Žádné „dnes otevřeno“: Google si popis drží dny, týdenní rozpis zastará pomaleji.)
+  const links = [c.w && 'w', c.ig && 'ig', !c.ig && c.fb && 'fb'].filter(Boolean).map((k) => L.linkNames[k]);
+  const sentences = [
     L.desc(kind, c.n, addr),
-    hoursText ? L.descHours(hoursText) : null,
+    // Nerozpoznaný zápis z OSM (sezónní provoz apod.) ukážeme, jak je, pokud je krátký
+    hoursText ? L.descHours(hoursText) : c.o ? (c.o.length <= 60 ? L.descHours(c.o) : null) : L.descNoHours,
     feats.length ? `${feats.slice(0, 3).join(', ')}.` : null,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .slice(0, 300);
+    nearby.length ? L.descNear(nearby.filter(({ d }) => d <= 0.5).length) : null,
+    links.length ? L.descLinks(links) : null,
+  ].filter(Boolean);
+  let description = sentences[0];
+  for (const sentence of sentences.slice(1)) if (description.length + 1 + sentence.length <= 165) description += ` ${sentence}`;
 
   const sameAs = [c.w, c.ig, c.fb].filter(Boolean);
   const business = {
