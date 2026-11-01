@@ -4,7 +4,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parseHours, formatWeek } from '../assets/hours.js';
+import { parseHours, formatWeek, humanizeHours } from '../assets/hours.js';
 import { cafePath, cityNameIn, mapySearchUrl } from '../assets/slug.js';
 import { head, foot, esc, breadcrumbLd, SITE, cityEnSlug } from './build-pages.mjs';
 
@@ -36,6 +36,7 @@ const T = {
     descNear: (k) => (k === 1 ? 'Na mapě s další kavárnou do 500 m.' : k ? `Na mapě s dalšími ${k} kavárnami do 500 m.` : 'Na mapě s kavárnami v okolí.'),
     descLinks: (l) => `Odkaz na ${l.join(' a ')}.`, linkNames: { w: 'web', ig: 'Instagram', fb: 'Facebook' },
     crumbs: 'Drobečková navigace', navigate: 'Navigovat', onMap: 'Na mapě', web: 'Web', mapHome: '/', mapy: 'Fotky a recenze na Mapy.com', minimap: (n) => `Mapa: ${n} a kavárny v okolí`,
+    rawNote: 'Takhle je otevírací doba zapsaná v OpenStreetMap, celou ji neumíme přečíst.',
     closed: 'zavřeno', nonstop: 'nonstop', holidays: 'Svátky a výjimky nezohledňujeme. Před cestou je raději ověřte.',
     fix: 'Nesedí otevírací doba? Opravte ji', add: 'Znáte otevírací dobu? Pomozte ji doplnit', missing: 'Otevírací doba zatím v OpenStreetMap chybí.',
     description: '<h2>Popis</h2><p>', hours: 'Otevírací doba', amenities: 'Vybavení', noFeats: 'Zatím o vybavení nic nevíme.', fixFeats: 'Nesedí vybavení? Opravte ho', addFeats: 'Víte, jestli tu mají Wi‑Fi nebo zahrádku? Doplňte to', nearby: 'Další kavárny v okolí', all: (town) => `Všechny kavárny: ${town}`,
@@ -53,6 +54,7 @@ const T = {
     descNear: (k) => (k === 1 ? 'On the map with another café within 500 m.' : k ? `On the map with ${k} more cafés within 500 m.` : 'On the map with cafés nearby.'),
     descLinks: (l) => `Links to ${l.join(' and ')}.`, linkNames: { w: 'the website', ig: 'Instagram', fb: 'Facebook' },
     crumbs: 'Breadcrumb', navigate: 'Directions', onMap: 'On the map', web: 'Website', mapHome: '/en/', mapy: 'Photos & reviews on Mapy.com', minimap: (n) => `Map: ${n} and cafés nearby`,
+    rawNote: 'This is how the opening hours are written in OpenStreetMap; we can’t read all of it.',
     closed: 'closed', nonstop: 'open 24/7', holidays: 'Public holidays and exceptions are not included. Please check before you go.',
     fix: 'Hours wrong? Fix them', add: 'Know the opening hours? Add them', missing: 'Opening hours are not in OpenStreetMap yet.',
     description: '<h2>Description <span class="muted small">(in Czech)</span></h2><p lang="cs">', hours: 'Opening hours', amenities: 'Amenities', noFeats: 'We don\'t know anything about the amenities yet.', fixFeats: 'Amenities wrong? Fix them', addFeats: 'Know if they have Wi‑Fi or outdoor seating? Add it', nearby: 'Other cafés nearby', all: (town) => `All cafés in ${town}`,
@@ -159,7 +161,8 @@ function cafePage(c, ctx, lang = 'cs') {
         <p class="small muted">${L.holidays}</p>
         ${helpBox(c, L.fix)}`;
   } else if (c.o) {
-    hours = `<p class="cafe-hours raw">${esc(c.o)}</p>${helpBox(c, L.fix)}`;
+    hours = `<div class="cafe-hours raw">${humanizeHours(c.o, lang).map((l) => `<p>${esc(l)}</p>`).join('')}</div>
+        <p class="small muted">${L.rawNote}</p>${helpBox(c, L.fix)}`;
   } else {
     hours = `<p class="muted">${L.missing}</p>${helpBox(c, L.add, true)}`;
   }

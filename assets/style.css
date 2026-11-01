@@ -201,7 +201,8 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .hours td { padding: 4px 0; }
 .hours td:last-child { text-align: right; color: var(--ink-2); }
 .hours tr.today td { font-weight: 600; color: var(--ink); }
-.hours-raw { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--ink-2); overflow-wrap: anywhere; }
+.hours-raw { font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
+.hours-raw p { margin: 0 0 3px; }
 .feats { display: flex; flex-wrap: wrap; gap: 6px; }
 .feats .tag { font-size: 13px; padding: 4px 10px; }
 .desc { color: var(--ink-2); margin: 0; }

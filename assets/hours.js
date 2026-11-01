@@ -7,7 +7,8 @@ const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const DAY_RE = '(?:Mo|Tu|We|Th|Fr|Sa|Su|PH|SH)';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MON = '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)';
-const MONTH_SEL_RE = new RegExp(`^(${MON}(?:\\s*-\\s*${MON})?(?:\\s*,\\s*${MON}(?:\\s*-\\s*${MON})?)*)\\s*:?\\s+`);
+// Jen celé měsíce („May-Sep“); s konkrétním dnem („Jan 1 - May 31“) pravidlu nerozumíme → null, ne „zavřeno“.
+const MONTH_SEL_RE = new RegExp(`^(${MON}(?:\\s*-\\s*${MON})?(?:\\s*,\\s*${MON}(?:\\s*-\\s*${MON})?)*)\\s*:?\\s+(?!\\d{1,2}(?![\\d:.]))`);
 
 function monthMatches(sel, month) {
   for (const part of sel.split(',')) {
@@ -19,10 +20,11 @@ function monthMatches(sel, month) {
 }
 
 function parseTime(s) {
-  const m = /^(\d{1,2}):(\d{2})$/.exec(s);
+  // „9:30“, ale i jen hodina („Fr 09-20“): v OSM nesprávně, ale často
+  const m = /^(\d{1,2})(?::(\d{2}))?$/.exec(s);
   if (!m) return null;
   const h = +m[1];
-  const min = +m[2];
+  const min = +(m[2] ?? 0);
   if (h > 48 || min > 59) return null;
   return h * 60 + min;
 }
@@ -52,7 +54,7 @@ function parseTimes(s) {
   for (let part of s.split(',')) {
     part = part.trim();
     if (!part) continue;
-    const m = /^(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})\+?$/.exec(part);
+    const m = /^(\d{1,2}(?::\d{2})?)\s*-\s*(\d{1,2}(?::\d{2})?)\+?$/.exec(part);
     if (!m) return null;
     const start = parseTime(m[1]);
     let end = parseTime(m[2]);
@@ -75,6 +77,10 @@ export function parseHours(str, date = new Date()) {
     .replace(/\s+/g, ' ')
     .replace(/[–—]/g, '-')
     .replace(/(\d)\s*h\b/g, '$1')
+    // Častá odchylka od normy: anglické zkratky dnů („Mon-Thu: 7-20“), tečka v čase („08.00“)
+    .replace(/\b(Mon|Tues?|Wed|Thu(?:rs?)?|Fri|Sat|Sun)\b/g, (d) => d.slice(0, 2))
+    .replace(new RegExp(`(${DAY_RE})\\s*:\\s+`, 'g'), '$1 ')
+    .replace(/(^|[\s-])(\d{1,2})\.(\d{2})(?=$|[\s,;-])/g, '$1$2:$3')
     .trim();
   if (/^24\/7$/.test(s)) return DAYS.map(() => [[0, 1440]]);
 
@@ -87,6 +93,12 @@ export function parseHours(str, date = new Date()) {
   for (let rule of s.split(';')) {
     rule = rule.trim();
     if (!rule) continue;
+    // Pravidlo s konkrétním datem: zavírací výjimku („Dec 24 off“) přeskočíme jako svátky,
+    // datovaný rozvrh („Jun 1 - Dec 31: Mo-Fr …“) neumíme, a hádat nebudeme.
+    if (new RegExp(`^${MON}\\s*\\d{1,2}(?![\\d:.])`).test(rule)) {
+      if (/(?:^|\s)(off|closed)$/i.test(rule)) continue;
+      return null;
+    }
     const ms = MONTH_SEL_RE.exec(rule + ' ');
     if (ms) {
       any = true; // sezónní pravidlo mimo sezónu = zavřeno
@@ -206,4 +218,32 @@ export function statusLabel(week, now = new Date(), lang = 'cs') {
   const day = (dayIndex(now) + s.next.day) % 7;
   const when = s.next.day === 0 ? T.at(at) : s.next.day === 1 ? T.tomorrow(at) : T.dayAt(T.days[day], at);
   return { cls: 'closed', text: T.opens(when) };
+}
+
+// Zápis, kterému parser nerozumí, aspoň čitelně: místo „Mo-Fr 07:30-18:00; Su "dle domluvy"“
+// řádky „po–pá 07:30–18:00“, „ne dle domluvy“. Obsah se nemění, jen se překládají zkratky OSM.
+const RAW_DAYS = {
+  cs: { Mo: 'po', Tu: 'út', We: 'st', Th: 'čt', Fr: 'pá', Sa: 'so', Su: 'ne', PH: 'svátky', SH: 'prázdniny' },
+  en: { Mo: 'Mon', Tu: 'Tue', We: 'Wed', Th: 'Thu', Fr: 'Fri', Sa: 'Sat', Su: 'Sun', PH: 'public holidays', SH: 'school holidays' },
+};
+const RAW_MONTHS_CS = ['led', 'úno', 'bře', 'dub', 'kvě', 'čvn', 'čvc', 'srp', 'zář', 'říj', 'lis', 'pro'];
+
+/** @returns {string[]} řádky k zobrazení */
+export function humanizeHours(str, lang = 'cs') {
+  const D = RAW_DAYS[lang] || RAW_DAYS.cs;
+  return String(str)
+    .split(/\s*(?:\|\||;)\s*/)
+    .map((rule) =>
+      rule
+        .replace(/"([^"]*)"/g, '$1')
+        .replace(/\b(Mon|Tues?|Wed|Thu(?:rs?)?|Fri|Sat|Sun)\b/g, (d) => d.slice(0, 2))
+        .replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH|SH)\b/g, (d) => D[d])
+        .replace(new RegExp(`\\b${MON}\\b`, 'g'), (m) => (lang === 'en' ? m : RAW_MONTHS_CS[MONTHS.indexOf(m)]))
+        .replace(/\b(off|closed)\b/gi, lang === 'en' ? 'closed' : 'zavřeno')
+        .replace(/\bopen\b/gi, lang === 'en' ? 'open' : 'otevřeno')
+        .replace(/\s*-\s*/g, '–')
+        .replace(/\s+/g, ' ')
+        .trim()
+    )
+    .filter(Boolean);
 }

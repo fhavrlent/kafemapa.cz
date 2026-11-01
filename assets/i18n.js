@@ -12,6 +12,8 @@ const STR = {
   cs: {
     // stav a seznam
     hoursInDetail: 'Otevírací doba v detailu',
+    hoursUnclear: 'Nevíme, jestli je teď otevřeno',
+    hoursRawNote: 'Takhle je otevírací doba zapsaná v OpenStreetMap, celou ji neumíme přečíst.',
     hoursUnknown: 'Otevírací doba neuvedena',
     places: ['místo', 'místa', 'míst'],
     results: ['výsledek', 'výsledky', 'výsledků'],
@@ -61,6 +63,8 @@ const STR = {
   },
   en: {
     hoursInDetail: 'Opening hours in detail',
+    hoursUnclear: 'Can’t tell if it’s open now',
+    hoursRawNote: 'This is how the opening hours are written in OpenStreetMap; we can’t read all of it.',
     hoursUnknown: 'Opening hours unknown',
     places: ['place', 'places'],
     results: ['result', 'results'],

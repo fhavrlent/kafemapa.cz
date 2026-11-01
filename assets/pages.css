@@ -104,7 +104,8 @@ body.page { height: auto; }
 .cafe h3 a:hover { color: var(--accent); text-decoration: underline; }
 .cafe .status { font-size: 12.5px; }
 .cafe-addr, .cafe-hours, .cafe-links { margin: 0; font-size: 13.5px; color: var(--ink-2); }
-.cafe-hours.raw { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; overflow-wrap: anywhere; }
+.cafe-hours.raw { overflow-wrap: anywhere; }
+.cafe-hours.raw p { margin: 0 0 3px; }
 .cafe .tags { margin-top: 4px; }
 .cafe-links { margin-top: auto; padding-top: 6px; }
 

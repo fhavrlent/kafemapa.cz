@@ -1,4 +1,4 @@
-import { parseHours, statusLabel, fmtMin, formatWeek } from './hours.js';
+import { parseHours, statusLabel, fmtMin, formatWeek, humanizeHours } from './hours.js';
 import { cafePath, cityNameIn, mapySearchUrl } from './slug.js';
 import { LANG, t, pluralIn, numIn } from './i18n.js';
 import { addBasemap } from './basemap.js';
@@ -347,7 +347,7 @@ function renderDetail(c) {
     }).join('')}</tbody></table>
     <p class="muted small">${t.noHolidays}</p>`;
   } else if (c.o) {
-    hours = `<p class="hours-raw">${esc(c.o)}</p>`;
+    hours = `<div class="hours-raw">${humanizeHours(c.o, LANG).map((l) => `<p>${esc(l)}</p>`).join('')}</div><p class="muted small">${t.hoursRawNote}</p>`;
   } else {
     hours = `<p class="muted">${t.hoursMissing}</p>`;
   }
@@ -377,7 +377,7 @@ function renderDetail(c) {
     <div class="kind">${kind}</div>
     <h2>${esc(c.n)}</h2>
     ${addr ? `<p class="addr">${icon('pin')}<span>${esc(addr)}</span></p>` : ''}
-    <span class="status-pill ${c.status.cls}">${c.status.cls !== 'unknown' ? `<i class="dot dot-${c.status.cls === 'soon' ? 'open' : c.status.cls}"></i>` : icon('clock')}${esc(c.status.text)}</span>
+    <span class="status-pill ${c.status.cls}">${c.status.cls !== 'unknown' ? `<i class="dot dot-${c.status.cls === 'soon' ? 'open' : c.status.cls}"></i>` : icon('clock')}${esc(c.status.cls === 'unknown' && c.o ? t.hoursUnclear : c.status.text)}</span>
     <div class="actions">${actions.join('')}</div>
     ${c.d ? `<div class="section"><h3>${t.description}</h3><p class="desc">${esc(c.d)}</p></div>` : ''}
     <div class="section"><h3>${t.hours}</h3>${hours}

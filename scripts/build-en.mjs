@@ -4,7 +4,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parseHours, formatWeek } from '../assets/hours.js';
+import { parseHours, formatWeek, humanizeHours } from '../assets/hours.js';
 import { cafePath, cityNameIn } from '../assets/slug.js';
 import { head, foot, esc, breadcrumbLd, MIN_CAFES, cityEnSlug, townBar, nearTown } from './build-pages.mjs';
 
@@ -38,7 +38,7 @@ function tags(c) {
 function cafeItem(c, data) {
   const href = cafePath(c, c.c != null ? data.cities[c.c].n : null, 'en') || `/en/#${c.i}`;
   const week = parseHours(c.o);
-  const hours = week ? formatWeek(week, 'en') : c.o || null;
+  const hours = week ? formatWeek(week, 'en') : c.o ? humanizeHours(c.o, 'en').join(' · ') : null;
   const tg = tags(c);
   return `<li class="cafe" data-f="${c.f || 0}"${c.k || c.r ? ' data-beans' : ''}${c.o ? ` data-o="${esc(c.o)}"` : ''}>
       <div class="cafe-top">

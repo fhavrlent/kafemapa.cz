@@ -97,3 +97,22 @@ test('angličtina: formatWeek a statusLabel', async () => {
   assert.equal(statusLabel(w, at('2026-10-14T19:00:00'), 'en').text, 'Closed · opens tomorrow at 8:00');
   assert.equal(statusLabel(parseHours('24/7'), at('2026-10-14T03:00:00'), 'en').text, 'Open 24/7');
 });
+
+test('časté odchylky od normy: jen hodiny, tečka v čase, anglické zkratky dnů', () => {
+  const lom = parseHours('Tu-Th 09:00-18:00; Fr 09-20; Sa 10:00-20:00; Su 10-18');
+  assert.deepEqual(lom[4], [[540, 1200]]); // pá 9–20
+  assert.deepEqual(lom[6], [[600, 1080]]); // ne 10–18
+  assert.deepEqual(lom[0], []);
+  const pausa = parseHours('Mon-Thu: 7-20, Fri: 7-22, Sat: 10-22, Sun: 10-20');
+  assert.deepEqual(pausa[3], [[420, 1200]]);
+  assert.deepEqual(pausa[5], [[600, 1320]]);
+  assert.deepEqual(parseHours('Mo-Fr 08.00 - 18.00')[0], [[480, 1080]]);
+});
+
+test('pravidla s konkrétním datem: zavírací výjimka se přeskočí, datovaný rozvrh je nečitelný', () => {
+  assert.deepEqual(parseHours('13:30-17:00; Dec 24 off')[2], [[810, 1020]]);
+  assert.equal(parseHours('Jan 1 - May 31: Mo-Fr 08:00-18:00'), null);
+  assert.equal(parseHours('Mo-Su 09:00-19:00; Oct 01-Feb 28: Sa-Su 10:30-18:00'), null);
+  // celé měsíce dál fungují, i s časem hned za měsícem
+  assert.deepEqual(parseHours('Apr-Oct 09:00-17:00', new Date('2026-07-01'))[0], [[540, 1020]]);
+});

@@ -3,7 +3,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parseHours, formatWeek } from '../assets/hours.js';
+import { parseHours, formatWeek, humanizeHours } from '../assets/hours.js';
 
 export const SITE = 'https://kafemapa.cz';
 export const MIN_CAFES = 5; // menší města by měla příliš tenký obsah
@@ -143,7 +143,7 @@ export const nearTown = (href, name, meta) =>
 function cafeItem(c) {
   const href = cafeLinks.get(c.i) || `/#${c.i}`;
   const week = parseHours(c.o);
-  const hours = week ? formatWeek(week) : c.o ? c.o : null;
+  const hours = week ? formatWeek(week) : c.o ? humanizeHours(c.o).join(' · ') : null;
   const tags = [];
   if (c.k) tags.push(c.r ? 'Pražírna' : 'Káva na doma');
   else if (c.r) tags.push('Pražírna');
