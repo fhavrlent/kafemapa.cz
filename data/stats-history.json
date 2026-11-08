@@ -145,5 +145,12 @@
   "withHours": 2626,
   "withAddress": 1676,
   "withWebsite": 1540
+ },
+ {
+  "date": "2026-11-08",
+  "places": 4087,
+  "withHours": 2627,
+  "withAddress": 1678,
+  "withWebsite": 1541
  }
 ]
