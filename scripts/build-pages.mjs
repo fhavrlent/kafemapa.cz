@@ -68,6 +68,7 @@ ${hreflang}  <meta name="theme-color" content="#f6efe6" media="(prefers-color-sc
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="preload" href="/assets/fonts/inter-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="/assets/style.css">
@@ -202,7 +203,7 @@ function cityPage(city, ctx) {
         : ''),
   ];
 
-  const sorted = cafes.slice().sort((a, b) => collator.compare(a.n, b.n));
+  const sorted = cafes.toSorted((a, b) => collator.compare(a.n, b.n));
 
   return (
     head({
@@ -534,9 +535,9 @@ function aboutPage(lang, meta) {
 }
 
 function indexPage(pages, meta, totalCafes) {
-  const top = pages.slice().sort((a, b) => b.cafes.length - a.cafes.length).slice(0, 12);
+  const top = pages.toSorted((a, b) => b.cafes.length - a.cafes.length).slice(0, 12);
   const groups = new Map();
-  for (const p of pages.slice().sort((a, b) => collator.compare(a.city.n, b.city.n))) {
+  for (const p of pages.toSorted((a, b) => collator.compare(a.city.n, b.city.n))) {
     const letter = /^ch/i.test(p.city.n) ? 'Ch' : p.city.n[0].toUpperCase();
     if (!groups.has(letter)) groups.set(letter, []);
     groups.get(letter).push(p);

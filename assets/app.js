@@ -227,9 +227,7 @@ function renderList() {
   // v přehledu (malé přiblížení) nechceme seznam začínat benzinkami
   const chainLast = !state.me && map.getZoom() < 13;
   const chain = (c) => (chainLast && c.f & F.CHAIN ? 1 : 0);
-  items = items
-    .slice()
-    .sort((a, b) => (state.me || state.q ? 0 : rank[a.status.cls] - rank[b.status.cls]) || chain(a) - chain(b) || a._d - b._d);
+  items = items.toSorted((a, b) => (state.me || state.q ? 0 : rank[a.status.cls] - rank[b.status.cls]) || chain(a) - chain(b) || a._d - b._d);
   $('#count').textContent = label;
 
   if (!items.length) {
@@ -584,18 +582,23 @@ const sheetState = () => SHEET.find((s) => document.body.classList.contains('she
 /* ---------------- události ---------------- */
 
 let qTimer;
+function runSearch() {
+  clearTimeout(qTimer);
+  qTimer = undefined;
+  state.q = norm($('#q').value.trim()).replace(/\s+/g, ' ');
+  if (state.selected) closeDetail();
+  applyFilters();
+}
 $('#q').addEventListener('input', (e) => {
   $('#qClear').hidden = !e.target.value;
   clearTimeout(qTimer);
-  qTimer = setTimeout(() => {
-    state.q = norm(e.target.value.trim()).replace(/\s+/g, ' ');
-    if (state.selected) closeDetail();
-    applyFilters();
-  }, 120);
+  qTimer = setTimeout(runSearch, 120);
 });
 $('#q').addEventListener('focus', () => sheetState() !== 'expanded' && setSheet('expanded'));
 $('#q').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
+  // isComposing / 229: Enter jen potvrzuje znaky v IME (čínština, japonština…), nemá otevírat výsledek
+  if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) {
+    if (qTimer) runSearch(); // napsáno a hned Enter: hledání ještě neproběhlo, výsledky by byly staré
     const first = $('#cityHint [data-city]') || $('#list .card');
     first?.click();
     e.target.blur();
@@ -639,8 +642,20 @@ document.addEventListener('click', (e) => {
   }
   if (target.closest('[data-close]')) target.closest('dialog').close();
 });
-for (const d of document.querySelectorAll('dialog')) {
-  d.addEventListener('click', (e) => e.target === d && d.close()); // klik mimo
+// Klik mimo zavírá dialog sám (closedby="any"). Safari to zatím neumí: tam rozhoduje poloha
+// kliknutí, ne cíl, protože cílem je dialog i v mezerách mezi jeho obsahem.
+if (!('closedBy' in HTMLDialogElement.prototype)) {
+  /** @param {PointerEvent} e @param {HTMLDialogElement} d */
+  const outside = (e, d) => {
+    const r = d.getBoundingClientRect();
+    return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+  };
+  for (const d of document.querySelectorAll('dialog')) {
+    if (d.getAttribute('closedby') !== 'any') continue;
+    let pressedOutside = false;
+    d.addEventListener('pointerdown', (e) => { pressedOutside = outside(e, d); });
+    d.addEventListener('pointerup', (e) => { if (pressedOutside && outside(e, d)) d.close(); });
+  }
 }
 
 window.addEventListener('hashchange', showFromHash);
@@ -698,7 +713,10 @@ document.querySelector('.tabs').addEventListener('click', (e) => {
   for (const x of document.querySelectorAll('.tabs [role=tab]')) x.setAttribute('aria-selected', String(x === t));
   renderRank(t.dataset.tab);
 });
-$('#btnAbout').addEventListener('click', () => $('#dlgAbout').showModal());
+// Menu otevírá HTML samo (command="show-modal"), skript jen v prohlížečích bez Invoker Commands.
+if (!('commandForElement' in HTMLButtonElement.prototype)) {
+  $('#btnAbout').addEventListener('click', () => $('#dlgAbout').showModal());
+}
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && state.selected && !document.querySelector('dialog[open]')) leaveDetail();

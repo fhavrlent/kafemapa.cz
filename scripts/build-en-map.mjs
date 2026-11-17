@@ -60,7 +60,7 @@ const BLOCKS = [
   [/<div class="promo" id="promo"[\s\S]*?<\/div>\n/, ''],
   [
     /<dialog id="dlgAbout"[\s\S]*?<\/dialog>/,
-    `<dialog id="dlgAbout" class="dialog menu-dialog" aria-labelledby="aboutTitle">
+    `<dialog id="dlgAbout" class="dialog menu-dialog" closedby="any" aria-labelledby="aboutTitle">
     <header>
       <h2 id="aboutTitle">Menu</h2>
       <button class="icon-btn" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>

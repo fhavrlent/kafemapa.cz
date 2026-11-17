@@ -21,6 +21,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="preload" href="/assets/fonts/inter-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="preload" href="/data/cafes.json" as="fetch" crossorigin>
@@ -79,7 +80,7 @@
         </a>
         <nav class="brand-actions">
           <button class="icon-btn" id="btnRank" title="Žebříček měst" aria-label="Žebříček měst"><svg><use href="#i-trophy"/></svg></button>
-          <button class="icon-btn menu-btn" id="btnAbout" title="Menu" aria-label="Menu: města, index, novinky, o projektu"><svg><use href="#i-menu"/></svg><span>Menu</span></button>
+          <button type="button" class="icon-btn menu-btn" id="btnAbout" command="show-modal" commandfor="dlgAbout" title="Menu" aria-label="Menu: města, index, novinky, o projektu"><svg><use href="#i-menu"/></svg><span>Menu</span></button>
         </nav>
       </header>
       <p class="tagline"><span id="tagline">Všechny kavárny v Česku na jedné mapě.</span> <a href="/kavarny/">Podle měst&nbsp;→</a> <a href="/en/" lang="en" hreflang="en" class="lang-link">English</a></p>
@@ -131,7 +132,7 @@
     </main>
   </div>
 
-  <dialog id="dlgRank" class="dialog" aria-labelledby="rankTitle">
+  <dialog id="dlgRank" class="dialog" closedby="any" aria-labelledby="rankTitle">
     <header>
       <h2 id="rankTitle">Kavárenský žebříček</h2>
       <button class="icon-btn" data-close aria-label="Zavřít"><svg><use href="#i-x"/></svg></button>
@@ -145,7 +146,7 @@
     <p class="rank-more"><a href="/kavarensky-index/">Celý Kavárenský index: otevírací doby, řetězce a další čísla&nbsp;→</a></p>
   </dialog>
 
-  <dialog id="dlgAbout" class="dialog menu-dialog" aria-labelledby="aboutTitle">
+  <dialog id="dlgAbout" class="dialog menu-dialog" closedby="any" aria-labelledby="aboutTitle">
     <header>
       <h2 id="aboutTitle">Menu</h2>
       <button class="icon-btn" data-close aria-label="Zavřít"><svg><use href="#i-x"/></svg></button>

@@ -68,7 +68,7 @@ function townPage(p, ctx) {
   const perCapita = city.pop ? (n / city.pop) * 10000 : null;
   const r = rank.get(city);
   const path = `/en/cities/${cityEnSlug(city)}/`;
-  const sorted = cafes.slice().sort((a, b) => collator.compare(a.n, b.n));
+  const sorted = cafes.toSorted((a, b) => collator.compare(a.n, b.n));
   const missing = sorted.filter((c) => !c.o);
   const nearby = pages
     .filter((q) => q.city !== city)
@@ -157,8 +157,8 @@ function townPage(p, ctx) {
 }
 
 function townsIndex(pages, data) {
-  const top = pages.slice().sort((a, b) => b.cafes.length - a.cafes.length).slice(0, 12);
-  const all = pages.slice().sort((a, b) => collator.compare(nameOf(a.city), nameOf(b.city)));
+  const top = pages.toSorted((a, b) => b.cafes.length - a.cafes.length).slice(0, 12);
+  const all = pages.toSorted((a, b) => collator.compare(nameOf(a.city), nameOf(b.city)));
   return (
     head({
       lang: 'en',

@@ -28,7 +28,7 @@ const all = data.cafes;
 const cafes = all.filter((c) => !c.k);
 const share = (n, of) => +(n / of).toFixed(4);
 const median = (xs) => {
-  const s = [...xs].sort((a, b) => a - b);
+  const s = xs.toSorted((a, b) => a - b);
   return s[s.length >> 1];
 };
 const perCapita = (c) => +((c.count / c.pop) * 10000).toFixed(2);

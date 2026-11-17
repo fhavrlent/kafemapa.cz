@@ -45,7 +45,7 @@ function homeStatic(data, lang) {
   const L = T[lang];
   const date = new Date(data.osmBase || data.generated).toLocaleDateString(lang === 'en' ? 'en-GB' : 'cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
   const withPage = data.cities.filter((c) => c.slug);
-  const towns = [...withPage].sort((a, b) => b.count - a.count).slice(0, TOWNS);
+  const towns = withPage.toSorted((a, b) => b.count - a.count).slice(0, TOWNS);
   return `<li class="home-static">
           <p>${L.intro(numIn(lang, data.cafes.length), esc(date))}</p>
           <h2>${L.towns}</h2>

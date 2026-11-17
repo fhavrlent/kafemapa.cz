@@ -309,8 +309,7 @@ export async function buildReport(root, outDir, meta) {
     <p class="lead">Jak si česká města stojí v kavárnách? Kavárenský index vychází dvakrát do roka z otevřených dat OpenStreetMap: hustota kaváren na obyvatele, otevírací doby, řetězce a mezery v datech.</p>
     <ol class="editions">
       ${editions
-        .slice()
-        .reverse()
+        .toReversed()
         .map(
           (x) => `<li><a href="${x.path}"><span class="eyebrow">${esc(x.s.edition.name)}</span><strong>${esc(x.e.title)}</strong><span class="muted">${esc(x.e.dek)}</span></a></li>`
         )
