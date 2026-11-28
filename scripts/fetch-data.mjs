@@ -8,6 +8,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { computeChanges, appendChanges } from './changes.mjs';
+import { recordOldPaths } from './redirects.mjs';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -305,6 +306,16 @@ if (delta.from) {
 }
 
 await writeFile(OUT, JSON.stringify(out));
+
+// Staré adresy stránek přejmenovaných kaváren (build z nich udělá přesměrování).
+const OLD_PATHS = join(ROOT, 'data', 'old-paths.json');
+if (prev) {
+  let oldPaths = {};
+  try {
+    oldPaths = JSON.parse(await readFile(OLD_PATHS, 'utf8'));
+  } catch {}
+  await writeFile(OLD_PATHS, JSON.stringify(recordOldPaths(oldPaths, prev, out), null, 1) + '\n');
+}
 
 // Historie úplnosti dat: jeden záznam za den dat z OSM (opakované stažení ho přepíše).
 const HISTORY = join(ROOT, 'data', 'stats-history.json');

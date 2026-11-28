@@ -13,6 +13,7 @@ import { buildEn } from './build-en.mjs';
 import { buildEnMap } from './build-en-map.mjs';
 import { buildHome } from './build-home.mjs';
 import { checkLinks } from './check-links.mjs';
+import { redirectLines, MAX_REDIRECTS } from './redirects.mjs';
 import { buildReport } from './build-report.mjs';
 import { findKey } from './indexnow.mjs';
 import { createHash } from 'node:crypto';
@@ -69,6 +70,15 @@ await writeFile(
 </html>
 `
 );
+// Staré adresy přejmenovaných kaváren → aktuální stránka (scripts/redirects.mjs).
+let oldPaths = {};
+try {
+  oldPaths = JSON.parse(await readFile(join(ROOT, 'data', 'old-paths.json'), 'utf8'));
+} catch {}
+const redirects = redirectLines(oldPaths, data);
+if (redirects.length > MAX_REDIRECTS) throw new Error(`Přesměrování je ${redirects.length}, Cloudflare jich vezme nejvýš ${MAX_REDIRECTS}.`);
+await writeFile(join(OUT, '_redirects'), redirects.join('\n') + '\n');
+
 const nPages = await buildPages(OUT, data, { extraUrls: [...changeUrls, ...reportUrls, ...cafes.urls, ...enUrls], cafePaths: cafes.pathById });
 
 // IndexNow: klíč do kořene webu a manifest hashů stránek, podle kterého
